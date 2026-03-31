@@ -1,0 +1,27 @@
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Python (compiled file)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments configuration (passwords)
+.env
+
+# Local database
+*.sqlite3
+
+#IDE
+.vscode/
+.idea/
+
+# Static/Media (Files that the user uploads)
+media/
+static/
+
+# Logs do sistema e erro
+*.log
