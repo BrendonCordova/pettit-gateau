@@ -55,3 +55,20 @@ class SKU(BaseModel):
 
     def __str__(self):
         return f"{self.product.name} - {self.volume_ml} - R$ {self.price}"
+    
+class ProductImage(BaseModel):
+    
+    image = models.ImageField(upload_to="products/%Y/%m/%d/", verbose_name="Imagem")
+    display_order = models.PositiveIntegerField(default=0, verbose_name="Ordem de Exibição")
+    is_main = models.BooleanField(default=False, verbose_name="Imagem Principal")
+
+    #Relationship
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
+
+    class Meta:
+        ordering = ['display_order']
+        verbose_name = "Imagem do Produto"
+        verbose_name_plural = "Imagens do Produto"
+
+    def __str__(self):
+        return f"Imagem de {self.product.name}"
