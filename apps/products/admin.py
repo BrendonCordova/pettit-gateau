@@ -1,9 +1,19 @@
 from django.contrib import admin
-from .models import Brand, Category, Product, SKU
+from .models import Brand, Category, Product, SKU, ProductImage
 
 admin.site.register(Brand)
 admin.site.register(Category)
-admin.site.register(Product)
+
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'brand', 'category', 'is_active')
+    list_filter = ('brand', 'category', 'is_active')
+    search_fields = ('name',)
+    inlines = [ProductImageInline]
 
 @admin.register(SKU)
 class SKUAdmin(admin.ModelAdmin):
