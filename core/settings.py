@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.base.apps.BaseConfig',
     'apps.products.apps.ProductsConfig',
+    'apps.customers.apps.CustomersConfig',
 ]
 
 MIDDLEWARE = [
@@ -121,6 +122,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+AUTH_USER_MODEL = 'customers.Customer'
 
 # Media Settings
 MEDIA_URL = '/media/'
