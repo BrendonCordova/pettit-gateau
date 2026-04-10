@@ -58,3 +58,27 @@ class Customer(AbstractBaseUser, PermissionsMixin, BaseModel):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - ({self.email})"
+
+class Address(BaseModel):
+    """
+    Model for managing multiple addresses for the same customer.
+    """
+    is_default = models.BooleanField(default=False, verbose_name="Endereço Padrão")
+    name = models.CharField(max_length=35, verbose_name="Nome do Endereço")
+    zip_code = models.CharField(max_length=9, verbose_name="CEP")
+    street = models.CharField(max_length=60, verbose_name="Logradouro")
+    number = models.CharField(max_length=11, verbose_name="Número")
+    neighborhood = models.CharField(max_length=45, verbose_name="Bairro")
+    city = models.CharField(max_length=60, verbose_name="Cidade")
+    state = models.CharField(max_length=2, verbose_name="UF")
+    complement = models.CharField(max_length=20, blank=True, null=True, verbose_name="Complemento")
+
+    #Relationship
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="addresses", verbose_name="Cliente")
+
+    class Meta:
+        verbose_name = "Endereço"
+        verbose_name_plural = "Endereços"
+
+    def __str__(self):
+        return f"{self.name}: {self.street}, {self.number}, {self.neighborhood} - {self.city}/{self.state}"

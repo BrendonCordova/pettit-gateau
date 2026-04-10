@@ -1,5 +1,18 @@
 from django.contrib import admin
-from .models import Customer
+from .models import Customer, Address
+
+class AddressInline(admin.StackedInline):
+    model = Address
+    extra = 0
+
+    fieldsets = (
+        ('Localização', {
+            'fields': ('name','zip_code', 'street', 'number', 'complement', 'neighborhood')
+        }),
+        ('Região e Configuração', {
+            'fields': ('city', 'state', 'is_default')
+        }),
+    )
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -7,6 +20,8 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('email', 'first_name', 'last_name', 'tax_id')
     list_filter = ('is_staff', 'is_active')
     ordering = ('email',)
+
+    inlines = [AddressInline]
 
     fieldsets = (
         ('Credenciais de Acesso', {
