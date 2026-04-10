@@ -6,17 +6,19 @@ Este projeto é um ecossistema completo de vendas online, desenvolvido para demo
 
 ---
 
-## 🚀 Status do Projeto: [Fase 2 - Catálogo e Admin]
-Ambiente de desenvolvimento configurado. Módulos principais de Catálogo (Produtos, SKUs e Imagens) modelados com sucesso e integrados ao painel administrativo.
+## 🚀 Status do Projeto: [Fase 4 - Backoffice e Clientes]
+Ambiente de desenvolvimento robusto operando em Docker. Módulos de Catálogo (Produtos/SKUs) e Clientes (Autenticação Customizada e Logística) modelados e integrados com sucesso. Iniciando o desenvolvimento de Views e reatividade no Front-end.
 
 ## 🧠 Diferenciais Técnicos (O que este projeto resolve)
 
 Diferente de e-commerces básicos, o **Pettit Gateau** foi projetado com:
 
-* **Arquitetura de SKU:** Separação lógica entre Produto (Identidade) e SKU (Logística), permitindo variações de volume (50ml, 100ml) e concentração (EDP, EDT) com controle de estoque independente.
-* **Data Integrity (Snapshotting):** Implementação de registro histórico de preços no ato da venda, garantindo que alterações no catálogo não corrompam o faturamento retroativo.
-* **Security First:** Uso de **UUIDs** (Universal Unique Identifiers) em todas as entidades transacionais para mitigar ataques de enumeração de dados.
-* **Global Standards:** Nomenclatura técnica em inglês e suporte a múltiplos endereços por cliente, seguindo padrões de APIs internacionais.
+* **Custom User Model (Email Auth):** Substituição do padrão de *Username* do Django pela autenticação via E-mail, otimizando o fluxo de checkout e melhorando a UX.
+* **Gestão Logística 1:N:** Modelagem de múltiplos endereços por cliente estruturada com chaves estrangeiras, `is_default` flag para cálculo de frete rápido, e proteção de dados alinhada à LGPD (Exclusão em Cascata).
+* **Arquitetura de SKU:** Separação lógica entre Produto (Identidade) e SKU (Logística), permitindo variações de volume (50ml, 100ml) com controle de estoque independente.
+* **Data Integrity (Snapshotting):** Registro histórico de preços para garantir que alterações no catálogo não corrompam o faturamento retroativo.
+* **Security First:** Uso de **UUIDs** (Universal Unique Identifiers) e abstração de *BaseModels* para mitigar ataques de enumeração e garantir auditoria (created_at/updated_at).
+* **Global Standards:** Nomenclatura técnica em inglês, aderindo aos padrões das melhores equipes de engenharia de software.
 
 ## 🔄 Workflow de Desenvolvimento (Git)
 
@@ -37,11 +39,13 @@ Este projeto adota o **GitHub Flow** como estratégia oficial de versionamento, 
 ## 🗺️ Roadmap de Desenvolvimento
 
 - [x] Levantamento de Requisitos e Regras de Negócio
-- [x] Modelagem Lógica de Entidades (ERD)
-- [x] Configuração de Governança (Git/GitHub)
-- [ ] Implementação do Core e Base Models (UUID/Audit)
-- [ ] Desenvolvimento do Módulo de Catálogo & SKUs
-- [ ] Fluxo de Checkout e Integridade de Pedidos
+- [x] Modelagem Lógica de Entidades (ERD) e Governança (Git)
+- [x] Implementação do Core e Base Models (UUID/Audit)
+- [x] Desenvolvimento do Módulo de Catálogo & Variações (SKUs)
+- [x] Módulo de Clientes (Auth Customizada & Múltiplos Endereços)
+- [ ] Construção do Front-end Reativo (Views, Templates e JS)
+- [ ] Fluxo de Carrinho de Compras e Sessões
+- [ ] Checkout e Integridade de Pedidos
 - [ ] Deploy Automatizado e Documentação de API
 
 ---
