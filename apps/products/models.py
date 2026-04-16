@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from apps.base.models import BaseModel
 
 class Category(BaseModel):
@@ -26,6 +27,7 @@ class Product(BaseModel):
     name = models.CharField(max_length=120, verbose_name="Nome do Produto")
     description = models.TextField(max_length=600, verbose_name="Descrição")
     fragrance = models.CharField(max_length=2, choices=Fragrance.choices, verbose_name="Fragrância")
+    slug = models.SlugField(max_length=100, unique=True, blank=True, null=True, verbose_name="Slug (URL)")
 
     #Relationship
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="products")
@@ -33,6 +35,11 @@ class Product(BaseModel):
 
     def __str__(self):
         return f"{self.brand.name} - {self.name}"
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
     
 class SKU(BaseModel):
     class Concentration(models.TextChoices):

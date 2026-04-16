@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {{product.name}} - Pettit Gateau</title>
+    <style>
+        /* CSS super básico só para podermos visualizar o clique */
+        body { font-family: sans-serif; padding: 20px; }
+        .sku-selector { margin: 20px 0; }
+        .btn-sku { 
+            padding: 10px 20px; margin-right: 10px; cursor: pointer; 
+            border: 1px solid #ccc; background: white; border-radius: 4px;
+        }
+        /* Esta é a classe que o JS vai ligar e desligar */
+        .btn-sku.active { 
+            border-color: black; background: #f9f9f9; font-weight: bold; 
+        }
+        .btn-buy {
+            padding: 15px 30px; background: black; color: white; border: none; cursor: pointer;
+        }
+        </style>
+</head>
+<body>
+    <h1> {{product.name}} </h1>
+    <h4> {{product.brand}}</h4>
+
+    <p> {{product.get_fragrance_display}} -  {{product.category}}</p>
+
+    <div class="sku-selector">
+        <p>Escolha o tamanho:</p>
+        
+        {% for sku in skus %}
+            <button 
+                class="btn-sku {% if sku.id == default_sku.id %}active{% endif %}" 
+                data-price="{{ sku.price }}" 
+                data-id="{{ sku.id }}">
+                {{ sku.volume_ml }}ml
+            </button>
+        {% endfor %}
+    </div>
+
+    <h2 id="price-display">R$ {{ default_sku.price }}</h2>
+
+    <form action="#" method="POST">
+        {% csrf_token %}
+        <input type="hidden" id="selected-sku-id" name="sku_id" value="{{ default_sku.id }}">
+        
+        <button type="submit" class="btn-buy">Adicionar ao Carrinho</button>
+    </form>
+
+    <hr>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const priceDisplay = document.getElementById('price-display');
+            const hiddenSkuInput = document.getElementById('selected-sku-id');
+            const skuButtons = document.querySelectorAll('.btn-sku');
+
+            skuButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    
+                    const newPrice = this.getAttribute('data-price');
+                    const newId = this.getAttribute('data-id');
+
+                    priceDisplay.innerText = `R$ ${newPrice}`;
+                    
+                    hiddenSkuInput.value = newId;
+
+                    skuButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
