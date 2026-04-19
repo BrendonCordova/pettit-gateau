@@ -21,6 +21,60 @@
 
     <h1>Nossas Fragrâncias</h1>
 
+    <form method="GET" action="{% url 'products:list' %}" style="background: #f4f4f4; padding: 15px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end;">
+        
+        <div>
+            <label for="brand">Marca:</label><br>
+            <select name="brand" id="brand">
+                <option value="">Todas</option>
+                {% for brand in brands %}
+                    <option value="{{ brand.id }}" {% if current_filters.brand == brand.id|stringformat:"s" %}selected{% endif %}>
+                        {{ brand.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label for="category">Categoria:</label><br>
+            <select name="category" id="category">
+                <option value="">Todas</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if current_filters.category == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="fragrance">Família Olfativa:</label><br>
+            <select name="fragrance" id="fragrance">
+                <option value="">Todas</option>
+                {% for value, label in fragrance_choices %}
+                    <option value="{{ value }}" {% if current_filters.fragrance == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="min_price">Preço Mínimo:</label><br>
+            <input type="number" name="min_price" id="min_price" step="0.01" placeholder="R$ 0,00" value="{{ current_filters.min_price }}">
+        </div>
+
+        <div>
+            <label for="max_price">Preço Máximo:</label><br>
+            <input type="number" name="max_price" id="max_price" step="0.01" placeholder="R$ 999,00" value="{{ current_filters.max_price }}">
+        </div>
+
+        <div>
+            <button type="submit" style="padding: 5px 15px; background: black; color: white;">Filtrar</button>
+            <a href="{% url 'products:list' %}" style="margin-left: 10px; text-decoration: none; color: gray;">Limpar</a>
+        </div>
+    </form>
+
     <div class="product-grid">
         {% for product in page_obj %}
             <div class="product-card">
@@ -45,7 +99,7 @@
     <div class="pagination">
         
         {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">&laquo; Anterior</a>
+            <a href="?page={{ page_obj.previous_page_number }}&{{ query_string }}" class="page-link">&laquo; Anterior</a>
         {% else %}
             <span class="page-link disabled">&laquo; Anterior</span>
         {% endif %}
@@ -53,7 +107,7 @@
         <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Próxima &raquo;</a>
+            <a href="?page={{ page_obj.next_page_number }}&{{ query_string }}" class="page-link">Próxima &raquo;</a>
         {% else %}
             <span class="page-link disabled">Próxima &raquo;</span>
         {% endif %}
