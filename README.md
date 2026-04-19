@@ -6,13 +6,14 @@ Este projeto é um ecossistema completo de vendas online, desenvolvido para demo
 
 ---
 
-## 🚀 Status do Projeto: [Fase 4 - Backoffice e Clientes]
-Ambiente de desenvolvimento robusto operando em Docker. Módulos de Catálogo (Produtos/SKUs) e Clientes (Autenticação Customizada e Logística) modelados e integrados com sucesso. Iniciando o desenvolvimento de Views e reatividade no Front-end.
+## 🚀 Status do Projeto: [Fase 5 - Front-end Público (SSR) e Preparação para os Filtros Dinâmicos]
+Módulos de Catálogo e Clientes totalmente integrados. O Front-end público (Vitrine PLP e Detalhes PDP) foi implementado com sucesso utilizando Server-Side Rendering (SSR) otimizado para SEO, paginação robusta e reatividade limpa com Vanilla JS. Iniciando os filtros dinâmicos (PLP).
 
 ## 🧠 Diferenciais Técnicos (O que este projeto resolve)
 
 Diferente de e-commerces básicos, o **Pettit Gateau** foi projetado com:
 
+* **Arquitetura Híbrida Estratégica:** Separação inteligente de responsabilidades. Uso de **SSR (Django Templates)** nas áreas públicas para maximizar SEO e performance (Time-to-First-Byte), e preparação para **API-Driven (DRF)** nas áreas transacionais (Carrinho/Checkout) garantindo fluidez e escalabilidade.
 * **Custom User Model (Email Auth):** Substituição do padrão de *Username* do Django pela autenticação via E-mail, otimizando o fluxo de checkout e melhorando a UX.
 * **Gestão Logística 1:N:** Modelagem de múltiplos endereços por cliente estruturada com chaves estrangeiras, `is_default` flag para cálculo de frete rápido, e proteção de dados alinhada à LGPD (Exclusão em Cascata).
 * **Arquitetura de SKU:** Separação lógica entre Produto (Identidade) e SKU (Logística), permitindo variações de volume (50ml, 100ml) com controle de estoque independente.
@@ -43,7 +44,8 @@ Este projeto adota o **GitHub Flow** como estratégia oficial de versionamento, 
 - [x] Implementação do Core e Base Models (UUID/Audit)
 - [x] Desenvolvimento do Módulo de Catálogo & Variações (SKUs)
 - [x] Módulo de Clientes (Auth Customizada & Múltiplos Endereços)
-- [ ] Construção do Front-end Reativo (Views, Templates e JS)
+- [x] Construção do Front-end Reativo (Views, Templates e JS)
+- [ ] Filtros Dinâmicos PLP
 - [ ] Fluxo de Carrinho de Compras e Sessões
 - [ ] Checkout e Integridade de Pedidos
 - [ ] Deploy Automatizado e Documentação de API
