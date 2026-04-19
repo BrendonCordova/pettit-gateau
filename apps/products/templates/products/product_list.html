@@ -24,6 +24,11 @@
     <form method="GET" action="{% url 'products:list' %}" style="background: #f4f4f4; padding: 15px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end;">
         
         <div>
+            <label for="q">Buscar Produto:</label><br>
+            <input type="text" name="q" id="q" placeholder="Ex: Acqua di Giò..." value="{{ current_filters.q }}">
+        </div>
+
+        <div>
             <label for="brand">Marca:</label><br>
             <select name="brand" id="brand">
                 <option value="">Todas</option>

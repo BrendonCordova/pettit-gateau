@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Product, Brand, Category
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.db.models import Q
 
 def product_list(request):
 
@@ -12,6 +12,7 @@ def product_list(request):
     fragrance = request.GET.get('fragrance')
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
+    search_query = request.GET.get('q')
 
     if brand_id:
         products = products.filter(brand_id=brand_id)
@@ -27,6 +28,12 @@ def product_list(request):
 
     if max_price:
         products = products.filter(skus__price__lte=max_price).distinct()
+
+    if search_query:
+        products = products.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query)
+        ).distinct()
 
     paginator = Paginator(products, 8)
 
