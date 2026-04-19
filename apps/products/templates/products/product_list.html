@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vitrine - Pettit Gateau</title>
+    <style>
+        /* CSS Básico para fazer um "Grid" de vitrine e botões de paginação */
+        body { font-family: sans-serif; padding: 20px; }
+        .product-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+        .product-card { border: 1px solid #ccc; padding: 15px; width: 200px; border-radius: 8px; }
+        .product-card a { text-decoration: none; color: black; font-weight: bold; }
+        
+        /* Estilo da Paginação */
+        .pagination { margin-top: 30px; display: flex; gap: 10px; align-items: center; }
+        .page-link { padding: 8px 12px; border: 1px solid #000; text-decoration: none; color: black; }
+        .page-link.active { background: black; color: white; }
+        .page-link.disabled { border-color: #ccc; color: #ccc; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <h1>Nossas Fragrâncias</h1>
+
+    <div class="product-grid">
+        {% for product in page_obj %}
+            <div class="product-card">
+                <h3><a href="{% url 'products:detail' product.slug %}">{{ product.name }}</a></h3>
+                <p>{{ product.brand.name }}</p>
+                
+                {% with first_sku=product.skus.first %}
+                    {% if first_sku %}
+                        <p>A partir de R$ {{ first_sku.price }}</p>
+                    {% else %}
+                        <p>Indisponível</p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        {% empty %}
+            <p>Nenhum produto cadastrado ainda.</p>
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <div class="pagination">
+        
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">&laquo; Anterior</a>
+        {% else %}
+            <span class="page-link disabled">&laquo; Anterior</span>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Próxima &raquo;</a>
+        {% else %}
+            <span class="page-link disabled">Próxima &raquo;</span>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>
