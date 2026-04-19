@@ -6,8 +6,8 @@ Este projeto é um ecossistema completo de vendas online, desenvolvido para demo
 
 ---
 
-## 🚀 Status do Projeto: [Fase 5 - Front-end Público (SSR) e Preparação para os Filtros Dinâmicos]
-Módulos de Catálogo e Clientes totalmente integrados. O Front-end público (Vitrine PLP e Detalhes PDP) foi implementado com sucesso utilizando Server-Side Rendering (SSR) otimizado para SEO, paginação robusta e reatividade limpa com Vanilla JS. Iniciando os filtros dinâmicos (PLP).
+## 🚀 Status do Projeto: [Fase 6 - Carrinho de Compras e Sessões (API-Driven)]
+O Front-end público (Vitrine PLP com filtros avançados, busca textual e paginação, além dos Detalhes PDP) foi implementado com sucesso utilizando Server-Side Rendering (SSR) otimizado para SEO. Iniciando agora a arquitetura transacional: criação do Carrinho de Compras e controle de Sessões utilizando integrações assíncronas.
 
 ## 🧠 Diferenciais Técnicos (O que este projeto resolve)
 
@@ -31,9 +31,10 @@ Este projeto adota o **GitHub Flow** como estratégia oficial de versionamento, 
 ## 🛠️ Stack Tecnológica
 
 * **Linguagem:** Python 3.x
-* **Framework:** Django (Web Framework for perfectionists)
+* **Framework:** Django & Django REST Framework (DRF)
 * **Banco de Dados:** PostgreSQL (Relacional Robusto)
 * **Ambiente:** Docker & Docker Compose (Containerização)
+* **Front-end:** HTML5, CSS3, Vanilla JavaScript
 * **Segurança:** Python-Decouple (Gestão de .env)
 * **Modelagem:** DBML / DBDiagram.io
 
@@ -45,7 +46,7 @@ Este projeto adota o **GitHub Flow** como estratégia oficial de versionamento, 
 - [x] Desenvolvimento do Módulo de Catálogo & Variações (SKUs)
 - [x] Módulo de Clientes (Auth Customizada & Múltiplos Endereços)
 - [x] Construção do Front-end Reativo (Views, Templates e JS)
-- [ ] Filtros Dinâmicos PLP
+- [x] Filtros Dinâmicos PLP
 - [ ] Fluxo de Carrinho de Compras e Sessões
 - [ ] Checkout e Integridade de Pedidos
 - [ ] Deploy Automatizado e Documentação de API
