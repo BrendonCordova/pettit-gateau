@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Cadastro | Pettit Gateau{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4">Crie sua Conta</h3>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    
+                    <button type="submit" class="btn btn-dark w-100 mt-3">Criar Conta</button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p>Já possui conta? <a href="{% url 'customers:login' %}">Faça Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
