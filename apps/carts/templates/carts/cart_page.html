@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Carrinho | Pettit Gateau{% endblock%}
+
+{% block content %}
+
+{% csrf_token %}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Meu Carrinho de Compras</h1>
+    
+    <div class="row">
+        <!-- Tabela de Produtos -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Volume</th>
+                                <th>Preço Unit.</th>
+                                <th>Qtd.</th>
+                                <th>Subtotal</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                      
+                        <tbody id="cart-items-body">
+                            <tr><td colspan="6" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo do Pedido -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Resumo do Pedido</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong id="cart-total">R$ 0.00</strong>
+                    </div>
+                    <button class="btn btn-dark w-100">Finalizar Compra</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    const apiUrl = '/carrinho/api/my-cart/';
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    const getHeaders = () => ({
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+    });
+
+    async function loadCart() {
+        try {
+            const response = await fetch(apiUrl);
+            const cart = await response.json();
+            
+            const tbody = document.getElementById('cart-items-body');
+            const totalEl = document.getElementById('cart-total');
+            
+            tbody.innerHTML = '';
+
+            if (cart.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">Seu carrinho está vazio.</td></tr>';
+                totalEl.innerText = 'R$ 0.00';
+                return;
+            }
+
+            cart.items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.product_name}</td>
+                    <td>${item.volume_ml}ml</td>
+                    <td>R$ ${item.price}</td>
+                    <td style="width: 120px;">
+                        <input type="number" class="form-control form-control-sm" 
+                               value="${item.quantity}" min="0" 
+                               onchange="updateQuantity('${item.sku}', this.value)">
+                    </td>
+                    <td>R$ ${item.subtotal}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="removeItem('${item.sku}')">X</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            totalEl.innerText = `R$ ${cart.total_price}`;
+
+        } catch (error) {
+            console.error("Erro ao carregar o carrinho:", error);
+        }
+    }
+
+    async function updateQuantity(skuId, newQuantity) {
+        try {
+            await fetch(apiUrl, {
+                method: 'PATCH',
+                headers: getHeaders(),
+                body: JSON.stringify({ sku_id: skuId, quantity: parseInt(newQuantity) })
+            });
+            loadCart();
+        } catch (error) {
+            console.error("Erro ao atualizar:", error);
+        }
+    }
+
+    async function removeItem(skuId) {
+        if(!confirm("Tem certeza que deseja remover este item?")) return;
+        
+        try {
+            await fetch(apiUrl, {
+                method: 'DELETE',
+                headers: getHeaders(),
+                body: JSON.stringify({ sku_id: skuId })
+            });
+            loadCart();
+        } catch (error) {
+            console.error("Erro ao remover:", error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCart);
+</script>
+{% endblock scripts %}

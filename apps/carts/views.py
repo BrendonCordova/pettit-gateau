@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from .models import Cart, CartItem
 from apps.products.models import SKU
 from .serializers import CartSerializer
+from django.views.generic import TemplateView
 
 class CartDetailAPIView(APIView):
 
@@ -90,3 +91,6 @@ class CartDetailAPIView(APIView):
         serializer = CartSerializer(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+class CartPageView(TemplateView):
+
+    template_name = 'carts/cart_page.html'
