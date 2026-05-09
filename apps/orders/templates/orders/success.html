@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Pedido Confirmado | Pettit Gateau{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-success">
+                <div class="card-body py-5">
+                    <h1 class="display-1 text-success mb-3">✅</h1>
+                    <h2 class="fw-bold">Pedido Realizado!</h2>
+                    <p class="lead text-muted">Obrigado pela sua compra, {{ order.customer.first_name }}.</p>
+                    
+                    <div class="bg-light p-3 rounded mt-4 text-start">
+                        <p class="mb-1"><strong>Nº do Pedido:</strong> {{ order.id }}</p>
+                        <p class="mb-1"><strong>Status:</strong> {{ order.get_status_display }}</p>
+                        <p class="mb-0"><strong>Total Pago:</strong> R$ {{ order.total_price }}</p>
+                    </div>
+
+                    <a href="/" class="btn btn-outline-dark mt-4">Voltar para a Loja</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

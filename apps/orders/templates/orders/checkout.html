@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Finalizar Compra | Pettit Gateau{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Finalizar Compra</h2>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Resumo dos Itens</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for item in cart.items.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ item.quantity }}x {{ item.sku.product.name }} ({{ item.sku.volume_ml }}ml)
+                                <span>R$ {{ item.subtotal }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold border-bottom pb-2">Entrega</h5>
+                    {% if address %}
+                        <p class="small text-muted mb-4">
+                            {{ address.street }}, {{ address.number }}<br>
+                            {{ address.city }} - {{ address.state }}<br>
+                            CEP: {{ address.zip_code }}
+                        </p>
+                    {% else %}
+                        <p class="text-danger small">Nenhum endereço cadastrado. Crie um pelo Painel Admin para testar.</p>
+                    {% endif %}
+
+                    <h4 class="fw-bold mt-3 border-top pt-3 d-flex justify-content-between">
+                        Total: <span class="text-success">R$ {{ cart.total_price }}</span>
+                    </h4>
+
+                    <form method="POST" class="mt-4">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark w-100 py-2 fs-5" {% if not address %}disabled{% endif %}>
+                            Confirmar Pagamento
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

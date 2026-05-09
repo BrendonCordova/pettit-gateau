@@ -44,7 +44,9 @@
                         <strong>Total:</strong>
                         <strong id="cart-total">R$ 0.00</strong>
                     </div>
-                    <button class="btn btn-dark w-100">Finalizar Compra</button>
+                    <a href="{% url 'orders:checkout' %}" class="btn btn-dark w-100">
+                        Finalizar Compra
+                    </a>
                 </div>
             </div>
         </div>
