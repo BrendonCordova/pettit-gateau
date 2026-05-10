@@ -17,6 +17,9 @@ def checkout_view(request):
     if not address:
         address = Address.objects.filter(customer=request.user).first()
 
+    if not address:
+        return redirect('customers:address-create')
+
     if request.method == 'POST':
 
         if not address:

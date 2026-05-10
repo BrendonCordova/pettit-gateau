@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Novo Endereço | Pettit Gateau{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="mb-4">Cadastrar Endereço de Entrega</h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12 mb-3">{{ form.name.label_tag }}{{ form.name }}</div>
+                        <div class="col-md-4 mb-3">{{ form.zip_code.label_tag }}{{ form.zip_code }}</div>
+                        <div class="col-md-8 mb-3">{{ form.street.label_tag }}{{ form.street }}</div>
+                        <div class="col-md-4 mb-3">{{ form.number.label_tag }}{{ form.number }}</div>
+                        <div class="col-md-8 mb-3">{{ form.complement.label_tag }}{{ form.complement }}</div>
+                        <div class="col-md-5 mb-3">{{ form.neighborhood.label_tag }}{{ form.neighborhood }}</div>
+                        <div class="col-md-5 mb-3">{{ form.city.label_tag }}{{ form.city }}</div>
+                        <div class="col-md-2 mb-3">{{ form.state.label_tag }}{{ form.state }}</div>
+                    </div>
+                    <div class="form-check mb-4">
+                        {{ form.is_default }}
+                        <label class="form-check-label">Definir como endereço padrão</label>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100">Salvar Endereço e Continuar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
