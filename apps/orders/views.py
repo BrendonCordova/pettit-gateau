@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from apps.carts.models import Cart
 from apps.customers.models import Address
 from .models import Order, OrderItem
+from django.db import transaction
+from django.db.models import F
+from django.contrib import messages
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
@@ -12,38 +15,47 @@ def checkout_view(request):
     if not cart or cart.items.count() == 0:
         return redirect('products:list')
     
-    address = Address.objects.filter(customer=request.user, is_default=True).first()
-
-    if not address:
-        address = Address.objects.filter(customer=request.user).first()
+    address = Address.objects.filter(customer=request.user, is_default=True).first() or \
+        Address.objects.filter(customer=request.user).first()
 
     if not address:
         return redirect('customers:address-create')
 
     if request.method == 'POST':
 
-        if not address:
-            # The address form still needs to be implemented
-            return render(request, 'orders/checkout.html', {'cart': cart, 'error': 'Você precisa de um endereço cadastrado.'})
+        try:
+            with transaction.atomic():
 
-        order = Order.objects.create(
-            customer=request.user,
-            address=address,
-            status='PENDING',
-            total_price=cart.total_price
-        )
+                for cart_item in cart.items.all():
+                    if cart_item.sku.stock_quantity < cart_item.quantity:
+                        raise ValueError(f'Desculpe, o produto {cart_item.sku.product.name} não tem estoque suficiente.')
 
-        for cart_item in cart.items.all():
-            OrderItem.objects.create(
-                order=order,
-                sku=cart_item.sku,
-                price=cart_item.sku.price,
-                quantity=cart_item.quantity
-            )
+                order = Order.objects.create(
+                    customer=request.user,
+                    address=address,
+                    status='PENDING',
+                    total_price=cart.total_price
+                )
 
-        cart.items.all().delete()
+                for cart_item in cart.items.all():
+                    OrderItem.objects.create(
+                        order=order,
+                        sku=cart_item.sku,
+                        price=cart_item.sku.price,
+                        quantity=cart_item.quantity
+                    )
 
-        return redirect('orders:success', order_id=order.id)
+                    cart_item.sku.stock_quantity = F('stock_quantity') - cart_item.quantity
+                    cart_item.sku.save()
+                    cart_item.sku.refresh_from_db()
+
+                cart.items.all().delete()
+
+            return redirect('orders:success', order_id=order.id)
+       
+        except ValueError as e:
+
+            return render(request, 'orders/checkout.html', {'cart': cart, 'address': address, 'error': str(e)})
     
     context = {
         'cart': cart,
