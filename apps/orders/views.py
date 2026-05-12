@@ -7,6 +7,9 @@ from django.db import transaction
 from django.db.models import F
 from django.contrib import messages
 from .services import MercadoPagoService
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
@@ -78,3 +81,42 @@ def order_success_view(request, order_id):
     order = get_object_or_404(Order, id=order_id, customer=request.user)
 
     return render(request, 'orders/success.html', {'order': order})
+
+@csrf_exempt
+def mercado_pago_webhook(request):
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+
+            resource_id = data.get('data', {}).get('id') or data.get('resource')
+            topic = data.get('type') or data.get('topic')
+
+            if topic == 'payment' and resource_id:
+                mp_service = MercadoPagoService()
+
+                payment_info = mp_service.sdk.payment().get(resource_id)
+                payment_data = payment_info['response']
+
+                status = payment_data.get('status')
+                order_id = payment_data.get('external_reference')
+
+                if order_id:
+                    order = Order.objects.filter(id=order_id).first()
+
+                    if order and status == 'approved':
+                        order.status = 'PAID'
+                        order.save()
+                        print(f'✅ Pedido {order_id} atualizado para PAGO via webhook!')
+    #         payload = json.loads(request.body)
+
+    #         print('WEBHOOK RECEBIDO DO MERCADO PAGO:')
+    #         print(json.dumps(payload, indent=4))
+
+            return JsonResponse({'status': 'sucesso'}, status=200)
+        
+        except Exception as e:
+            print(f'Erro no Webhook: {e}')
+            return JsonResponse({'error': 'bad_request'}, status=400)
+        
+    return JsonResponse({'error': 'method_not_allowed'}, status=405)

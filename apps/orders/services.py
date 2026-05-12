@@ -17,6 +17,9 @@ class MercadoPagoService:
 
         success_url = f'http://localhost:8000/pedidos/sucesso/{order.id}/'
 
+        base_url = config('WEBHOOK_BASE_URL', default='http://localhost:8000')
+        webhook_url = f'{base_url}/pedidos/webhook/mercado-pago/'
+
         preference_data = {
             'items': items,
             'external_reference': str(order.id),
@@ -26,6 +29,7 @@ class MercadoPagoService:
                 "pending": "http://127.0.0.1:8000/pedidos/pendente/",
             },
             # 'auto_return': 'approved',
+            'notification_url': webhook_url,
         }
 
         print("==== JSON ENVIADO PARA O MERCADO PAGO ====")
