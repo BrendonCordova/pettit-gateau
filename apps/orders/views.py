@@ -6,6 +6,7 @@ from .models import Order, OrderItem
 from django.db import transaction
 from django.db.models import F
 from django.contrib import messages
+from .services import MercadoPagoService
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
@@ -49,14 +50,22 @@ def checkout_view(request):
                     cart_item.sku.save()
                     cart_item.sku.refresh_from_db()
 
+                mp_service = MercadoPagoService()
+
+                preference = mp_service.create_payment_preference(order, cart.items.all())
+
+                payment_url = preference['sandbox_init_point']
+
                 cart.items.all().delete()
 
-            return redirect('orders:success', order_id=order.id)
+            return redirect(payment_url)
        
         except ValueError as e:
-
             return render(request, 'orders/checkout.html', {'cart': cart, 'address': address, 'error': str(e)})
-    
+        except Exception as e:
+            print("ERRO FATAL:", e)
+            return render(request, 'orders/checkout.html', {'cart': cart, 'address': address, 'error': 'Ocorreu um erro ao comunicar com o banco. Tente novamente.'})
+
     context = {
         'cart': cart,
         'address': address
