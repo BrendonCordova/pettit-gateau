@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Brand, Category, Product, SKU, ProductImage
+from .models import Brand, Category, Product, SKU, ProductImage, Review
 
 admin.site.register(Brand)
 admin.site.register(Category)
@@ -21,3 +21,9 @@ class SKUAdmin(admin.ModelAdmin):
     search_fields = ('sku_code', 'product__name')
     list_filter = ('concentration', 'volume_ml')
     list_editable = ('price', 'stock_quantity')
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('product', 'customer', 'rating', 'created_at')
+    list_filter = ('rating', 'created_at')
+    search_fields = ('customer__first_name', 'product__name')

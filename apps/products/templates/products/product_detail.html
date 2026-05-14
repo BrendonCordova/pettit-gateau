@@ -25,9 +25,15 @@
 
 {% block content %}
 <h1> {{product.name}} </h1>
+{% if product.get_reviews_count > 0 %}
+    <h5 style="color: #f39c12; margin-top: -10px; margin-bottom: 20px;">
+        ⭐ {{ product.get_average_rating }}
+    </h5>
+{% endif %}
 <h4> {{product.brand}}</h4>
 
 <p> {{product.get_fragrance_display}} -  {{product.category}}</p>
+
 
 <div class="sku-selector">
     <p>Escolha o tamanho:</p>
@@ -55,6 +61,49 @@
 <button type="button" class="btn-buy" id="add-to-cart-btn" onclick="addToCart()">
     Adicionar ao Carrinho
 </button>
+
+<div class="reviews-section" style="margin-top: 50px;">
+    <h3>Avaliações dos Clientes</h3>
+    <div class="product-rating">
+        <span>⭐ {{ product.get_average_rating }}</span> 
+        <small>({{ product.get_reviews_count }} avaliações)</small>
+    </div>
+    
+    <div id="reviews-container">
+        {% for review in reviews %}
+            <div class="review-card" style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                <strong>{{ review.customer.first_name }}</strong> - Nota: {{ review.rating }}/5
+                <p>{{ review.comment }}</p>
+            </div>
+        {% empty %}
+            <p>Este perfume ainda não foi avaliado. Seja o primeiro!</p>
+        {% endfor %}
+    </div>
+
+    {% if reviews_count > 3 %}
+        <button id="load-more-btn" class="btn btn-outline-dark mt-3" data-slug="{{ product.slug }}" data-page="2">
+            Ler mais
+        </button>
+    {% endif %}
+
+    <hr style="margin: 40px 0;">
+    
+    {% if user_has_purchased %}
+        <div class="review-form-box p-4" style="background-color: #f8f9fa; border-radius: 8px;">
+            <h4>Deixe sua avaliação</h4>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary mt-2">Enviar Comentário</button>
+            </form>
+        </div>
+    {% elif user.is_authenticated %}
+        <div class="alert alert-info mt-4">
+            Apenas clientes que adquiriram este produto podem avaliá-lo.
+        </div>
+    {% endif %}
+    
+</div>
 {% endblock content %}
 
 {% block scripts %}
@@ -120,6 +169,51 @@
             btn.innerText = "Adicionar ao Carrinho";
             btn.disabled = false;
         }
+    }
+
+    const loadMoreBtn = document.getElementById('load-more-btn');
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', async function() {
+
+            const slug = this.getAttribute('data-slug');
+            const page = this.getAttribute('data-page');
+
+            const originalText = this.innerText;
+            this.innerText = 'Carregando..';
+            this.disabled = true;
+
+            try {
+
+                const response = await fetch(`/produtos/${slug}/avaliacoes/api/?page=${page}`);
+                const data = await response.json();
+
+                const container = document.getElementById('reviews-container');
+
+                data.reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.className = 'review-card';
+                    reviewDiv.style.cssText = 'border-bottom: 1px solid #eee; padding: 10px 0;';
+                    reviewDiv.innerHTML = `
+                        <strong>${review.customer}</strong> - Nota: ${review.rating}/5
+                        <p>${review.comment}</p>
+                    `;
+                    container.appendChild(reviewDiv);
+                });
+
+                if (data.has_next) {
+                    this.setAttribute('data-page', data.next_page_number);
+                    this.innerText = originalText;
+                    this.disabled = false;
+                } else {
+                    this.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar avaliações:', error);
+                this.innerText = 'Erro. Tente novamente';
+                this.disabled = false;
+            }
+        });
     }
 </script>
 {% endblock scripts %}
