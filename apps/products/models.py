@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 from apps.base.models import BaseModel
+from django.core.validators import MinValueValidator, MaxValueValidator
+from apps.customers.models import Customer
 
 class Category(BaseModel):
     name = models.CharField(max_length=80, verbose_name="Nome da Categoria")
@@ -79,3 +81,19 @@ class ProductImage(BaseModel):
 
     def __str__(self):
         return f"Imagem de {self.product.name}"
+    
+class Review(BaseModel):
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], verbose_name='Nota')
+    comment = models.TextField(blank=True, null=True, verbose_name='Comentário')
+    # Relationships
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='reviews', verbose_name='Produto')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='reviews', verbose_name='Cliente')
+
+    class Meta:
+        verbose_name = 'Avaliação'
+        verbose_name_plural = 'Avaliações'
+        ordering = ['-created_at']
+        unique_together = ('product', 'customer')
+
+    def __str__(self):
+        return f'{self.customer.first_name} - {self.product.name} ({self.rating}/5)'
