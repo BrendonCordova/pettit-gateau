@@ -1,7 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Brand, Category
 from django.core.paginator import Paginator
 from django.db.models import Q
+from apps.orders.models import Order
+from .forms import ReviewForm
 
 def product_list(request):
 
@@ -59,12 +61,35 @@ def product_list(request):
 def product_detail(request, slug):
 
     product = get_object_or_404(Product.objects.prefetch_related('skus'), slug=slug)
+    reviews = product.reviews.all()
+    user_has_purchased = False
 
     available_skus = product.skus.filter(is_active=True)
     default_sku = available_skus.first()
 
+    if request.user.is_authenticated:
+        user_has_purchased = Order.objects.filter(
+            customer=request.user,
+            status='PAID',
+            items__sku__product=product
+        ).exists()
+
+    if request.method == 'POST' and user_has_purchased:
+        form = ReviewForm(request.POST)
+        if form .is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.customer = request.user
+            review.save()
+            return redirect('products:detail', slug=product.slug)
+    else:
+        form = ReviewForm()
+
     context = {
         'product': product,
+        'reviews': reviews,
+        'form': form,
+        'user_has_purchased': user_has_purchased,
         'skus': available_skus,
         'default_sku': default_sku,
     }

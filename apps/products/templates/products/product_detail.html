@@ -29,6 +29,34 @@
 
 <p> {{product.get_fragrance_display}} -  {{product.category}}</p>
 
+<div class="reviews-section">
+    <h3>Avaliações dos Clientes</h3>
+    
+    {% for review in reviews %}
+        <div class="review-card">
+            <strong>{{ review.customer.first_name }}</strong> - Nota: {{ review.rating }}/5
+            <p>{{ review.comment }}</p>
+        </div>
+    {% empty %}
+        <p>Este perfume ainda não foi avaliado. Seja o primeiro!</p>
+    {% endfor %}
+
+    <hr>
+
+    {% if user_has_purchased %}
+        <h4>Deixe sua avaliação</h4>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Enviar Comentário</button>
+        </form>
+    {% else %}
+        <div class="alert alert-info">
+            Apenas clientes que adquiriram este produto podem deixar uma avaliação.
+        </div>
+    {% endif %}
+</div>
+
 <div class="sku-selector">
     <p>Escolha o tamanho:</p>
     
