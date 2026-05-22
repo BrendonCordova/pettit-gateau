@@ -40,16 +40,25 @@ class CartDetailAPIView(APIView):
     
         sku = get_object_or_404(SKU, id=sku_id)
 
-        cart_item, created = CartItem.objects.get_or_create(
-            cart=cart,
-            sku=sku,
-            defaults={'quantity':quantity}
-        )
+        existing_item = CartItem.objects.filter(cart=cart, sku=sku).first()
+        current_quantity = existing_item.quantity if existing_item else 0
 
-        if not created:
-            cart_item.quantity += quantity
-            cart_item.save()
-
+        if current_quantity + quantity > sku.stock_quantity:
+            return Response(
+                {'error': f'Estoque insuficiente. Temos {sku.stock_quantity} unidades disponíveis'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if existing_item:
+            existing_item.quantity += quantity
+            existing_item.save()
+        else:
+            CartItem.objects.get_or_create(
+                cart=cart,
+                sku=sku,
+                quantity=quantity
+            )
+        
         serializer = CartSerializer(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -77,6 +86,13 @@ class CartDetailAPIView(APIView):
             return Response({"error": "sku_id e quantity são obrigatórios"}, status=status.HTTP_400_BAD_REQUEST)
         
         quantity = int(quantity)
+        sku = get_object_or_404(SKU, id=sku.id)
+
+        if quantity > sku.stock_quantity:
+            return Response(
+                {'error': f'Estoque insuficiente. Temos {sku.stock_quantity} unidades disponíveis'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if quantity <= 0:
             CartItem.objects.filter(cart=cart, sku_id=sku_id).delete()
