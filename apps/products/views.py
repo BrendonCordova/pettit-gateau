@@ -6,10 +6,11 @@ from apps.orders.models import Order
 from .forms import ReviewForm, Review
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.contrib import messages
 
 def product_list(request):
 
-    products = Product.objects.prefetch_related('skus').order_by('-created_at')
+    products = Product.objects.prefetch_related('skus').filter(is_active=True).order_by('-created_at')
 
     brand_id = request.GET.get('brand')
     category_id = request.GET.get('category')
@@ -64,6 +65,11 @@ def product_detail(request, slug):
 
     product = get_object_or_404(Product.objects.prefetch_related('skus'), slug=slug)
 
+    if not product.is_active:
+        messages.warning(request, f'O perfume {product.name} não está disponível no momento. Que tal escolher outra fragrância?')
+
+        return redirect('products:list')
+
     all_reviews = product.reviews.all().order_by('-created_at')
     recent_reviews = all_reviews[:3]
     reviews_count = all_reviews.count()
@@ -106,7 +112,7 @@ def product_detail(request, slug):
     return render(request, 'products/product_detail.html', context)
 
 def load_more_reviews_api(request, slug):
-    product = get_object_or_404(Product, slug=slug)
+    product = get_object_or_404(Product, slug=slug, is_active=True)
 
     all_reviews = product.reviews.all().order_by('-created_at')
 
