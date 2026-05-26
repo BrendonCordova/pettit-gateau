@@ -23,6 +23,8 @@ def checkout_view(request):
         Address.objects.filter(customer=request.user).first()
 
     if not address:
+
+        messages.info(request, 'Para finalizar sua compra, precisamos que você cadastre um endereço de entrega.')
         return redirect('customers:address-create')
 
     if request.method == 'POST':
