@@ -75,6 +75,13 @@
             
             tbody.innerHTML = '';
 
+            const totalItemsCount = cart.items ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
+
+            const cartBadge = document.getElementById('cart-item-count');
+            if (cartBadge) {
+                cartBadge.innerText = totalItemsCount;
+            }
+
             if (cart.items.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center">Seu carrinho está vazio.</td></tr>';
                 totalEl.innerText = 'R$ 0.00';

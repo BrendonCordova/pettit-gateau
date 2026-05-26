@@ -86,7 +86,7 @@ class CartDetailAPIView(APIView):
             return Response({"error": "sku_id e quantity são obrigatórios"}, status=status.HTTP_400_BAD_REQUEST)
         
         quantity = int(quantity)
-        sku = get_object_or_404(SKU, id=sku.id)
+        sku = get_object_or_404(SKU, id=sku_id)
 
         if quantity > sku.stock_quantity:
             return Response(
