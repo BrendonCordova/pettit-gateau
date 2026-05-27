@@ -51,9 +51,9 @@ def checkout_view(request):
                         quantity=cart_item.quantity
                     )
 
-                    cart_item.sku.stock_quantity = F('stock_quantity') - cart_item.quantity
-                    cart_item.sku.save()
-                    cart_item.sku.refresh_from_db()
+                    # cart_item.sku.stock_quantity = F('stock_quantity') - cart_item.quantity
+                    # cart_item.sku.save()
+                    # cart_item.sku.refresh_from_db()
 
                 mp_service = MercadoPagoService()
 
@@ -108,9 +108,13 @@ def mercado_pago_webhook(request):
                 if order_id:
                     order = Order.objects.filter(id=order_id).first()
 
-                    if order and status == 'approved':
+                    if order and status == 'approved' and order.status != 'PAID':
                         order.status = 'PAID'
                         order.save()
+
+                        for item in order.items.all():
+                            item.sku.stock_quantity = F('stock_quantity') - item.quantity
+                            item.sku.save()
 
                         cart = Cart.objects.filter(user=order.customer).first()
                         if cart:
