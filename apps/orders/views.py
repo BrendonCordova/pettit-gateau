@@ -51,10 +51,6 @@ def checkout_view(request):
                         quantity=cart_item.quantity
                     )
 
-                    # cart_item.sku.stock_quantity = F('stock_quantity') - cart_item.quantity
-                    # cart_item.sku.save()
-                    # cart_item.sku.refresh_from_db()
-
                 mp_service = MercadoPagoService()
 
                 preference = mp_service.create_payment_preference(order, cart.items.all())
@@ -121,10 +117,6 @@ def mercado_pago_webhook(request):
                             cart.items.all().delete()
 
                         print(f'✅ Pedido {order_id} atualizado para PAGO via webhook!')
-    #         payload = json.loads(request.body)
-
-    #         print('WEBHOOK RECEBIDO DO MERCADO PAGO:')
-    #         print(json.dumps(payload, indent=4))
 
             return JsonResponse({'status': 'sucesso'}, status=200)
         
