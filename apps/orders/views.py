@@ -61,8 +61,6 @@ def checkout_view(request):
 
                 payment_url = preference['sandbox_init_point']
 
-                cart.items.all().delete()
-
             return redirect(payment_url)
        
         except ValueError as e:
@@ -81,6 +79,10 @@ def checkout_view(request):
 def order_success_view(request, order_id):
 
     order = get_object_or_404(Order, id=order_id, customer=request.user)
+
+    cart = Cart.filter(user=request.user).first()
+    if cart:
+        cart.items.all().delete()
 
     return render(request, 'orders/success.html', {'order': order})
 
@@ -109,6 +111,11 @@ def mercado_pago_webhook(request):
                     if order and status == 'approved':
                         order.status = 'PAID'
                         order.save()
+
+                        cart = Cart.objects.filter(user=order.customer).first()
+                        if cart:
+                            cart.items.all().delete()
+
                         print(f'✅ Pedido {order_id} atualizado para PAGO via webhook!')
     #         payload = json.loads(request.body)
 
