@@ -8,9 +8,22 @@ from .serializers import CartSerializer
 from django.views.generic import TemplateView
 
 class CartDetailAPIView(APIView):
-
+    '''
+    API endpoint for managing the shopping cart.
+    Handles retrieving, adding, updating, and removing items from a user's cart.
+    Supports both authenticated users and anonymous sessions.
+    '''
     def _get_cart(self, request):
-        '''Utility (private) method for searching for or creating a shopping cart (DRY)'''
+        '''
+        Utility method to retrieve or create a shopping cart.
+        Links the cart to the authenticated user or to the anonymous session key.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            Cart: The active shopping cart instance for the current user/session.
+        '''
         if not request.session.session_key:
             request.session.create()
 
@@ -24,13 +37,31 @@ class CartDetailAPIView(APIView):
         return cart
 
     def get(self, request):
+        '''
+        Retrieves the current state of the shopping cart.
 
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            Response: A serialized JSON response containing cart details and total price.
+        '''
         cart = self._get_cart(request)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
     
     def post(self, request):
+        '''
+        Adds a new item to the shopping cart or increments its quantity.
+        Validates available stock before confirming the addition.
 
+        Args:
+            request (HttpRequest): The HTTP request containing 'sku_id' and 'quantity'.
+
+        Returns:
+            Response: A JSON response with the updated cart data (HTTP 200) 
+                      or an error message if stock is insufficient (HTTP 400).
+        '''
         cart = self._get_cart(request)
         sku_id = request.data.get('sku_id')
         quantity = int(request.data.get('quantity', 1))
@@ -63,6 +94,15 @@ class CartDetailAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request):
+        '''
+        Removes a specific SKU entirely from the shopping cart.
+
+        Args:
+            request (HttpRequest): The HTTP request containing the 'sku_id' to remove.
+
+        Returns:
+            Response: A JSON response with the updated cart data.
+        '''
         cart = self._get_cart(request)
         sku_id = request.data.get('sku_id')
 
@@ -77,7 +117,16 @@ class CartDetailAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def patch(self, request):
+        '''
+        Updates the exact quantity of an existing item in the shopping cart.
+        Removes the item if the quantity is updated to 0 or less.
 
+        Args:
+            request (HttpRequest): The HTTP request containing 'sku_id' and the new 'quantity'.
+
+        Returns:
+            Response: A JSON response with the updated cart data or a stock error.
+        '''
         cart = self._get_cart(request)
         sku_id = request.data.get('sku_id')
         quantity = request.data.get('quantity')
@@ -108,5 +157,8 @@ class CartDetailAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class CartPageView(TemplateView):
-
+    '''
+    Class-based view to render the frontend shopping cart interface.
+    The actual data population is handled asynchronously via the CartDetailAPIView.
+    '''
     template_name = 'carts/cart_page.html'

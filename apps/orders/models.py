@@ -8,7 +8,11 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 
 class Order(BaseModel):
-
+    '''
+    Represents a customer's purchase order.
+    Tracks the lifecycle status of the transaction (e.g., PENDING, PAID, SHIPPED) 
+    and maintains the total financial value of the order.
+    '''
     STATUS_CHOICE = (
         ('PENDING', 'Aguardando Pagamento'),
         ('PAID', 'Pagamento Aprovado'),
@@ -34,13 +38,20 @@ class Order(BaseModel):
         return f'Pedido #{self.id} - {self.customer.first_name} ({self.get_status_display()})'
     
     def update_total(self):
-
+        '''
+        Dynamically calculates and updates the order's total price based on 
+        the sum of all associated order items' subtotals.
+        '''
         total = sum(item.get_subtotal() for item in self.items.all())
         self.total_price = total
         self.save()
     
 class OrderItem(BaseModel):
-
+    '''
+    Represents a specific product SKU line within an order.
+    Snapshots the price at the moment of purchase to prevent historical data 
+    changes if the base product price is updated later.
+    '''
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True,verbose_name='Preço Unitário na Compra')
     quantity = models.PositiveIntegerField(verbose_name='Quantity', validators=[MinValueValidator(1)])
 
@@ -56,11 +67,21 @@ class OrderItem(BaseModel):
         return f'{self.quantity}x - {self.sku.product.name} ({self.sku.volume_ml}ml) - Pedido #{self.id}'
     
     def get_subtotal(self):
+        '''
+        Calculates the financial subtotal for this specific order line.
+
+        Returns:
+            Decimal: The item's purchase price multiplied by its quantity.
+        '''
         if self.price and self.quantity:
             return self.price * self.quantity
         return Decimal(0.00)
     
     def save(self, *args, **kwargs):
+        '''
+        Overrides the save method to automatically snapshot the SKU's current price 
+        if a price is not explicitly provided during creation.
+        '''
         if not self.price and self.sku:
             self.price = self.sku.price
 
@@ -69,5 +90,14 @@ class OrderItem(BaseModel):
 @receiver(post_save, sender=OrderItem)
 @receiver(post_delete, sender=OrderItem)
 def update_order_total(sender, instance, **kwargs):
+    '''
+    Django Signal receiver that listens for the creation, update, or deletion 
+    of OrderItems and triggers the parent Order to recalculate its total price.
+
+    Args:
+        sender (Model): The model class sending the signal (OrderItem).
+        instance (OrderItem): The specific instance being saved or deleted.
+        **kwargs: Additional keyword arguments passed by the signal.
+    '''
     if instance.order:
         instance.order.update_total()

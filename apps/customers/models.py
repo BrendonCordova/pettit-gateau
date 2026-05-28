@@ -4,10 +4,25 @@ from apps.base.models import BaseModel
 
 class CustomerManager(BaseUserManager):
     """
-    Customized manager for creating users using email as a unique identifier.
+    Customized manager for creating users using email as the unique identifier
+    instead of a standard username.
     """
     
     def create_user(self, email, password=None, **extra_fields):
+        '''
+        Creates and saves a standard Customer with the given email and password.
+
+        Args:
+            email (str): The user's email address.
+            password (str, optional): The user's password. Defaults to None.
+            **extra_fields: Additional fields to save to the user record.
+
+        Returns:
+            Customer: The newly created user instance.
+            
+        Raises:
+            ValueError: If the email field is empty.
+        '''
         if not email:
             raise ValueError("O endereço de e-mail é obrigatório.")
         
@@ -19,7 +34,19 @@ class CustomerManager(BaseUserManager):
     
     def create_superuser(self, email, password=None, **extra_fields):
         """
-        Teaches Django how to create a superuser from the terminal without asking for a username.
+        Creates and saves a superuser with the given email and password, 
+        automatically granting staff and superuser permissions.
+
+        Args:
+            email (str): The superuser's email address.
+            password (str, optional): The superuser's password. Defaults to None.
+            **extra_fields: Additional fields for the superuser.
+
+        Returns:
+            Customer: The newly created superuser instance.
+
+        Raises:
+            ValueError: If is_staff or is_superuser are not set to True.
         """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -34,8 +61,8 @@ class CustomerManager(BaseUserManager):
     
 class Customer(AbstractBaseUser, PermissionsMixin, BaseModel):
     """
-    Custom User Template focused on E-commerce.
-    Replaces the default Username with Email.
+    Custom User Model focused on E-commerce.
+    Replaces the default Django Username with Email as the primary authentication field.
     """
     email = models.EmailField(unique=True, verbose_name="E-mail")
     first_name = models.CharField(max_length=50, verbose_name="Nome")
@@ -62,6 +89,7 @@ class Customer(AbstractBaseUser, PermissionsMixin, BaseModel):
 class Address(BaseModel):
     """
     Model for managing multiple addresses for the same customer.
+    Tracks location details and identifies the default delivery address.
     """
     is_default = models.BooleanField(default=False, verbose_name="Endereço Padrão")
     name = models.CharField(max_length=35, verbose_name="Nome do Endereço")

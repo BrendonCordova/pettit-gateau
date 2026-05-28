@@ -2,6 +2,10 @@ from django import forms
 from .models import Review
 
 class ReviewForm(forms.ModelForm):
+    '''
+    Form for handling the creation and validation of customer product reviews.
+    Customizes widget attributes for Bootstrap styling on the frontend.
+    '''
     class Meta:
         model = Review
         fields = ['rating', 'comment']

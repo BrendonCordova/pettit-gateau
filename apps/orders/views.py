@@ -13,7 +13,21 @@ from django.views.decorators.csrf import csrf_exempt
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
+    '''
+    Handles the checkout process for authenticated users.
+    Validates cart availability and stock levels, creates the order and order items 
+    within a database transaction, and generates a Mercado Pago payment preference.
 
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: A redirection to the Mercado Pago sandbox checkout URL, 
+                      or the rendered 'checkout.html' template displaying validation errors.
+        
+    Raises:
+        ValueError: If a cart item's requested quantity exceeds available stock.
+    '''
     cart = Cart.objects.filter(user=request.user).first()
 
     if not cart or cart.items.count() == 0:
@@ -73,7 +87,17 @@ def checkout_view(request):
 
 @login_required(login_url='/conta/login/')
 def order_success_view(request, order_id):
+    '''
+    Renders the success page after a user returns from the payment gateway.
+    Clears the active shopping cart upon successful order placement.
 
+    Args:
+        request (HttpRequest): The HTTP request object.
+        order_id (uuid): The unique identifier of the placed order.
+
+    Returns:
+        HttpResponse: The rendered 'success.html' template containing order details.
+    '''
     order = get_object_or_404(Order, id=order_id, customer=request.user)
 
     cart = Cart.filter(user=request.user).first()
@@ -84,7 +108,18 @@ def order_success_view(request, order_id):
 
 @csrf_exempt
 def mercado_pago_webhook(request):
+    '''
+    Asynchronous webhook endpoint for receiving payment status updates from Mercado Pago.
+    If a payment is approved, it updates the order status to 'PAID', safely deducts 
+    the purchased quantities from the inventory, and clears the user's cart.
 
+    Args:
+        request (HttpRequest): The HTTP POST request containing the JSON payload from Mercado Pago.
+
+    Returns:
+        JsonResponse: A JSON response with HTTP 200 on success, 400 on parsing errors, 
+                      or 405 for disallowed HTTP methods.
+    '''
     if request.method == 'POST':
         try:
             data = json.loads(request.body)

@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Customer, Address
 
 class AddressInline(admin.StackedInline):
+    '''Inline admin interface for managing a customer's addresses directly from their profile.'''
     model = Address
     extra = 0
 
@@ -16,6 +17,7 @@ class AddressInline(admin.StackedInline):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
+    '''Admin interface configuration for the custom Customer model.'''
     list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_active')
     search_fields = ('email', 'first_name', 'last_name', 'tax_id')
     list_filter = ('is_staff', 'is_active')

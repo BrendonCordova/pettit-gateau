@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Cart, CartItem
 
 class CartItemInline(admin.TabularInline):
+    '''Inline admin interface for viewing cart items directly inside a Cart record.'''
     model = CartItem
     extra = 0
     readonly_fields = ['subtotal']
@@ -9,6 +10,7 @@ class CartItemInline(admin.TabularInline):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
+    '''Admin interface configuration for the Cart model.'''
     list_display = ['id', 'user', 'session_key', 'created_at']
     list_filter = ['created_at']
     inlines = [CartItemInline]
@@ -20,4 +22,5 @@ class CartAdmin(admin.ModelAdmin):
 
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
+    '''Admin interface configuration for the CartItem model.'''
     list_display = ['id', 'cart', 'sku', 'quantity']

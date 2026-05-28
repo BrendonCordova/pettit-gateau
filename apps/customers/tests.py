@@ -3,8 +3,15 @@ from django.urls import reverse
 from .models import Customer, Address
 
 class CustomerModelTestCase(TestCase):
+    '''
+    Test suite for verifying the core logic of customer creation.
+    Ensures proper handling of standard users and superusers via the custom manager.
+    '''
     def test_create_normal_user(self):
-
+        '''
+        Verifies that a standard user is created correctly with the proper 
+        default permissions (not staff, not superuser) and password hashing.
+        '''
         user = Customer.objects.create_user(
             email='cliente@teste.com',
             password='senha_segura*',
@@ -18,6 +25,10 @@ class CustomerModelTestCase(TestCase):
         self.assertFalse(user.is_superuser)
 
     def test_create_superuser(self):
+        '''
+        Verifies that a superuser is created correctly with all administrative 
+        privileges active (is_staff=True, is_superuser=True).
+        '''
         admin = Customer.objects.create_superuser(
             email='admin@teste.com',
             password='senha_segura*',
@@ -29,7 +40,15 @@ class CustomerModelTestCase(TestCase):
         self.assertTrue(admin.is_superuser)
 
 class CustomerViewsTestCase(TestCase):
+    '''
+    Test suite for customer-related views.
+    Verifies authentication barriers, form payload processing, and redirections.
+    '''
     def setUp(self):
+        '''
+        Sets up the initial database state, URL routing variables, and mock users 
+        for the view tests.
+        '''
         self.address_url = reverse('customers:address-create')
         self.customer = Customer.objects.create_user(
             email='joao@teste.com',
@@ -39,12 +58,20 @@ class CustomerViewsTestCase(TestCase):
         )
 
     def test_address_create_unauthenticated_blocked(self):
+        '''
+        Tests if unauthenticated users attempting to access the address creation 
+        view are intercepted and redirected to the login page.
+        '''
         response = self.client.get(self.address_url)
 
         self.assertEqual(response.status_code, 302)
         self.assertIn('login', response.url)
 
     def test_address_create_authenticated_success(self):
+        '''
+        Tests the successful submission of an address form by an authenticated user.
+        Verifies database persistence and proper redirection to the checkout page.
+        '''
         self.client.login(email='joao@teste.com', password='senha_segura*')
 
         payload = {
