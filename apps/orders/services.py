@@ -2,11 +2,29 @@ import mercadopago
 from decouple import config
 
 class MercadoPagoService:
+    '''
+    Service class responsible for interacting with the Mercado Pago API.
+    Handles the authentication and the creation of payment preferences.
+    '''
     def __init__(self):
+        '''Initializes the Mercado Pago SDK using the access token from environment variables.'''
         self.sdk = mercadopago.SDK(config('MP_ACCESS_TOKEN'))
 
     def create_payment_preference(self, order, items_list):
+        '''
+        Builds and registers a payment preference payload with Mercado Pago.
+        Configures return URLs (success, pending, failure) and the webhook notification endpoint.
 
+        Args:
+            order (Order): The order instance triggering the payment.
+            items_list (QuerySet): A list of cart items to be formatted for the gateway.
+
+        Returns:
+            dict: The Mercado Pago response dictionary containing the 'sandbox_init_point' URL.
+            
+        Raises:
+            Exception: If the Mercado Pago API fails to return a valid initialization URL.
+        '''
         items = []
         for item in items_list:
             items.append({
