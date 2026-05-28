@@ -6,8 +6,15 @@ from apps.customers.models import Customer
 from .models import Cart
 
 class CartAPITestCase(TestCase):
-
+    '''
+    Test suite for the Cart API endpoints.
+    Verifies adding items, session handling, and inventory stock validations.
+    '''
     def setUp(self):
+        '''
+        Sets up the test environment by creating mock products, SKUs with 
+        limited stock, a test customer, and authenticating the client.
+        '''
         self.brand = Brand.objects.create(name='Marca Teste')
         self.category = Category.objects.create(name='Categoria Teste')
         self.product = Product.objects.create(
@@ -29,7 +36,10 @@ class CartAPITestCase(TestCase):
         self.add_url = reverse('carts:cart-api')
 
     def test_add_item_to_cart_success(self):
-
+        '''
+        Tests if a valid payload successfully adds an item to the user's cart 
+        and verifies the HTTP 200 OK response.
+        '''
         payload = {
             'sku_id': str(self.sku.id),
             'quantity': 2
@@ -47,6 +57,11 @@ class CartAPITestCase(TestCase):
         self.assertEqual(cart.items.count(), 1)
 
     def test_add_item_exceeding_stock(self):
+        '''
+        Tests the API's stock validation mechanism. 
+        Ensures an HTTP 400 Bad Request is returned when attempting to add 
+        a quantity that exceeds available inventory.
+        '''
         payload = {
             'sku_id': str(self.sku.id),
             'quantity': 10
