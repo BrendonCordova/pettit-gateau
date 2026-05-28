@@ -16,6 +16,17 @@ from django.utils.html import strip_tags
 
 @login_required
 def address_create_view(request):
+    '''
+    Handles the creation of a new shipping or billing address for an authenticated user.
+    Upon successful creation, redirects the user back to the checkout process.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the form data.
+
+    Returns:
+        HttpResponse: The rendered 'address_form.html' template or a redirection 
+                      to the checkout view.
+    '''
     if request.method == 'POST':
         form = AddressForm(request.POST)
         if form.is_valid():
@@ -30,10 +41,26 @@ def address_create_view(request):
     return render(request, 'customers/address_form.html', {'form': form})
 
 class CustomerLoginView(LoginView):
+    '''
+    Class-based view handling customer authentication.
+    Overrides the default Django template and automatically redirects authenticated users.
+    '''
     template_name = 'customers/login.html'
     redirect_authenticated_user = True
 
 def register_view(request):
+    '''
+    Processes new customer registrations.
+    Creates an inactive user account, generates a secure cryptographic token,
+    and dispatches an account activation email.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing registration data.
+
+    Returns:
+        HttpResponse: The rendered 'register.html' template on GET or validation failure, 
+                      or a redirection to the login page upon successful registration.
+    '''
     if request.method == 'POST':
         form = CustomerCreationForm(request.POST)
         if form.is_valid():
@@ -85,6 +112,18 @@ def register_view(request):
     return render(request, 'customers/register.html', {'form': form})
 
 def verify_email_view(request, uidb64, token):
+    '''
+    Validates the secure email verification link clicked by the user.
+    If the cryptographic token is valid and not expired, activates the customer's account.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        uidb64 (str): The base64 encoded user ID.
+        token (str): The cryptographic verification token.
+
+    Returns:
+        HttpResponseRedirect: Redirects to the login page with a success or error message.
+    '''
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = Customer.objects.get(pk=uid)
