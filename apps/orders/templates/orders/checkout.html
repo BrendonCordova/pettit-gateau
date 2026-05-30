@@ -10,7 +10,7 @@
     {% endif %}
 
     <div class="row">
-        <div class="col-md-8">
+        <section class="col-md-8" aria-label="Resumo dos Itens">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white fw-bold">Resumo dos Itens</div>
                 <div class="card-body">
@@ -24,12 +24,12 @@
                     </ul>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="col-md-4">
+        <section class="col-md-4" aria-labelledby="delivery-title">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="fw-bold border-bottom pb-2">Entrega</h5>
+                    <h2 id="delivery-title" class="h5 fw-bold border-bottom pb-2">Entrega</h2>
                     {% if address %}
                         <p class="small text-muted mb-4">
                             {{ address.street }}, {{ address.number }}<br>
@@ -52,7 +52,7 @@
                     </form>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </div>
 {% endblock %}

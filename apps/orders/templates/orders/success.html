@@ -2,13 +2,14 @@
 {% block title %}Pedido Confirmado | Pettit Gateau{% endblock %}
 
 {% block content %}
-<div class="container mt-5 text-center">
+<section class="container mt-5 text-center" aria-labelledby="success-title">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-sm border-success">
                 <div class="card-body py-5">
-                    <h1 class="display-1 text-success mb-3">✅</h1>
-                    <h2 class="fw-bold">Pedido Realizado!</h2>
+                    <div class="display-1 text-success mb-3" aria-hidden="true">✅</div>
+                    
+                    <h1 id="success-title" class="fw-bold h2">Pedido Realizado!</h1>
                     <p class="lead text-muted">Obrigado pela sua compra, {{ order.customer.first_name }}.</p>
                     
                     <div class="bg-light p-3 rounded mt-4 text-start">
@@ -22,5 +23,5 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}

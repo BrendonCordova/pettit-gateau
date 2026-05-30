@@ -22,59 +22,60 @@
     .quantity-box input {padding: 10px; width: 60px; text-align: center; font-size: 16px;}
 </style>
 {% endblock extra_css %}
-
 {% block content %}
-<h1> {{product.name}} </h1>
-{% if product.get_reviews_count > 0 %}
-    <h5 style="color: #f39c12; margin-top: -10px; margin-bottom: 20px;">
-        ⭐ {{ product.get_average_rating }}
-    </h5>
-{% endif %}
-<h4> {{product.brand}}</h4>
+<article>
+    <h1>{{product.name}}</h1>
+    {% if product.get_reviews_count > 0 %}
+        <h5 style="color: #f39c12; margin-top: -10px; margin-bottom: 20px;">
+            <span aria-hidden="true">⭐</span> {{ product.get_average_rating }}
+        </h5>
+    {% endif %}
+    <h2>{{product.brand}}</h2>
 
-<p> {{product.get_fragrance_display}} -  {{product.category}}</p>
+    <p>{{product.get_fragrance_display}} - {{product.category}}</p>
 
+    <fieldset class="sku-selector">
+        <legend class="visually-hidden">Escolha o tamanho do perfume:</legend>
+        <p>Escolha o tamanho:</p>
+        
+        {% for sku in skus %}
+            <button 
+                class="btn-sku {% if sku.id == default_sku.id %}active{% endif %}" 
+                data-price="{{ sku.price }}" 
+                data-id="{{ sku.id }}">
+                {{ sku.volume_ml }}ml
+            </button>
+        {% endfor %}
+    </fieldset>
 
-<div class="sku-selector">
-    <p>Escolha o tamanho:</p>
-    
-    {% for sku in skus %}
-        <button 
-            class="btn-sku {% if sku.id == default_sku.id %}active{% endif %}" 
-            data-price="{{ sku.price }}" 
-            data-id="{{ sku.id }}">
-            {{ sku.volume_ml }}ml
-        </button>
-    {% endfor %}
-</div>
+    <h3 id="price-display">R$ {{ default_sku.price }}</h3>
 
-<h2 id="price-display">R$ {{ default_sku.price }}</h2>
+    {% csrf_token %}
+    <input type="hidden" id="selected-sku-id" name="sku_id" value="{{ default_sku.id }}">
+        
+    <div class="quantity-box">
+        <label for="quantity">Quantidade:</label><br>
+        <input type="number" id="quantity" value="1" min="1">
+    </div>
 
-{% csrf_token %}
-<input type="hidden" id="selected-sku-id" name="sku_id" value="{{ default_sku.id }}">
-    
-<div class="quantity-box">
-    <label for="quantity">Quantidade:</label><br>
-    <input type="number" id="quantity" value="1" min="1">
-</div>
+    <button type="button" class="btn-buy" id="add-to-cart-btn" onclick="addToCart()">
+        Adicionar ao Carrinho
+    </button>
+</article>
 
-<button type="button" class="btn-buy" id="add-to-cart-btn" onclick="addToCart()">
-    Adicionar ao Carrinho
-</button>
-
-<div class="reviews-section" style="margin-top: 50px;">
-    <h3>Avaliações dos Clientes</h3>
+<section class="reviews-section" aria-labelledby="reviews-title" style="margin-top: 50px;">
+    <h3 id="reviews-title">Avaliações dos Clientes</h3>
     <div class="product-rating">
-        <span>⭐ {{ product.get_average_rating }}</span> 
+        <span aria-hidden="true">⭐</span> <span>{{ product.get_average_rating }}</span> 
         <small>({{ product.get_reviews_count }} avaliações)</small>
     </div>
     
     <div id="reviews-container">
         {% for review in reviews %}
-            <div class="review-card" style="border-bottom: 1px solid #eee; padding: 10px 0;">
+            <article class="review-card" style="border-bottom: 1px solid #eee; padding: 10px 0;">
                 <strong>{{ review.customer.first_name }}</strong> - Nota: {{ review.rating }}/5
                 <p>{{ review.comment }}</p>
-            </div>
+            </article>
         {% empty %}
             <p>Este perfume ainda não foi avaliado. Seja o primeiro!</p>
         {% endfor %}
@@ -98,12 +99,11 @@
             </form>
         </div>
     {% elif user.is_authenticated %}
-        <div class="alert alert-info mt-4">
+        <div class="alert alert-info mt-4" role="alert">
             Apenas clientes que adquiriram este produto podem avaliá-lo.
         </div>
     {% endif %}
-    
-</div>
+</section>
 {% endblock content %}
 
 {% block scripts %}
