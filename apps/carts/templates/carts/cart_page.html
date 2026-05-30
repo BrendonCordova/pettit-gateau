@@ -10,19 +10,18 @@
     <h1 class="mb-4">Meu Carrinho de Compras</h1>
     
     <div class="row">
-        <!-- Tabela de Produtos -->
-        <div class="col-md-8">
+        <section class="col-md-8" aria-label="Itens do Carrinho">
             <div class="card">
                 <div class="card-body">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Produto</th>
-                                <th>Volume</th>
-                                <th>Preço Unit.</th>
-                                <th>Qtd.</th>
-                                <th>Subtotal</th>
-                                <th>Ações</th>
+                                <th scope="col">Produto</th>
+                                <th scope="col">Volume</th>
+                                <th scope="col">Preço Unit.</th>
+                                <th scope="col">Qtd.</th>
+                                <th scope="col">Subtotal</th>
+                                <th scope="col">Ações</th>
                             </tr>
                         </thead>
                       
@@ -32,13 +31,12 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Resumo do Pedido -->
-        <div class="col-md-4">
+        <section class="col-md-4" aria-labelledby="summary-title">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Resumo do Pedido</h5>
+                    <h2 id="summary-title" class="card-title h5">Resumo do Pedido</h2>
                     <hr>
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Total:</strong>
@@ -49,7 +47,7 @@
                     </a>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </div>
 

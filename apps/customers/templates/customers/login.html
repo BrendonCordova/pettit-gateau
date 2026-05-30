@@ -2,11 +2,11 @@
 {% block title %}Login | Pettit Gateau{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
+<section class="row justify-content-center mt-5" aria-labelledby="login-title">
     <div class="col-md-5">
         <div class="card shadow-sm">
             <div class="card-body p-4">
-                <h3 class="text-center mb-4">Acesse sua Conta</h3>
+                <h1 id="login-title" class="text-center mb-4 h3">Acesse sua Conta</h1>
                 
                 <form method="POST">
                     {% csrf_token %}
@@ -22,5 +22,5 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
