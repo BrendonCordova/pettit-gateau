@@ -40,6 +40,17 @@
         </nav>
     </header>
 
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <main class="container">
         {% block content %}
         {% endblock content %}
@@ -71,6 +82,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', updateCartCounter);
+
+            document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                let alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    let bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 4000);
+        });
     </script>
 
     {% block scripts %}{% endblock %}
