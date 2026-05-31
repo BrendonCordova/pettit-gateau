@@ -1,148 +1,362 @@
 {% extends 'base.html' %}
 
-{% block title %}{{product.name}} - Pettit Gateau {% endblock %}
+{% block title %}{{ product.name }} - Pettit Gateau {% endblock %}
 
 {% block extra_css %}
 <style>
-
-    .sku-selector { margin: 20px 0; }
-    .btn-sku { 
-        padding: 10px 20px; margin-right: 10px; cursor: pointer; 
-        border: 1px solid #ccc; background: white; border-radius: 4px;
+    body {
+        background-color: var(--bg-cream) !important;
     }
 
-    .btn-sku.active { 
-        border-color: black; background: #f9f9f9; font-weight: bold; 
+    /* GALERIA DE IMAGENS */
+    .product-gallery {
+        display: flex;
+        gap: 20px;
     }
-    .btn-buy {
-        padding: 15px 30px; background: black; color: white; border: none; cursor: pointer;
+    
+    .thumbnail-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 
-    .quantity-box {margin-bottom: 20px;}
-    .quantity-box input {padding: 10px; width: 60px; text-align: center; font-size: 16px;}
+    .thumbnail-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+        background-color: white;
+    }
+    .thumbnail-img:hover {
+        border-color: var(--coral-light);
+    }
+    .thumbnail-img.active {
+        border: 2px solid var(--text-brown);
+    }
+
+    .main-image-box {
+        flex-grow: 1;
+        background-color: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 10px;
+    }
+    .main-product-img {
+        max-width: 100%;
+        height: auto;
+        max-height: 550px;
+        object-fit: contain;
+    }
+
+    /* INFORMAÇÕES DO PRODUTO */
+    .product-title {
+        color: var(--coral-light);
+        font-weight: bold;
+        font-size: 2.2rem;
+        margin-bottom: 5px;
+    }
+    .product-subtitle {
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .size-label {
+        color: var(--text-brown);
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+    
+    .sku-selector {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    .btn-sku {
+        background: transparent;
+        border: 1px solid var(--text-brown);
+        color: var(--text-brown);
+        padding: 8px 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+    .btn-sku.active {
+        background: var(--text-brown);
+        color: white;
+        font-weight: bold;
+    }
+
+    .product-price {
+        font-size: 2.5rem;
+        color: var(--text-brown);
+        font-weight: normal;
+        margin-bottom: 30px;
+    }
+
+    /* CONTROLE DE QUANTIDADE */
+    .quantity-control {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--text-brown);
+        padding: 5px 15px;
+        margin-bottom: 30px;
+        border-radius: 5px;
+    }
+    .btn-qty {
+        background: transparent;
+        border: none;
+        color: var(--text-brown);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0 10px;
+    }
+    .btn-qty:focus { outline: none; }
+    .qty-input {
+        width: 40px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        color: var(--text-brown);
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .qty-input:focus { outline: none; }
+
+    /* BOTÃO ADICIONAR */
+    .btn-add-cart {
+        background-color: transparent;
+        color: var(--text-brown);
+        border: 1px solid var(--text-brown);
+        padding: 12px 35px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: 0.3s;
+        display: block;
+    }
+    .btn-add-cart:hover {
+        background-color: var(--text-brown);
+        color: white;
+    }
+
+    /* DESCRIÇÃO E AVALIAÇÕES */
+    .description-title {
+        color: #D6A476;
+        font-size: 1.8rem;
+        margin-top: 60px;
+        margin-bottom: 20px;
+    }
+    .description-text {
+        color: var(--text-brown);
+        font-size: 1.15rem;
+        line-height: 1.8;
+        max-width: 800px;
+    }
+
+    .reviews-section {
+        margin-top: 80px;
+        margin-bottom: 50px;
+    }
+
+    /* CAIXA DE AVALIAÇÕES COM BORDA ARREDONDADA */
+    .reviews-wrapper {
+        border: 2px solid #D6A476;
+        border-radius: 15px;
+        padding: 25px;
+        background-color: transparent;
+        margin-bottom: 15px;
+    }
+    
+    .review-card {
+        border-bottom: 1px solid #e0e0e0;
+        padding: 15px 0;
+    }
+    
+    /* Remove a linha do último comentário para ficar limpo dentro da caixa */
+    .review-card:last-child {
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+    }
 </style>
 {% endblock extra_css %}
+
 {% block content %}
-<article>
-    <h1>{{product.name}}</h1>
-    {% if product.get_reviews_count > 0 %}
-        <h5 style="color: #f39c12; margin-top: -10px; margin-bottom: 20px;">
-            <span aria-hidden="true">⭐</span> {{ product.get_average_rating }}
-        </h5>
-    {% endif %}
-    <h2>{{product.brand}}</h2>
+<div class="container mt-5">
+    
+    <div class="row">
+        <div class="col-lg-6 mb-5">
+            <div class="product-gallery">
+                
+                <div class="thumbnail-list">
+                    {% for img in product.images.all %}
+                        <img src="{{ img.image.url }}" alt="{{ product.name }}" 
+                             class="thumbnail-img {% if img.is_main %}active{% endif %}" 
+                             data-main="{{ img.image.url }}" 
+                             onclick="changeMainImage(this)">
+                    {% endfor %}
+                </div>
 
-    <p>{{product.get_fragrance_display}} - {{product.category}}</p>
+                <div class="main-image-box">
+                    {% for img in product.images.all %}
+                        {% if img.is_main %}
+                            <img src="{{ img.image.url }}" id="main-product-image" class="main-product-img" alt="{{ product.name }}">
+                        {% endif %}
+                    {% endfor %}
+                </div>
 
-    <fieldset class="sku-selector">
-        <legend class="visually-hidden">Escolha o tamanho do perfume:</legend>
-        <p>Escolha o tamanho:</p>
-        
-        {% for sku in skus %}
-            <button 
-                class="btn-sku {% if sku.id == default_sku.id %}active{% endif %}" 
-                data-price="{{ sku.price }}" 
-                data-id="{{ sku.id }}">
-                {{ sku.volume_ml }}ml
+            </div>
+        </div>
+
+        <div class="col-lg-6 ps-lg-5">
+            
+            <h1 class="product-title">{{ product.name }}</h1>
+            <div class="product-subtitle">
+                {% if default_sku.get_concentration_display %}{{ default_sku.get_concentration_display }} - {% endif %} 
+                Perfume {{ product.category.name }}
+            </div>
+
+            {% if product.get_reviews_count > 0 %}
+                <div style="color: #D6A476; margin-bottom: 25px; font-size: 1.1rem;">
+                    <span aria-hidden="true">⭐</span> {{ product.get_average_rating }} ({{ product.get_reviews_count }} avaliações)
+                </div>
+            {% endif %}
+
+            <div class="size-label">Tamanho:</div>
+            
+            <div class="sku-selector">
+                {% for sku in skus %}
+                    <button class="btn-sku {% if sku.id == default_sku.id %}active{% endif %}" 
+                            data-price="{{ sku.price }}" 
+                            data-id="{{ sku.id }}">
+                        {{ sku.volume_ml }}ml
+                    </button>
+                {% endfor %}
+            </div>
+
+            <h2 id="price-display" class="product-price">R$ {{ default_sku.price }}</h2>
+
+            {% csrf_token %}
+            <input type="hidden" id="selected-sku-id" name="sku_id" value="{{ default_sku.id }}">
+            
+            <div class="quantity-control">
+                <button type="button" class="btn-qty" onclick="updateQty(-1)"><i class="bi bi-dash"></i></button>
+                <input type="number" id="quantity" class="qty-input" value="1" min="1" readonly>
+                <button type="button" class="btn-qty" onclick="updateQty(1)"><i class="bi bi-plus"></i></button>
+            </div>
+
+            <button type="button" class="btn-add-cart" id="add-to-cart-btn" onclick="addToCart()">
+                Adicionar ao Carrinho
             </button>
-        {% endfor %}
-    </fieldset>
 
-    <h3 id="price-display">R$ {{ default_sku.price }}</h3>
+        </div>
+    </div>
 
-    {% csrf_token %}
-    <input type="hidden" id="selected-sku-id" name="sku_id" value="{{ default_sku.id }}">
+    <div class="row">
+        <div class="col-12">
+            <h3 class="description-title">Sobre a Fragrância</h3>
+            <p class="description-text">
+                {{ product.description|linebreaksbr }}
+            </p>
+        </div>
+    </div>
+
+    <section class="reviews-section" aria-labelledby="reviews-title">
+        <h3 id="reviews-title" style="color: var(--text-brown); font-weight: bold; margin-bottom: 20px;">Avaliações dos Clientes</h3>
         
-    <div class="quantity-box">
-        <label for="quantity">Quantidade:</label><br>
-        <input type="number" id="quantity" value="1" min="1">
-    </div>
-
-    <button type="button" class="btn-buy" id="add-to-cart-btn" onclick="addToCart()">
-        Adicionar ao Carrinho
-    </button>
-</article>
-
-<section class="reviews-section" aria-labelledby="reviews-title" style="margin-top: 50px;">
-    <h3 id="reviews-title">Avaliações dos Clientes</h3>
-    <div class="product-rating">
-        <span aria-hidden="true">⭐</span> <span>{{ product.get_average_rating }}</span> 
-        <small>({{ product.get_reviews_count }} avaliações)</small>
-    </div>
-    
-    <div id="reviews-container">
-        {% for review in reviews %}
-            <article class="review-card" style="border-bottom: 1px solid #eee; padding: 10px 0;">
-                <strong>{{ review.customer.first_name }}</strong> - Nota: {{ review.rating }}/5
-                <p>{{ review.comment }}</p>
-            </article>
-        {% empty %}
-            <p>Este perfume ainda não foi avaliado. Seja o primeiro!</p>
-        {% endfor %}
-    </div>
-
-    {% if reviews_count > 3 %}
-        <button id="load-more-btn" class="btn btn-outline-dark mt-3" data-slug="{{ product.slug }}" data-page="2">
-            Ler mais
-        </button>
-    {% endif %}
-
-    <hr style="margin: 40px 0;">
-    
-    {% if user_has_purchased %}
-        <div class="review-form-box p-4" style="background-color: #f8f9fa; border-radius: 8px;">
-            <h4>Deixe sua avaliação</h4>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary mt-2">Enviar Comentário</button>
-            </form>
+        <div class="reviews-wrapper" id="reviews-container">
+            {% for review in reviews %}
+                <article class="review-card">
+                    <strong style="color: var(--text-brown);">{{ review.customer.first_name }}</strong> 
+                    <span style="color: #D6A476; margin-left: 10px;">⭐ {{ review.rating }}/5</span>
+                    <p class="mt-2 text-muted mb-0">{{ review.comment }}</p>
+                </article>
+            {% empty %}
+                <p class="text-muted mb-0">Este perfume ainda não foi avaliado. Seja o primeiro!</p>
+            {% endfor %}
         </div>
-    {% elif user.is_authenticated %}
-        <div class="alert alert-info mt-4" role="alert">
-            Apenas clientes que adquiriram este produto podem avaliá-lo.
-        </div>
-    {% endif %}
-</section>
+
+        {% if reviews_count > 3 %}
+            <button id="load-more-btn" class="btn btn-outline-dark" data-slug="{{ product.slug }}" data-page="2" style="border-radius: 20px; color: var(--text-brown); border-color: var(--border-brown);">
+                Ler mais avaliações
+            </button>
+        {% endif %}
+
+        {% if user_has_purchased %}
+            <div class="review-form-box mt-5 p-4 shadow-sm" style="background-color: white; border-radius: 15px; border: 1px solid var(--border-brown);">
+                <h4 style="color: var(--text-brown); margin-bottom: 20px;">Deixe sua avaliação</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn" style="background-color: var(--coral-light); color: white; padding: 10px 25px; border-radius: 20px;">Enviar Comentário</button>
+                </form>
+            </div>
+        {% elif user.is_authenticated %}
+            <div class="alert alert-info mt-5 shadow-sm" role="alert" style="border-radius: 10px; background-color: #fcf8e3; border-color: #faebcc; color: #8a6d3b;">
+                Apenas clientes que adquiriram este produto podem avaliá-lo.
+            </div>
+        {% endif %}
+    </section>
+
+</div>
 {% endblock content %}
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    // 1. GALERIA: Mudar imagem principal ao clicar na miniatura
+    function changeMainImage(element) {
+        document.getElementById('main-product-image').src = element.getAttribute('data-main');
+        document.querySelectorAll('.thumbnail-img').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+    }
 
+    // 2. CONTROLE DE QUANTIDADE (+ e -)
+    function updateQty(change) {
+        let qtyInput = document.getElementById('quantity');
+        let currentVal = parseInt(qtyInput.value);
+        if (currentVal + change >= 1) {
+            qtyInput.value = currentVal + change;
+        }
+    }
+
+    // 3. SELEÇÃO DE SKU E PREÇO
+    document.addEventListener('DOMContentLoaded', function() {
         const priceDisplay = document.getElementById('price-display');
         const hiddenSkuInput = document.getElementById('selected-sku-id');
         const skuButtons = document.querySelectorAll('.btn-sku');
 
         skuButtons.forEach(button => {
             button.addEventListener('click', function() {
-                
                 const newPrice = this.getAttribute('data-price');
                 const newId = this.getAttribute('data-id');
 
                 priceDisplay.innerText = `R$ ${newPrice}`;
-                
                 hiddenSkuInput.value = newId;
 
                 skuButtons.forEach(btn => btn.classList.remove('active'));
-                
                 this.classList.add('active');
             });
         });
     });
 
+    // 4. API: Adicionar ao Carrinho
     async function addToCart() {
         const SkuId = document.getElementById('selected-sku-id').value;
         const quantity = document.getElementById('quantity').value;
-
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
         const btn = document.getElementById('add-to-cart-btn');
+        
         btn.innerText = "Adicionando...";
         btn.disabled = true;
 
         try {
-
             const response = await fetch('/carrinho/api/my-cart/', {
                 method: 'POST',
                 headers: {
@@ -171,32 +385,30 @@
         }
     }
 
+    // 5. API: Carregar Mais Avaliações (Adaptado para o novo CSS limpo)
     const loadMoreBtn = document.getElementById('load-more-btn');
-
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', async function() {
-
             const slug = this.getAttribute('data-slug');
             const page = this.getAttribute('data-page');
-
             const originalText = this.innerText;
+            
             this.innerText = 'Carregando..';
             this.disabled = true;
 
             try {
-
                 const response = await fetch(`/produtos/${slug}/avaliacoes/api/?page=${page}`);
                 const data = await response.json();
-
                 const container = document.getElementById('reviews-container');
 
                 data.reviews.forEach(review => {
-                    const reviewDiv = document.createElement('div');
+                    const reviewDiv = document.createElement('article');
+                    // Usamos apenas a classe agora, o CSS cuida da formatação
                     reviewDiv.className = 'review-card';
-                    reviewDiv.style.cssText = 'border-bottom: 1px solid #eee; padding: 10px 0;';
                     reviewDiv.innerHTML = `
-                        <strong>${review.customer}</strong> - Nota: ${review.rating}/5
-                        <p>${review.comment}</p>
+                        <strong style="color: var(--text-brown);">${review.customer}</strong> 
+                        <span style="color: #D6A476; margin-left: 10px;">⭐ ${review.rating}/5</span>
+                        <p class="mt-2 text-muted mb-0">${review.comment}</p>
                     `;
                     container.appendChild(reviewDiv);
                 });
