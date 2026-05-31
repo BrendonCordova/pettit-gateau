@@ -6,58 +6,233 @@
     <title>{% block title %}Pettit Gateau{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --bg-cream: #FFFDF9;
+            --border-brown: #4A3B32;
+            --text-brown: #4A3B32;
+            --coral-light: #FF8A7A;
+            --gold-accent: #D6A476;
+            --footer-bg: #050505;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-cream) !important;
+            color: var(--text-brown);
+            font-family: Arial, sans-serif;
+            /* Flexbox puro e rígido na tag body */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Esta é a classe mágica que empurra o rodapé */
+        .content-wrapper {
+            flex: 1 0 auto;
+            padding-top: 110px; /* Mantém o conteúdo a salvo do cabeçalho fixo */
+            width: 100%;
+        }
+
+        /* ================= HEADER (FIXO NO TOPO) ================= */
+        .custom-header {
+            background-color: var(--bg-cream);
+            border-bottom: 1.5px solid var(--border-brown);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1030;
+        }
+        
+        .header-logo {
+            font-family: 'Arial Black', Impact, sans-serif;
+            color: var(--coral-light);
+            font-size: 1.8rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+        .header-logo:hover { color: var(--coral-light); }
+        
+        .nav-center a {
+            color: var(--text-brown);
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-center a:hover { color: var(--coral-light); }
+
+        .header-icons a {
+            color: var(--text-brown);
+            font-size: 1.8rem;
+            margin-left: 25px;
+            position: relative;
+            text-decoration: none;
+        }
+        .header-icons a:hover { color: var(--coral-light); }
+        
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -10px;
+            font-size: 0.7rem;
+            background-color: var(--coral-light);
+            border: 2px solid var(--bg-cream);
+        }
+
+        /* ================= FOOTER ================= */
+        .custom-footer {
+            background-color: var(--footer-bg);
+            color: #E0E0E0;
+            padding: 60px 0 40px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .footer-logo {
+            font-family: 'Georgia', serif;
+            color: var(--gold-accent);
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .footer-heading {
+            color: var(--gold-accent);
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .footer-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .footer-contact {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        .footer-contact i {
+            font-size: 1.3rem;
+            margin-right: 15px;
+            color: #E0E0E0;
+        }
+        .footer-social {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            text-decoration: none;
+            color: #E0E0E0;
+        }
+        .footer-social i {
+            font-size: 1.3rem;
+            margin-right: 15px;
+        }
+        .footer-social:hover { color: var(--coral-light); }
+    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-light">
 
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4" aria-label="Navegação Principal">
-            <div class="container">
-                <a class="navbar-brand" href="/">Pettit Gateau</a>
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Perfumes</a>
-                        </li>
-                    </ul>
+<body>
 
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link text-warning fw-bold" href="/carrinho/">
-                                Carrinho 
-                                <span id="cart-item-count" class="badge bg-danger rounded-pill">0</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+    <header class="custom-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="/" class="header-logo">
+                Pettit Gateau <span aria-hidden="true" style="font-size: 1.4rem;">🐾</span>
+            </a>
+            <nav class="nav-center d-none d-md-block">
+                <a href="#">Masculino</a>
+                <a href="#">Feminino</a>
+                <a href="#">Unissex</a>
+            </nav>
+            <div class="header-icons d-flex align-items-center">
+                <a href="{% url 'customers:login' %}" aria-label="Perfil">
+                    <i class="bi bi-person-circle"></i>
+                </a>
+                <a href="#" aria-label="Configurações">
+                    <i class="bi bi-gear-fill"></i>
+                </a>
+                <a href="/carrinho/" aria-label="Carrinho de Compras">
+                    <i class="bi bi-cart-fill"></i>
+                    <span id="cart-item-count" class="badge rounded-pill cart-badge">0</span>
+                </a>
             </div>
-        </nav>
+        </div>
     </header>
 
-    {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    <div class="content-wrapper">
+        
+        {% if messages %}
+            <div class="container mb-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border: 1px solid var(--border-brown);">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <main class="container">
+            {% block content %}
+            {% endblock content %}
+        </main>
+
+    </div>
+
+    <footer class="custom-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5 col-md-12 mb-5 mb-lg-0 pe-lg-5">
+                    <span class="footer-logo">Pettit Gateau</span>
+                    <p class="footer-text">
+                        Na Perfumaria Pettit Gateau, Cada Fragrância Conta Uma História. Trazemos O Charme E A Elegância De Diferentes Partes Do Mundo, Reunindo Perfumes Renomados E Altamente Avaliados Para Oferecer Uma Experiência Sensorial Inesquecível. Aqui, Cada Detalhe É Pensado Para Transformar O Simples Ato De Escolher Um Perfume Em Um Momento Especial.
+                    </p>
                 </div>
-            {% endfor %}
+
+                <div class="col-lg-4 col-md-6 mb-5 mb-md-0">
+                    <h5 class="footer-heading">Entre em Contato</h5>
+                    <div class="footer-contact">
+                        <i class="bi bi-whatsapp"></i> (48) 9 98218022
+                    </div>
+                    <div class="footer-contact">
+                        <i class="bi bi-telephone-fill"></i> (48) 9 98218022
+                    </div>
+                    <div class="footer-contact">
+                        <i class="bi bi-envelope"></i> dev.gcbrendon@gmail.com
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-heading">Siga Nossas Redes Sociais</h5>
+                    <a href="#" class="footer-social">
+                        <i class="bi bi-instagram"></i> Pettit Gateau
+                    </a>
+                    <a href="#" class="footer-social">
+                        <i class="bi bi-tiktok"></i> Pettit_Gateau
+                    </a>
+                </div>
+            </div>
         </div>
-    {% endif %}
-
-    <main class="container">
-        {% block content %}
-        {% endblock content %}
-    </main>
-
-    <footer class="text-center mt-5 p-4 text-muted border-top">
-        <small>&copy; 2026 Pettit Gateau. Todos os direitos reservados.</small>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -68,7 +243,6 @@
                 const response = await fetch('/carrinho/api/my-cart/');
                 if (response.ok) {
                     const cart = await response.json();
-            
                     const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
                     
                     const counterElement = document.getElementById('cart-item-count');
@@ -83,7 +257,7 @@
 
         document.addEventListener('DOMContentLoaded', updateCartCounter);
 
-            document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 let alerts = document.querySelectorAll('.alert');
                 alerts.forEach(function(alert) {
