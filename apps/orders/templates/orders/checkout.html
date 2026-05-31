@@ -1,61 +1,203 @@
 {% extends 'base.html' %}
 {% block title %}Finalizar Compra | Pettit Gateau{% endblock %}
 
-{% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Finalizar Compra</h2>
+{% block extra_css %}
+<style>
+    body {
+        background-color: var(--bg-cream) !important;
+    }
 
+    .custom-card {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: transparent;
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+
+    .address-horizontal {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+    }
+
+    .address-icon-box {
+        background-color: rgba(255, 138, 122, 0.1);
+        padding: 15px 18px;
+        border-radius: 50%;
+        margin-right: 20px;
+    }
+
+    .address-edit-btn {
+        color: var(--coral-light);
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+        border: 1px solid var(--coral-light);
+        padding: 6px 20px;
+        border-radius: 20px;
+        transition: 0.3s;
+        white-space: nowrap;
+    }
+    .address-edit-btn:hover { 
+        background-color: var(--coral-light);
+        color: white; 
+    }
+
+    .empty-address-card {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: transparent;
+        padding: 25px;
+        text-decoration: none;
+        color: #D6A476;
+        font-size: 1.15rem;
+        font-weight: bold;
+        transition: 0.3s;
+        width: 100%;
+    }
+    .empty-address-card:hover {
+        background-color: rgba(214, 164, 118, 0.05);
+        color: #c49468;
+    }
+
+    .summary-title-brown {
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 1.4rem;
+        margin-bottom: 25px;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .summary-item-name {
+        font-size: 0.9rem;
+        color: #D6A476;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+    .summary-item-desc {
+        font-size: 0.85rem;
+        color: #D6A476;
+        text-transform: uppercase;
+    }
+
+    .btn-finalizar {
+        background-color: var(--coral-light);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 15px 30px;
+        font-weight: bold;
+        font-size: 1.15rem;
+        transition: 0.3s;
+        margin-top: 15px;
+        width: 100%;
+    }
+    .btn-finalizar:hover { 
+        background-color: #e87b6d; 
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    
     {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
+        <div class="alert alert-danger shadow-sm rounded-pill mb-4 text-center mx-auto" style="max-width: 600px;">{{ error }}</div>
     {% endif %}
 
-    <div class="row">
-        <section class="col-md-8" aria-label="Resumo dos Itens">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold">Resumo dos Itens</div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        {% for item in cart.items.all %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ item.quantity }}x {{ item.sku.product.name }} ({{ item.sku.volume_ml }}ml)
-                                <span>R$ {{ item.subtotal }}</span>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    <div class="row justify-content-center">
+        <section class="col-md-10 col-lg-7" aria-label="Detalhes e Resumo do Pedido">
+            
+            <div class="text-start mb-4">
+                <h2 style="color: #D6A476; font-weight: bold; margin-bottom: 0;">FINALIZAR COMPRA</h2>
+                <h5 class="text-muted" style="font-size: 1.1rem;">{{ cart.items.count }} Produtos</h5>
             </div>
-        </section>
 
-        <section class="col-md-4" aria-labelledby="delivery-title">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h2 id="delivery-title" class="h5 fw-bold border-bottom pb-2">Entrega</h2>
-                    {% if address %}
-                        <p class="small text-muted mb-4">
-                            {{ address.street }}, {{ address.number }}<br>
-                            {{ address.city }} - {{ address.state }}<br>
-                            CEP: {{ address.zip_code }}
-                        </p>
-                    {% else %}
-                        <div class="text-center py-3">
-                            <p class="text-muted small mb-2">Você ainda não possui um endereço de entrega.</p>
-                            <a href="{% url 'customers:address_create' %}" class="btn btn-outline-dark btn-sm rounded-pill px-4">
-                                + Adicionar Novo Endereço
-                            </a>
+            {% if address %}
+                <div class="custom-card mb-4 p-3 px-4">
+                    <div class="address-horizontal">
+                        <div class="d-flex align-items-center">
+                            <div class="address-icon-box">
+                                <i class="bi bi-geo-alt-fill" style="color: var(--coral-light); font-size: 1.6rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1" style="color: var(--text-brown); font-size: 1.05rem;">Endereço de Entrega</h6>
+                                <p class="mb-0" style="color: var(--text-brown); font-size: 0.95rem;">
+                                    {{ address.street }}, {{ address.number }} 
+                                    {% if address.complement %} - {{ address.complement }}{% endif %}
+                                </p>
+                                <p class="mb-0 text-muted" style="font-size: 0.85rem;">{{ address.city }} / {{ address.state }} - CEP: {{ address.zip_code }}</p>
+                            </div>
                         </div>
-                    {% endif %}
-
-                    <h4 class="fw-bold mt-3 border-top pt-3 d-flex justify-content-between">
-                        Total: <span class="text-success">R$ {{ cart.total_price }}</span>
-                    </h4>
-
-                    <form method="POST" class="mt-4">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-dark w-100 py-2 fs-5" {% if not address %}disabled{% endif %}>
-                            Confirmar Pagamento
-                        </button>
-                    </form>
+                        
+                        <div>
+                            <a href="{% url 'customers:address-update' address.id %}" class="address-edit-btn">Alterar</a>
+                        </div>
+                    </div>
                 </div>
+            {% else %}
+                <a href="{% url 'customers:address-create' %}" class="empty-address-card mb-4">
+                    <i class="bi bi-plus-lg me-2" style="font-size: 1.3rem;"></i> Escolha seu Endereço
+                </a>
+            {% endif %}
+
+            <div class="custom-card">
+                <h3 id="summary-title" class="summary-title-brown">Resumo do pedido</h3>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <strong style="color: var(--text-brown); font-size: 1.1rem;">Produtos ( {{ cart.items.count }} )</strong>
+                    <strong style="color: #D6A476; font-size: 1.1rem;">R$ {{ cart.total_price }}</strong>
+                </div>
+
+                <div class="mb-3 border-bottom pb-3">
+                    {% for item in cart.items.all %}
+                        <div class="mt-2">
+                            <div class="summary-item-name">{{ item.sku.product.name }}</div>
+                            <div class="summary-item-desc">{{ item.quantity }}x {{ item.sku.volume_ml }}ml</div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong style="color: var(--text-brown); font-size: 1.1rem;">Frete</strong>
+                    <strong style="color: #D6A476; font-size: 1.1rem;">Grátis</strong>
+                </div>
+                <div class="mb-3 border-bottom pb-3">
+                    <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">Correios</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong style="color: var(--text-brown); font-size: 1.1rem;">Descontos</strong>
+                    <strong style="color: var(--coral-light); font-size: 1.1rem;">- R$ 0,00</strong>
+                </div>
+                <div class="mb-4 border-bottom pb-4">
+                    <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">CUPOM APLICADO</span>
+                </div>
+                
+                <div class="mb-4 mt-3 text-center">
+                    <h5 class="fw-bold mb-1" style="color: var(--text-brown); font-size: 1.2rem;">Total a Pagar</h5>
+                    <h1 class="fw-bold mt-2" style="color: #D6A476; font-size: 2.8rem;">R$ {{ cart.total_price }}</h1>
+                </div>
+
+                <form method="POST" class="text-center mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-finalizar" {% if not address %}disabled{% endif %}>
+                        Ir para o Pagamento <i class="bi bi-lock-fill ms-2"></i>
+                    </button>
+                    <p class="text-center text-muted mt-3 mb-0" style="font-size: 0.8rem;">
+                        Você será redirecionado para o ambiente seguro do Mercado Pago.
+                    </p>
+                </form>
+                
             </div>
         </section>
     </div>
