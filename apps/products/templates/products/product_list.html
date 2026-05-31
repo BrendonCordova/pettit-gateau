@@ -1,118 +1,288 @@
 {% extends 'base.html' %}
-{% block title %}Vitrine - Pettit Gateau{% endblock %}
+{% block title %}Perfumes Masculinos | Pettit Gateau{% endblock %}
 
 {% block extra_css %}
 <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .product-grid { display: flex; flex-wrap: wrap; gap: 20px; }
-    .product-card { border: 1px solid #ccc; padding: 15px; width: 200px; border-radius: 8px; }
-    .product-card a { text-decoration: none; color: black; font-weight: bold; }
+    body {
+        background-color: var(--bg-cream) !important;
+    }
+
+    /* Título Decorativo */
+    .catalog-main-title {
+        color: var(--text-brown);
+        font-family: 'Georgia', serif;
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 20px;
+    }
+
+    /* Menu de Ordenação Dourado */
+    .sort-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 40px;
+        padding-right: 15px;
+    }
     
-    .pagination { margin-top: 30px; display: flex; gap: 10px; align-items: center; }
-    .page-link { padding: 8px 12px; border: 1px solid #000; text-decoration: none; color: black; }
-    .page-link.active { background: black; color: white; }
-    .page-link.disabled { border-color: #ccc; color: #ccc; pointer-events: none; }
+    .sort-dropdown {
+        background-color: #D6A476;
+        border-radius: 25px;
+        padding: 5px 20px;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .sort-select {
+        background-color: transparent;
+        border: none;
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        outline: none;
+        box-shadow: none;
+        appearance: none;
+        padding-right: 10px;
+    }
+    .sort-select:focus { outline: none; }
+    
+    .sort-icon { color: var(--text-brown); font-weight: bold; }
+
+    /* Cartão do Produto */
+    .catalog-card {
+        background: transparent;
+        border: none;
+        margin-bottom: 40px;
+        text-decoration: none;
+        display: block;
+    }
+    .catalog-card:hover .catalog-title { color: var(--text-brown); }
+
+    .catalog-img-wrapper {
+        height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        background-color: transparent;
+    }
+    .catalog-img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+    .catalog-card:hover .catalog-img { transform: scale(1.05); }
+
+    .catalog-title {
+        color: var(--coral-light);
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: 0.3s;
+    }
+    
+    .catalog-subtitle {
+        font-size: 0.75rem;
+        color: var(--text-brown);
+        margin-bottom: 10px;
+        min-height: 35px;
+        line-height: 1.4;
+    }
+
+    .catalog-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 15px;
+    }
+    
+    .catalog-price {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--text-brown);
+        margin: 0;
+    }
+    
+    .catalog-stock {
+        font-size: 0.75rem;
+        color: var(--coral-light);
+        font-weight: bold;
+    }
+
+    .btn-add-catalog {
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--text-brown);
+        color: var(--text-brown);
+        padding: 8px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .btn-add-catalog:hover {
+        background: var(--text-brown);
+        color: white;
+    }
+
+    /* Paginação Circular */
+    .catalog-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        margin-bottom: 60px;
+    }
+    
+    .page-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: var(--text-brown);
+        font-weight: bold;
+        transition: 0.3s;
+        border: 2px solid transparent;
+        background-color: rgba(214, 164, 118, 0.3); /* Dourado clarinho */
+    }
+    .page-circle.active {
+        background-color: #D6A476;
+        color: white;
+    }
+    .page-circle:hover:not(.active) {
+        border-color: #D6A476;
+    }
+    
+    .page-arrow {
+        color: #D6A476;
+        font-size: 1.5rem;
+        text-decoration: none;
+        padding: 0 10px;
+    }
+    .page-arrow:hover { color: var(--text-brown); }
+    .page-arrow.disabled { color: #ccc; pointer-events: none; }
 </style>
 {% endblock extra_css %}
 
 {% block content %}
-<h1 class="mt-4">Nossas Fragrâncias</h1>
+<div class="container">
+    
+    <h1 class="catalog-main-title">Perfumes</h1>
 
-<section aria-label="Filtros de Busca">
-    <form method="GET" action="{% url 'products:list' %}" style="background: #f4f4f4; padding: 15px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-        
-        <div>
-            <label for="q">Buscar Produto:</label><br>
-            <input type="text" name="q" id="q" placeholder="Ex: Acqua di Giò..." value="{{ current_filters.q }}">
-        </div>
-
-        <div>
-            <label for="brand">Marca:</label><br>
-            <select name="brand" id="brand">
-                <option value="">Todas</option>
-                {% for brand in brands %}
-                    <option value="{{ brand.id }}" {% if current_filters.brand == brand.id|stringformat:"s" %}selected{% endif %}>
-                        {{ brand.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        
-        <div>
-            <label for="category">Categoria:</label><br>
-            <select name="category" id="category">
-                <option value="">Todas</option>
-                {% for category in categories %}
-                    <option value="{{ category.id }}" {% if current_filters.category == category.id|stringformat:"s" %}selected{% endif %}>
-                        {{ category.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div>
-            <label for="fragrance">Família Olfativa:</label><br>
-            <select name="fragrance" id="fragrance">
-                <option value="">Todas</option>
-                {% for value, label in fragrance_choices %}
-                    <option value="{{ value }}" {% if current_filters.fragrance == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div>
-            <label for="min_price">Preço Mínimo:</label><br>
-            <input type="number" name="min_price" id="min_price" step="0.01" placeholder="R$ 0,00" value="{{ current_filters.min_price }}">
-        </div>
-
-        <div>
-            <label for="max_price">Preço Máximo:</label><br>
-            <input type="number" name="max_price" id="max_price" step="0.01" placeholder="R$ 999,00" value="{{ current_filters.max_price }}">
-        </div>
-
-        <div>
-            <button type="submit" style="padding: 5px 15px; background: black; color: white;">Filtrar</button>
-            <a href="{% url 'products:list' %}" style="margin-left: 10px; text-decoration: none; color: gray;">Limpar</a>
-        </div>
-    </form>
-</section>
-
-<section class="product-grid" aria-label="Catálogo de Produtos">
-    {% for product in page_obj %}
-        <article class="product-card">
-            <h2><a href="{% url 'products:detail' product.slug %}">{{ product.name }}</a></h2>
-            <p>{{ product.brand.name }}</p>
-            
-            {% with first_sku=product.skus.first %}
-                {% if first_sku %}
-                    <p>A partir de R$ {{ first_sku.price }}</p>
-                {% else %}
-                    <p>Indisponível</p>
+    <div class="sort-wrapper">
+        <form method="GET" id="sortForm">
+            {% for key, value in current_filters.items %}
+                {% if key != 'sort' and key != 'page' %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
                 {% endif %}
-            {% endwith %}
-        </article>
-    {% empty %}
-        <p>Nenhum produto cadastrado ainda.</p>
-    {% endfor %}
-</section>
+            {% endfor %}
+            
+            <div class="sort-dropdown shadow-sm">
+                <span class="sort-icon me-1">Ordenar por:</span>
+                <select name="sort" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+                    <option value="newest" {% if current_filters.sort == 'newest' %}selected{% endif %}>Lançamentos</option>
+                    <option value="top_rated" {% if current_filters.sort == 'top_rated' %}selected{% endif %}>Mais avaliados</option>
+                    <option value="best_selling" {% if current_filters.sort == 'best_selling' %}selected{% endif %}>Mais vendidos</option>
+                    <option value="a-z" {% if current_filters.sort == 'a-z' %}selected{% endif %}>A-Z</option>
+                    <option value="z-a" {% if current_filters.sort == 'z-a' %}selected{% endif %}>Z-A</option>
+                </select>
+                <i class="bi bi-chevron-down sort-icon"></i>
+            </div>
+        </form>
+    </div>
 
-<hr>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for product in page_obj %}
+            <div class="col">
+                <div class="catalog-card">
+                    
+                    <a href="{% url 'products:detail' product.slug %}" style="text-decoration: none;">
+                        <div class="catalog-img-wrapper">
+                            {% for img in product.images.all %}
+                                {% if img.is_main %}
+                                    <img src="{{ img.image.url }}" alt="{{ product.name }}" class="catalog-img">
+                                {% endif %}
+                            {% empty %}
+                                <div class="text-muted">Sem Imagem</div>
+                            {% endfor %}
+                        </div>
 
-<nav class="pagination" aria-label="Paginação">
-    {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&{{ query_string }}" class="page-link" aria-label="Página Anterior">&laquo; Anterior</a>
-    {% else %}
-        <span class="page-link disabled" aria-hidden="true">&laquo; Anterior</span>
+                        <div class="catalog-title">{{ product.name }}</div>
+                        
+                        <div class="catalog-subtitle">
+                            {% with default_sku=product.skus.first %}
+                                {% if default_sku.get_concentration_display %}
+                                    {{ default_sku.get_concentration_display }} - 
+                                {% endif %}
+                                Perfume {{ product.category.name }} 
+                                {% if default_sku %}{{ default_sku.volume_ml }}ml{% endif %}
+                            {% endwith %}
+                        </div>
+                    </a>
+
+                    <div class="catalog-price-row">
+                        {% with first_sku=product.skus.first %}
+                            {% if first_sku %}
+                                <div class="catalog-price">R$ {{ first_sku.price }}</div>
+                                
+                                {% if first_sku.stock_quantity == 0 %}
+                                    <div class="catalog-stock">Esgotado</div>
+                                {% elif first_sku.stock_quantity < 5 %}
+                                    <div class="catalog-stock">Restam apenas {{ first_sku.stock_quantity }}</div>
+                                {% endif %}
+                            {% else %}
+                                <div class="catalog-price" style="font-size: 1rem; color: #888;">Indisponível</div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+
+                    <a href="{% url 'products:detail' product.slug %}" class="btn btn-add-catalog d-block text-center text-decoration-none">
+                        Adicionar ao Carrinho
+                    </a>
+
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <h4 style="color: var(--text-brown);">Nenhuma fragrância encontrada com estes filtros.</h4>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="catalog-pagination" aria-label="Navegação de páginas do catálogo">
+            
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&{{ query_string }}" class="page-arrow"><i class="bi bi-chevron-left"></i></a>
+            {% else %}
+                <span class="page-arrow disabled"><i class="bi bi-chevron-left"></i></span>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <span class="page-circle active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                    <a href="?page={{ num }}&{{ query_string }}" class="page-circle">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&{{ query_string }}" class="page-arrow"><i class="bi bi-chevron-right"></i></a>
+            {% else %}
+                <span class="page-arrow disabled"><i class="bi bi-chevron-right"></i></span>
+            {% endif %}
+
+        </nav>
     {% endif %}
 
-    <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&{{ query_string }}" class="page-link" aria-label="Próxima Página">Próxima &raquo;</a>
-    {% else %}
-        <span class="page-link disabled" aria-hidden="true">Próxima &raquo;</span>
-    {% endif %}
-</nav>
+</div>
 {% endblock content %}
