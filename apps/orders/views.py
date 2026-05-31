@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from apps.carts.models import Cart
 from apps.customers.models import Address
-from .models import Order, OrderItem
+from .models import Order, OrderItem, ShippingMethod
 from django.db import transaction
 from django.db.models import F
 from django.contrib import messages
@@ -10,6 +10,8 @@ from .services import MercadoPagoService
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+from django.utils import timezone
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
@@ -50,11 +52,17 @@ def checkout_view(request):
                     if cart_item.sku.stock_quantity < cart_item.quantity:
                         raise ValueError(f'Desculpe, o produto {cart_item.sku.product.name} não tem estoque suficiente.')
 
+                default_shipping = ShippingMethod.objects.filter(is_active=True).first()
+                
+                frete_price = default_shipping.price if default_shipping else 0
+                final_price = cart.total_price + frete_price
+
                 order = Order.objects.create(
                     customer=request.user,
                     address=address,
                     status='PENDING',
-                    total_price=cart.total_price
+                    total_price=final_price,
+                    shipping_method=default_shipping
                 )
 
                 for cart_item in cart.items.all():
@@ -141,6 +149,7 @@ def mercado_pago_webhook(request):
 
                     if order and status == 'approved' and order.status != 'PAID':
                         order.status = 'PAID'
+                        order.payment_approved_at = timezone.now()
                         order.save()
 
                         for item in order.items.all():
@@ -160,3 +169,28 @@ def mercado_pago_webhook(request):
             return JsonResponse({'error': 'bad_request'}, status=400)
         
     return JsonResponse({'error': 'method_not_allowed'}, status=405)
+
+@login_required(login_url='/conta/login/')
+def order_list_view(request):
+    '''
+    Retrieves and displays a list of the user's orders.
+    Supports filtering by product name and order status.
+    '''
+    orders = Order.objects.filter(customer=request.user).order_by('-created_at')
+
+    search_query = request.GET.get('q')
+    status_filter = request.GET.get('status')
+
+    if search_query:
+        orders = orders.filter(
+            Q(items__sku__product__name__icontains=search_query)
+        ).distinct()
+
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+
+    context = {
+        'orders': orders,
+        'current_filters': request.GET,
+    }
+    return render(request, 'orders/order_list.html', context)

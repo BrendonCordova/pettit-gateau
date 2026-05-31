@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus Pedidos | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: var(--bg-cream) !important; }
+
+    .orders-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    .page-title {
+        color: var(--text-brown);
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+    }
+
+    .search-filter-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 40px;
+        align-items: center;
+    }
+
+    .search-box {
+        flex-grow: 1;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        border: 1.5px solid var(--border-brown);
+        border-radius: 50px;
+        padding: 10px 20px 10px 45px;
+        background: transparent;
+        color: var(--text-brown);
+        font-size: 0.95rem;
+    }
+    .search-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 1px var(--text-brown);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-brown);
+        font-size: 1.1rem;
+    }
+
+    .clear-icon {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-brown);
+        font-size: 1.2rem;
+        text-decoration: none;
+    }
+
+    .filter-select {
+        border: 1.5px solid var(--border-brown);
+        border-radius: 50px;
+        padding: 10px 20px;
+        background: transparent;
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+    }
+    .filter-wrapper { position: relative; }
+    .filter-wrapper i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--text-brown);
+    }
+
+    .order-card {
+        border: 1.5px solid var(--border-brown);
+        border-radius: 15px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        background: transparent;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .order-status-main {
+        color: var(--coral-light);
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+    }
+
+    .order-item-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: var(--text-brown);
+        text-transform: uppercase;
+        max-width: 450px;
+    }
+    .order-item-price { color: #D6A476; margin-left: 30px; }
+
+    .order-address {
+        color: #D6A476;
+        font-size: 0.9rem;
+        margin-top: 25px;
+        font-weight: bold;
+    }
+
+    .order-right-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: right;
+    }
+
+    .order-date-top {
+        font-weight: bold;
+        color: var(--text-brown);
+        font-size: 1.05rem;
+    }
+
+    .order-delivery-label {
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: var(--text-brown);
+        margin-bottom: 2px;
+    }
+
+    .order-delivery-date {
+        color: var(--coral-light);
+        font-weight: bold;
+        font-size: 1.05rem;
+    }
+
+    @media (max-width: 768px) {
+        .order-card { flex-direction: column; gap: 20px; }
+        .order-right-side { text-align: left; }
+        .order-item-row { flex-direction: column; gap: 5px; }
+        .order-item-price { margin-left: 0; }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="orders-container">
+    
+    <h1 class="page-title">Meus Pedidos</h1>
+
+    <form method="GET" class="search-filter-bar">
+        
+        <div class="search-box">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" name="q" class="search-input" placeholder="Busque por nome do perfume..." value="{{ current_filters.q }}">
+            {% if current_filters.q %}
+                <a href="{% url 'orders:list' %}?status={{ current_filters.status }}" class="clear-icon"><i class="bi bi-x"></i></a>
+            {% endif %}
+        </div>
+
+        <div class="filter-wrapper">
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+                <option value="">Filtro</option>
+                <option value="SHIPPED" {% if current_filters.status == 'SHIPPED' %}selected{% endif %}>A caminho</option>
+                <option value="PREPARING" {% if current_filters.status == 'PREPARING' %}selected{% endif %}>A enviar</option>
+                <option value="DELIVERED" {% if current_filters.status == 'DELIVERED' %}selected{% endif %}>Entregue</option>
+                <option value="PENDING" {% if current_filters.status == 'PENDING' %}selected{% endif %}>Aguardando Pagamento</option>
+                <option value="CANCELED" {% if current_filters.status == 'CANCELED' %}selected{% endif %}>Cancelado</option>
+            </select>
+            <i class="bi bi-chevron-down"></i>
+        </div>
+
+    </form>
+
+    {% for order in orders %}
+        <div class="order-card">
+            
+            <div>
+                <div class="order-status-main">
+                    {% if order.status == 'PENDING' %}Aguardando Pagamento
+                    {% elif order.status == 'PAID' or order.status == 'PREPARING' %}A enviar
+                    {% elif order.status == 'SHIPPED' %}A caminho
+                    {% elif order.status == 'DELIVERED' %}Entregue
+                    {% elif order.status == 'CANCELED' %}Cancelado
+                    {% else %}{{ order.get_status_display }}{% endif %}
+                </div>
+
+                {% for item in order.items.all %}
+                    <div class="order-item-row">
+                        <span>{{ item.sku.product.name }}</span>
+                        <span class="order-item-price">R$ {{ item.get_subtotal }}</span>
+                    </div>
+                {% endfor %}
+
+                <div class="order-address">
+                    {{ order.address.street }}, {{ order.address.number }}. {{ order.address.neighborhood }}, {{ order.address.city }}-{{ order.address.state }}.
+                </div>
+
+                <div class="order-shipping-info mt-2" style="font-size: 0.85rem; color: var(--text-brown); font-weight: 600;">
+                    <i class="bi bi-truck me-1" style="color: var(--coral-light); font-size: 1rem;"></i>
+                    {% if order.shipping_method %}
+                        Envio via {{ order.shipping_method.name }} (Prazo: {{ order.shipping_method.delivery_days }} dias)
+                    {% else %}
+                        Envio Padrão (Prazo: 7 dias)
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="order-right-side">
+                <div class="order-date-top">
+                    {{ order.created_at|date:"d \d\e F \d\e Y" }}
+                </div>
+                
+                <div>
+                    <div class="order-delivery-label">
+                        {% if order.status == 'DELIVERED' %}
+                            Entregue
+                        {% elif order.status == 'CANCELED' %}
+                            Cancelado
+                        {% else %}
+                            Data Prevista
+                        {% endif %}
+                    </div>
+                    <div class="order-delivery-date">
+                        {{ order.expected_delivery_date|date:"d \d\e F \d\e Y" }}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    {% empty %}
+        <div class="text-center py-5">
+            <h4 style="color: var(--text-brown);">Você ainda não possui nenhum pedido.</h4>
+            <a href="{% url 'products:list' %}" class="btn mt-3" style="background-color: var(--coral-light); color: white; border-radius: 20px; padding: 10px 30px; font-weight: bold;">Explorar Fragrâncias</a>
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

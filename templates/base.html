@@ -164,8 +164,8 @@
                 <a href="{% if user.is_authenticated %}{% url 'customers:profile' %}{% else %}{% url 'customers:login' %}{% endif %}" aria-label="Perfil">
                     <i class="bi bi-person-circle"></i>
                 </a>
-                <a href="#" aria-label="Meus Pedidos" class="mx-3 text-dark fs-5">
-                    <i class="bi bi-box-seam"></i>
+                <a href="{% url 'orders:list' %}" aria-label="Meus Pedidos">
+                    <i class="bi bi-box-seam-fill"></i>
                 </a>
                 <a href="/carrinho/" aria-label="Carrinho de Compras">
                     <i class="bi bi-cart-fill"></i>
