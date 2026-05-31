@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Brand, Category
+from .models import Product, Brand, Category, Banner
 from django.core.paginator import Paginator
 from django.db.models import Q, Avg, Count
 from apps.orders.models import Order
@@ -25,25 +25,20 @@ def product_list(request, category_name=None):
 
     page_title = "Nossas Fragrâncias"
 
-    # LÓGICA DE CATEGORIA INTELIGENTE
     if category_name:
-        # Filtra na base de dados ignorando maiúsculas/minúsculas (iexact)
         products = products.filter(category__name__iexact=category_name)
         
-        # Ajusta a gramática do título (Masculino -> Masculinos)
         if category_name.lower() in ['masculino', 'feminino']:
             page_title = f"Perfumes {category_name.capitalize()}s"
         else:
             page_title = f"Perfumes {category_name.capitalize()}"
 
-    # Captura outros filtros de texto se existirem
     search_query = request.GET.get('q')
     if search_query:
         products = products.filter(
             Q(name__icontains=search_query) | Q(description__icontains=search_query)
         ).distinct()
 
-    # Ordenação (Mantém exatamente como já estava)
     sort_by = request.GET.get('sort', 'newest')
     if sort_by == 'a-z':
         products = products.order_by('name')
@@ -56,7 +51,6 @@ def product_list(request, category_name=None):
     else: 
         products = products.order_by('-created_at')
 
-    # Paginação
     paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -70,7 +64,7 @@ def product_list(request, category_name=None):
         'page_obj': page_obj,
         'current_filters': request.GET,
         'query_string': query_string,
-        'page_title': page_title, # <-- Enviamos o título para o HTML!
+        'page_title': page_title,
     }  
     return render(request, 'products/product_list.html', context)
 
@@ -175,3 +169,23 @@ def load_more_reviews_api(request, slug):
         'has_next': page_obj.has_next(),
         'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None
     })
+
+def home_view(request):
+    '''
+    Renders the e-commerce homepage.
+    Fetches the active promotional banner, top 4 best-selling products, and 4 newest arrivals.
+    '''
+    active_banner = Banner.objects.filter(is_active=True).first()
+
+    best_sellers = Product.objects.prefetch_related('skus', 'images').filter(is_active=True).annotate(
+        num_reviews=Count('reviews')
+    ).order_by('-num_reviews', '-created_at')[:4]
+
+    newest = Product.objects.prefetch_related('skus', 'images').filter(is_active=True).order_by('-created_at')[:4]
+
+    context = {
+        'banner': active_banner,
+        'best_sellers': best_sellers,
+        'newest': newest,
+    }
+    return render(request, 'products/home.html', context)

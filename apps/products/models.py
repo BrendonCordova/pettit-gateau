@@ -145,3 +145,21 @@ class Review(BaseModel):
 
     def __str__(self):
         return f'{self.customer.first_name} - {self.product.name} ({self.rating}/5)'
+    
+class Banner(BaseModel):
+    '''
+    Model for managing promotional banners on the homepage.
+    Images are uploaded to the media directory.
+    '''
+    title = models.CharField(max_length=100, verbose_name="Título da Campanha")
+    image = models.ImageField(upload_to="banners/%Y/%m/", verbose_name="Imagem do Banner (Desktop)")
+    link = models.URLField(blank=True, null=True, verbose_name="Link de Redirecionamento")
+    is_active = models.BooleanField(default=True, verbose_name="Ativo")
+
+    class Meta:
+        verbose_name = "Banner"
+        verbose_name_plural = "Banners"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
