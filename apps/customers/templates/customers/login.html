@@ -3,12 +3,10 @@
 
 {% block extra_css %}
 <style>
-    /* Estilos específicos para a página de Login (Figma match) */
     .login-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        /* Dá um respiro para não colar no header/footer */
         min-height: 60vh; 
         padding: 40px 15px;
     }
@@ -47,7 +45,7 @@
     }
 
     .custom-input {
-        background-color: #F4D3CE; /* Rosa pastel/Pêssego do Figma */
+        background-color: #F4D3CE;
         border: none;
         border-radius: 50px;
         padding: 12px 25px;
@@ -60,7 +58,7 @@
     .custom-input:focus {
         outline: none;
         box-shadow: 0 0 0 2px var(--coral-light);
-        background-color: #fae2df; /* Fica um pouco mais claro ao clicar */
+        background-color: #fae2df;
     }
 
     .forgot-password {
@@ -87,7 +85,7 @@
         width: 200px;
         font-size: 1.1rem;
         display: block;
-        margin: 0 auto; /* Centraliza o botão */
+        margin: 0 auto;
         transition: 0.3s;
     }
 
@@ -113,7 +111,6 @@
         color: var(--coral-light);
     }
     
-    /* Customização dos erros do formulário */
     .errorlist {
         color: #dc3545;
         font-size: 0.85rem;

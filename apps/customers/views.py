@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import login
-from .forms import CustomerCreationForm, AddressForm
+from .forms import CustomerCreationForm, AddressForm, CustomerUpdateForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,6 +13,7 @@ from django.conf import settings
 from .models import Customer
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from .models import Address
 
 @login_required
 def address_create_view(request):
@@ -151,3 +152,38 @@ def profile_view(request):
         address = request.user.addresses.first()
         
     return render(request, 'customers/profile.html', {'address': address})
+
+@login_required
+def profile_update_view(request):
+    '''
+    Handles the updating of user personal information.
+    '''
+    if request.method == 'POST':
+        form = CustomerUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Dados pessoais atualizados com sucesso!')
+            return redirect('customers:profile')
+    else:
+        form = CustomerUpdateForm(instance=request.user)
+        
+    return render(request, 'customers/profile_update.html', {'form': form})
+
+@login_required
+def address_update_view(request, pk):
+    '''
+    Handles the updating of an existing user address.
+    Ensures the user can only edit their own addresses to maintain security.
+    '''
+    address = get_object_or_404(Address, pk=pk, customer=request.user)
+    
+    if request.method == 'POST':
+        form = AddressForm(request.POST, instance=address)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Endereço atualizado com sucesso!')
+            return redirect('customers:profile')
+    else:
+        form = AddressForm(instance=address)
+
+    return render(request, 'customers/address_update.html', {'form': form})

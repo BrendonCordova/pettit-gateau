@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}Editar Perfil | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    .modal-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        padding: 40px 15px;
+    }
+
+    .edit-card {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: white;
+        padding: 40px;
+        width: 100%;
+        max-width: 550px;
+        position: relative;
+    }
+
+    .btn-close-custom {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 1.5rem;
+        color: var(--text-brown);
+        cursor: pointer;
+        background: none;
+        border: none;
+        transition: 0.2s;
+    }
+    .btn-close-custom:hover { color: var(--coral-light); }
+
+    .edit-title {
+        font-size: 1.4rem;
+        color: var(--text-brown);
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .custom-label {
+        font-size: 0.95rem;
+        color: var(--text-brown);
+        margin-bottom: 5px;
+        display: block;
+        padding-left: 10px;
+        margin-top: 10px;
+    }
+
+    .edit-form input[type="text"],
+    .edit-form input[type="email"],
+    .edit-form input[type="date"],
+    .edit-form select {
+        background-color: #F4D3CE;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 20px;
+        width: 100%;
+        color: var(--text-brown);
+        font-size: 1rem;
+        margin-bottom: 5px;
+    }
+
+    .edit-form input:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--coral-light);
+        background-color: #fae2df;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn-cancelar {
+        background-color: #D6A476;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 25px;
+        font-weight: bold;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+    .btn-cancelar:hover { background-color: #c49468; color: white; }
+
+    .btn-salvar {
+        background-color: var(--coral-light);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 35px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .btn-salvar:hover { background-color: #e87b6d; color: white; }
+    
+    .edit-form label:not(.custom-label) { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="modal-wrapper" aria-labelledby="edit-title">
+    <div class="edit-card shadow-lg">
+        <button onclick="history.back()" class="btn-close-custom" aria-label="Fechar janela">
+            <i class="bi bi-x-circle"></i>
+        </button>
+
+        <h1 id="edit-title" class="edit-title">Editar dados pessoais</h1>
+        
+        <form method="POST" class="edit-form" id="profileUpdateForm">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="custom-label">Nome</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="col-md-6">
+                    <label class="custom-label">Sobrenome</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="col-md-12">
+                    <label class="custom-label">E-mail</label>
+                    {{ form.email }}
+                </div>
+                <div class="col-md-12">
+                    <label class="custom-label">CPF</label>
+                    {{ form.tax_id }}
+                </div>
+                <div class="col-md-6">
+                    <label class="custom-label">Data de Nascimento</label>
+                    <input type="date" name="{{ form.birth_date.name }}" value="{{ form.birth_date.value|date:'Y-m-d'|default_if_none:'' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="custom-label">Telefone</label>
+                    {{ form.phone }}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="javascript:history.back()" class="btn-cancelar">Cancelar</a>
+                <button type="submit" class="btn-salvar">Salvar</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
+        const confirmed = confirm("Tem certeza que deseja salvar as alterações no seu perfil?");
+        if (!confirmed) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

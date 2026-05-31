@@ -3,7 +3,6 @@
 
 {% block extra_css %}
 <style>
-    /* Reaproveitamento da estrutura de autenticação */
     .auth-container {
         display: flex;
         justify-content: center;
@@ -17,7 +16,7 @@
         background-color: white;
         padding: 40px;
         width: 100%;
-        max-width: 480px; /* Um pouco mais largo para acomodar os dados de registo */
+        max-width: 480px;
     }
 
     .auth-logo {
@@ -34,7 +33,7 @@
         font-size: 1.3rem;
         color: var(--text-brown);
         margin-bottom: 25px;
-        text-align: left; /* Conforme o Figma, o título é alinhado à esquerda */
+        text-align: left;
     }
 
     .custom-label {
@@ -45,7 +44,6 @@
         padding-left: 15px;
     }
 
-    /* O Segredo: Estilizar automaticamente qualquer input que o Django gerar */
     .register-form input:not([type="radio"]):not([type="checkbox"]):not([type="submit"]),
     .register-form select {
         background-color: #F4D3CE;
@@ -66,7 +64,6 @@
         background-color: #fae2df;
     }
 
-    /* Estilização para Radio Buttons e Checkboxes (Ex: Gênero) */
     .register-form ul {
         list-style: none;
         padding-left: 15px;

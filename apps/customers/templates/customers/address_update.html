@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Novo Endereço | Pettit Gateau{% endblock %}
+{% block title %}Editar Endereço | Pettit Gateau{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -11,7 +11,7 @@
         padding: 40px 15px;
     }
 
-    .address-card {
+    .edit-card {
         border: 2px solid var(--border-brown);
         border-radius: 15px;
         background-color: white;
@@ -32,11 +32,9 @@
         border: none;
         transition: 0.2s;
     }
-    .btn-close-custom:hover {
-        color: var(--coral-light);
-    }
+    .btn-close-custom:hover { color: var(--coral-light); }
 
-    .address-title {
+    .edit-title {
         font-size: 1.4rem;
         color: var(--text-brown);
         font-weight: bold;
@@ -50,10 +48,11 @@
         margin-bottom: 5px;
         display: block;
         padding-left: 10px;
+        margin-top: 10px;
     }
 
-    .address-form input[type="text"],
-    .address-form select {
+    .edit-form input[type="text"],
+    .edit-form select {
         background-color: #F4D3CE;
         border: none;
         border-radius: 50px;
@@ -61,11 +60,11 @@
         width: 100%;
         color: var(--text-brown);
         font-size: 1rem;
-        margin-bottom: 15px;
+        margin-bottom: 5px;
     }
 
-    .address-form input:focus,
-    .address-form select:focus {
+    .edit-form input:focus,
+    .edit-form select:focus {
         outline: none;
         box-shadow: 0 0 0 2px var(--coral-light);
         background-color: #fae2df;
@@ -74,9 +73,9 @@
     .checkbox-wrapper {
         display: flex;
         align-items: center;
-        margin-top: 10px;
+        margin-top: 20px;
     }
-    .address-form input[type="checkbox"] {
+    .edit-form input[type="checkbox"] {
         accent-color: var(--coral-light);
         transform: scale(1.3);
         margin-right: 10px;
@@ -93,7 +92,7 @@
         display: flex;
         justify-content: flex-end;
         gap: 15px;
-        margin-top: 20px;
+        margin-top: 30px;
     }
 
     .btn-cancelar {
@@ -118,68 +117,59 @@
         transition: 0.3s;
     }
     .btn-salvar:hover { background-color: #e87b6d; color: white; }
-
-    /* Esconde os labels brutos gerados pelo Django caso eles escapem */
-    .address-form label:not(.custom-label):not(.checkbox-label) {
-        display: none;
-    }
+    
+    .edit-form label:not(.custom-label):not(.checkbox-label) { display: none; }
 </style>
-{% endblock extra_css %}
+{% endblock %}
 
 {% block content %}
-<section class="modal-wrapper" aria-labelledby="address-title">
-    <div class="address-card shadow-lg">
-        
+<section class="modal-wrapper" aria-labelledby="edit-title">
+    <div class="edit-card shadow-lg">
         <button onclick="history.back()" class="btn-close-custom" aria-label="Fechar janela">
             <i class="bi bi-x-circle"></i>
         </button>
 
-        <h1 id="address-title" class="address-title">Cadastrar endereço</h1>
+        <h1 id="edit-title" class="edit-title">Editar Endereço</h1>
         
-        <form method="POST" class="address-form">
+        <form method="POST" class="edit-form" id="addressUpdateForm">
             {% csrf_token %}
             
             <div class="row">
                 <div class="col-md-12">
-                    <label for="{{ form.name.id_for_label }}" class="custom-label">Nome do endereço</label>
+                    <label class="custom-label">Nome do endereço</label>
                     {{ form.name }}
                 </div>
-                
                 <div class="col-md-12">
-                    <label for="{{ form.zip_code.id_for_label }}" class="custom-label">CEP</label>
+                    <label class="custom-label">CEP</label>
                     {{ form.zip_code }}
                 </div>
-                
                 <div class="col-md-8">
-                    <label for="{{ form.street.id_for_label }}" class="custom-label">Endereço</label>
+                    <label class="custom-label">Endereço</label>
                     {{ form.street }}
                 </div>
                 <div class="col-md-4">
-                    <label for="{{ form.number.id_for_label }}" class="custom-label">Número</label>
+                    <label class="custom-label">Número</label>
                     {{ form.number }}
                 </div>
-
                 <div class="col-md-12">
-                    <label for="{{ form.neighborhood.id_for_label }}" class="custom-label">Bairro</label>
+                    <label class="custom-label">Bairro</label>
                     {{ form.neighborhood }}
                 </div>
-                
                 <div class="col-md-8">
-                    <label for="{{ form.city.id_for_label }}" class="custom-label">Cidade</label>
+                    <label class="custom-label">Cidade</label>
                     {{ form.city }}
                 </div>
                 <div class="col-md-4">
-                    <label for="{{ form.state.id_for_label }}" class="custom-label">UF</label>
+                    <label class="custom-label">UF</label>
                     {{ form.state }}
                 </div>
-
                 <div class="col-md-12">
-                    <label for="{{ form.complement.id_for_label }}" class="custom-label">Complemento</label>
+                    <label class="custom-label">Complemento</label>
                     {{ form.complement }}
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-end mt-3">
+            <div class="d-flex justify-content-between align-items-end mt-2">
                 <div class="checkbox-wrapper">
                     {{ form.is_default }}
                     <label for="{{ form.is_default.id_for_label }}" class="checkbox-label">Endereço Principal</label>
@@ -190,8 +180,18 @@
                     <button type="submit" class="btn-salvar">Salvar</button>
                 </div>
             </div>
-
         </form>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('addressUpdateForm').addEventListener('submit', function(e) {
+        const confirmed = confirm("Tem certeza que deseja salvar as alterações neste endereço?");
+        if (!confirmed) {
+            e.preventDefault(); 
+        }
+    });
+</script>
 {% endblock %}

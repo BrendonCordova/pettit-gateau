@@ -67,7 +67,6 @@
         margin-bottom: 20px;
     }
 
-    /* O botão gigante de Adicionar Endereço */
     .add-address-box {
         display: flex;
         flex-direction: column;
@@ -99,7 +98,7 @@
 
     <h2 class="section-title">Dados Pessoais</h2>
     <div class="profile-card shadow-sm">
-        <a href="#" class="edit-link"><i class="bi bi-pencil-fill"></i> Alterar Dados</a>
+        <a href="{% url 'customers:profile-update' %}" class="edit-link"><i class="bi bi-pencil-fill"></i> Alterar Dados</a>
         
         <div class="user-name">
             {{ user.first_name }} {{ user.last_name }}
@@ -122,7 +121,7 @@
     <h2 class="section-title">Endereço</h2>
     <div class="profile-card shadow-sm">
         {% if address %}
-            <a href="#" class="edit-link"><i class="bi bi-pencil-fill"></i> Alterar Dados</a>
+            <a href="{% url 'customers:address-update' address.id %}" class="edit-link"><i class="bi bi-pencil-fill"></i> Alterar Dados</a>
             
             <div class="user-name" style="font-size: 1.1rem; margin-bottom: 5px;">{{ address.name }}</div>
             <div class="data-value mb-1">{{ address.street }}, {{ address.number }}</div>
