@@ -37,7 +37,12 @@
                             CEP: {{ address.zip_code }}
                         </p>
                     {% else %}
-                        <p class="text-danger small">Nenhum endereço cadastrado. Crie um pelo Painel Admin para testar.</p>
+                        <div class="text-center py-3">
+                            <p class="text-muted small mb-2">Você ainda não possui um endereço de entrega.</p>
+                            <a href="{% url 'customers:address_create' %}" class="btn btn-outline-dark btn-sm rounded-pill px-4">
+                                + Adicionar Novo Endereço
+                            </a>
+                        </div>
                     {% endif %}
 
                     <h4 class="fw-bold mt-3 border-top pt-3 d-flex justify-content-between">
