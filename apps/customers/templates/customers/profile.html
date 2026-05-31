@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Meu Perfil | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    .page-title {
+        color: var(--text-brown);
+        font-size: 1.8rem;
+        margin-bottom: 40px;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        color: var(--text-brown);
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .profile-card {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: white;
+        padding: 30px;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .edit-link {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: var(--text-brown);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .edit-link:hover {
+        color: var(--coral-light);
+    }
+
+    .data-label {
+        font-size: 0.75rem;
+        color: #888;
+        margin-bottom: 2px;
+    }
+
+    .data-value {
+        font-size: 1.05rem;
+        color: var(--text-brown);
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .user-name {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--text-brown);
+        margin-bottom: 20px;
+    }
+
+    /* O botão gigante de Adicionar Endereço */
+    .add-address-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: var(--text-brown);
+        padding: 20px 0;
+        transition: 0.3s;
+    }
+    .add-address-box i {
+        font-size: 2.5rem;
+        color: var(--text-brown);
+        margin-bottom: 10px;
+    }
+    .add-address-box span {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .add-address-box:hover i, .add-address-box:hover span {
+        color: var(--coral-light);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h1 class="page-title">Perfil</h1>
+
+    <h2 class="section-title">Dados Pessoais</h2>
+    <div class="profile-card shadow-sm">
+        <a href="#" class="edit-link"><i class="bi bi-pencil-fill"></i> Alterar Dados</a>
+        
+        <div class="user-name">
+            {{ user.first_name }} {{ user.last_name }}
+        </div>
+        
+        <div class="data-label">E-mail</div>
+        <div class="data-value">{{ user.email }}</div>
+        
+        <div class="data-label">CPF</div>
+        <div class="data-value">
+            {% if user.tax_id %}{{ user.tax_id }}{% else %}<span class="text-muted">Não informado</span>{% endif %}
+        </div>
+        
+        <div class="data-label">Telefone</div>
+        <div class="data-value" style="margin-bottom: 0;">
+            {% if user.phone %}{{ user.phone }}{% else %}<span class="text-muted">Não informado</span>{% endif %}
+        </div>
+    </div>
+
+    <h2 class="section-title">Endereço</h2>
+    <div class="profile-card shadow-sm">
+        {% if address %}
+            <a href="#" class="edit-link"><i class="bi bi-pencil-fill"></i> Alterar Dados</a>
+            
+            <div class="user-name" style="font-size: 1.1rem; margin-bottom: 5px;">{{ address.name }}</div>
+            <div class="data-value mb-1">{{ address.street }}, {{ address.number }}</div>
+            <div class="data-value mb-1">
+                {% if address.complement %}{{ address.complement }} - {% endif %}
+                {{ address.neighborhood }}
+            </div>
+            <div class="data-value mb-1">{{ address.city }} / {{ address.state }}</div>
+            <div class="data-value" style="margin-bottom: 0;">CEP: {{ address.zip_code }}</div>
+        {% else %}
+            <a href="{% url 'customers:address-create' %}" class="add-address-box">
+                <i class="bi bi-plus-circle-fill"></i>
+                <span>Adicionar</span>
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <form method="post" action="{% url 'customers:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger px-4" style="border-radius: 20px; font-weight: bold;">
+                Sair da Conta
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

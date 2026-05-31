@@ -165,7 +165,7 @@
                 <a href="#">Unissex</a>
             </nav>
             <div class="header-icons d-flex align-items-center">
-                <a href="{% url 'customers:login' %}" aria-label="Perfil">
+                <a href="{% if user.is_authenticated %}{% url 'customers:profile' %}{% else %}{% url 'customers:login' %}{% endif %}" aria-label="Perfil">
                     <i class="bi bi-person-circle"></i>
                 </a>
                 <a href="#" aria-label="Configurações">

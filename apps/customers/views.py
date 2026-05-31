@@ -138,3 +138,16 @@ def verify_email_view(request, uidb64, token):
     else:
         messages.error(request, 'O link de verificação é inválido ou expirou. Tente se cadastrar novamente.')
         return redirect('customers:register')
+    
+@login_required
+def profile_view(request):
+    '''
+    Renders the user profile page.
+    Fetches the user's default address (or the first available one) to display 
+    on the profile dashboard.
+    '''
+    address = request.user.addresses.filter(is_default=True).first()
+    if not address:
+        address = request.user.addresses.first()
+        
+    return render(request, 'customers/profile.html', {'address': address})
