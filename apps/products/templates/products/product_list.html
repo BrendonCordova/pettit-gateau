@@ -130,7 +130,6 @@
         color: white;
     }
 
-    /* Paginação Circular */
     .catalog-pagination {
         display: flex;
         justify-content: center;
@@ -152,7 +151,7 @@
         font-weight: bold;
         transition: 0.3s;
         border: 2px solid transparent;
-        background-color: rgba(214, 164, 118, 0.3); /* Dourado clarinho */
+        background-color: rgba(214, 164, 118, 0.3);
     }
     .page-circle.active {
         background-color: #D6A476;
@@ -176,7 +175,7 @@
 {% block content %}
 <div class="container">
     
-    <h1 class="catalog-main-title">Perfumes</h1>
+    <h1 class="catalog-main-title">{{ page_title }}</h1>
 
     <div class="sort-wrapper">
         <form method="GET" id="sortForm">

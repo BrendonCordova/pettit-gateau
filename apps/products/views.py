@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib import messages
 
-def product_list(request):
+def product_list(request, category_name=None):
     '''
     Retrieves and displays a paginated list of active products, 
     with optional filtering by brand, category, fragrance, price range, and search terms.
@@ -23,24 +23,28 @@ def product_list(request):
     '''
     products = Product.objects.prefetch_related('skus', 'images').filter(is_active=True)
 
-    brand_id = request.GET.get('brand')
-    category_id = request.GET.get('category')
-    fragrance = request.GET.get('fragrance')
-    search_query = request.GET.get('q')
+    page_title = "Nossas Fragrâncias"
 
-    if brand_id:
-        products = products.filter(brand_id=brand_id)
-    if category_id:
-        products = products.filter(category_id=category_id)
-    if fragrance:
-        products = products.filter(fragrance=fragrance)
+    # LÓGICA DE CATEGORIA INTELIGENTE
+    if category_name:
+        # Filtra na base de dados ignorando maiúsculas/minúsculas (iexact)
+        products = products.filter(category__name__iexact=category_name)
+        
+        # Ajusta a gramática do título (Masculino -> Masculinos)
+        if category_name.lower() in ['masculino', 'feminino']:
+            page_title = f"Perfumes {category_name.capitalize()}s"
+        else:
+            page_title = f"Perfumes {category_name.capitalize()}"
+
+    # Captura outros filtros de texto se existirem
+    search_query = request.GET.get('q')
     if search_query:
         products = products.filter(
             Q(name__icontains=search_query) | Q(description__icontains=search_query)
         ).distinct()
 
+    # Ordenação (Mantém exatamente como já estava)
     sort_by = request.GET.get('sort', 'newest')
-
     if sort_by == 'a-z':
         products = products.order_by('name')
     elif sort_by == 'z-a':
@@ -49,9 +53,10 @@ def product_list(request):
         products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating', '-created_at')
     elif sort_by == 'best_selling':
         products = products.annotate(num_reviews=Count('reviews')).order_by('-num_reviews', '-created_at')
-    else: # 'newest' (Lançamentos)
+    else: 
         products = products.order_by('-created_at')
 
+    # Paginação
     paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -65,6 +70,7 @@ def product_list(request):
         'page_obj': page_obj,
         'current_filters': request.GET,
         'query_string': query_string,
+        'page_title': page_title, # <-- Enviamos o título para o HTML!
     }  
     return render(request, 'products/product_list.html', context)
 

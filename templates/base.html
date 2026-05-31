@@ -160,9 +160,9 @@
                 Pettit Gateau <span aria-hidden="true" style="font-size: 1.4rem;">🐾</span>
             </a>
             <nav class="nav-center d-none d-md-block">
-                <a href="#">Masculino</a>
-                <a href="#">Feminino</a>
-                <a href="#">Unissex</a>
+                <a href="{% url 'products:category_list' 'Masculino' %}">Masculino</a>
+                <a href="{% url 'products:category_list' 'Feminino' %}">Feminino</a>
+                <a href="{% url 'products:category_list' 'Unissex' %}">Unissex</a>
             </nav>
             <div class="header-icons d-flex align-items-center">
                 <a href="{% if user.is_authenticated %}{% url 'customers:profile' %}{% else %}{% url 'customers:login' %}{% endif %}" aria-label="Perfil">
