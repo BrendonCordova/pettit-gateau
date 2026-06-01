@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from apps.carts.models import Cart
 from apps.customers.models import Address
-from .models import Order, OrderItem, ShippingMethod
+from .models import Order, OrderItem, ShippingMethod, ReturnRequest
 from django.db import transaction
 from django.db.models import F
 from django.contrib import messages
@@ -194,3 +194,82 @@ def order_list_view(request):
         'current_filters': request.GET,
     }
     return render(request, 'orders/order_list.html', context)
+
+@login_required(login_url='/conta/login/')
+def order_detail_view(request, pk):
+    '''
+    Retrieves and displays the details of a specific order.
+    Ensures the user can only view their own orders for security.
+    '''
+    order = get_object_or_404(Order, pk=pk, customer=request.user)
+    
+    return render(request, 'orders/order_detail.html', {'order': order})
+
+@login_required(login_url='/conta/login/')
+def order_return_view(request, pk):
+    '''
+    Handles the creation of a product return request.
+    Processes selected items, reasons, descriptions, and file uploads.
+    - 7 days for 'Arrependimento'
+    - 30 days max for defects ('Danificado', 'Produto Incorreto)
+    '''
+    order = get_object_or_404(Order, pk=pk, customer=request.user)
+
+    if order.status != 'DELIVERED':
+        messages.error(request, "Você só pode solicitar a devolução de um pedido que já foi entregue.")
+        return redirect('orders:detail', pk=order.id)
+
+    dias_passados = 0
+    if order.updated_at:
+        dias_passados = (timezone.now() - order.updated_at).days
+
+    if dias_passados > 30:
+        messages.error(request, "O prazo legal máximo de 30 dias para devoluções ou reclamações expirou.")
+        return redirect('orders:detail', pk=order.id)
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+        
+        if reason == 'Arrependimento' and dias_passados > 7:
+            messages.error(request, "O prazo de 7 dias para devolução por arrependimento expirou. Selecione outro motivo se o produto apresentar defeito.")
+            return redirect('orders:return', pk=order.id)
+
+        items_ids = request.POST.getlist('return_items')
+        action = request.POST.get('action')
+        description = request.POST.get('description')
+        media = request.FILES.get('media')
+
+        if not items_ids:
+            messages.error(request, "Selecione pelo menos um produto para devolver.")
+            return redirect('orders:return', pk=order.id)
+
+        return_req = ReturnRequest.objects.create(
+            order=order,
+            reason=reason,
+            action=action,
+            description=description,
+            media=media
+        )
+        
+        for item_id in items_ids:
+            return_req.items.add(item_id)
+
+        messages.success(request, "A sua solicitação de devolução foi enviada com sucesso! Entraremos em contacto brevemente.")
+        return redirect('orders:detail', pk=order.id)
+
+    return render(request, 'orders/order_return.html', {'order': order})
+
+@login_required(login_url='/conta/login/')
+def confirm_delivery_view(request, pk):
+    '''
+    Permite ao cliente confirmar manualmente que recebeu o produto.
+    Muda o status para DELIVERED e atualiza a data (updated_at) para iniciar o prazo de devolução.
+    '''
+    order = get_object_or_404(Order, pk=pk, customer=request.user)
+    
+    if order.status == 'SHIPPED':
+        order.status = 'DELIVERED'
+        order.save()
+        messages.success(request, "Entrega confirmada! Esperamos que adore a sua nova fragrância.")
+        
+    return redirect('orders:detail', pk=order.id)

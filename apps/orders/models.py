@@ -128,3 +128,27 @@ def update_order_total(sender, instance, **kwargs):
     '''
     if instance.order:
         instance.order.update_total()
+
+class ReturnRequest(BaseModel):
+    '''
+    Model to handle customer return requests.
+    Stores the specific items being returned, the reason, action requested (e.g., store credit),
+    and optional media evidence (photos of damaged goods).
+    '''
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='return_requests', verbose_name='Pedido')
+    items = models.ManyToManyField(OrderItem, verbose_name='Itens Devolvidos')
+    
+    reason = models.CharField(max_length=100, verbose_name='Motivo')
+    action = models.CharField(max_length=100, verbose_name='Procedimento (Crédito/Estorno)')
+    description = models.TextField(verbose_name='Descrição do Problema')
+    
+    media = models.ImageField(upload_to='returns/%Y/%m/', blank=True, null=True, verbose_name='Mídia (Foto)')
+    status = models.CharField(max_length=50, default='PENDENTE', verbose_name='Status da Devolução')
+
+    class Meta:
+        verbose_name = 'Solicitação de Devolução'
+        verbose_name_plural = 'Solicitações de Devolução'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Devolução #{self.id} - Pedido #{self.order.id}'

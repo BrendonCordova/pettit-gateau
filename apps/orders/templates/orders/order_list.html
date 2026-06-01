@@ -186,16 +186,11 @@
     </form>
 
     {% for order in orders %}
-        <div class="order-card">
+        <a href="{% url 'orders:detail' order.id %}" class="order-card" style="text-decoration: none; color: inherit; display: flex;">
             
             <div>
                 <div class="order-status-main">
-                    {% if order.status == 'PENDING' %}Aguardando Pagamento
-                    {% elif order.status == 'PAID' or order.status == 'PREPARING' %}A enviar
-                    {% elif order.status == 'SHIPPED' %}A caminho
-                    {% elif order.status == 'DELIVERED' %}Entregue
-                    {% elif order.status == 'CANCELED' %}Cancelado
-                    {% else %}{{ order.get_status_display }}{% endif %}
+                    {{ order.get_status_display }}
                 </div>
 
                 {% for item in order.items.all %}
@@ -240,7 +235,7 @@
                 </div>
             </div>
 
-        </div>
+        </a>
     {% empty %}
         <div class="text-center py-5">
             <h4 style="color: var(--text-brown);">Você ainda não possui nenhum pedido.</h4>
