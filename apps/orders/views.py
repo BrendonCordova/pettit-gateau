@@ -12,6 +12,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
@@ -254,10 +256,40 @@ def order_return_view(request, pk):
         for item_id in items_ids:
             return_req.items.add(item_id)
 
-        messages.success(request, "A sua solicitação de devolução foi enviada com sucesso! Entraremos em contacto brevemente.")
-        return redirect('orders:detail', pk=order.id)
+        assunto = f"Solicitação de Devolução Recebida - Pettit Gateau"
+        mensagem = f"""Olá, {order.customer.first_name}!
+
+Recebemos a sua solicitação de devolução referente ao pedido #{str(order.id)[:8]}.
+O número da sua solicitação é: #{return_req.id}
+
+Nossa equipe analisará sua solicitação em até 3 dias úteis.
+Você receberá atualizações pelo seu e-mail cadastrado.
+
+Atenciosamente,
+Equipe Pettit Gateau"""
+        
+        try:
+            send_mail(
+                assunto,
+                mensagem,
+                settings.DEFAULT_FROM_EMAIL,
+                [order.customer.email],
+                fail_silently=True,
+            )
+        except Exception as e:
+            print(f"Erro ao enviar e-mail de devolução: {e}")
+
+        return redirect('orders:return-success', return_id=return_req.id)
 
     return render(request, 'orders/order_return.html', {'order': order})
+
+@login_required(login_url='/conta/login/')
+def order_return_success_view(request, return_id):
+    '''
+    Exibe a página de sucesso após uma solicitação de devolução.
+    '''
+    return_req = get_object_or_404(ReturnRequest, id=return_id, order__customer=request.user)
+    return render(request, 'orders/order_return_success.html', {'return_req': return_req})
 
 @login_required(login_url='/conta/login/')
 def confirm_delivery_view(request, pk):

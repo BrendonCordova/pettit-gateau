@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Solicitação Enviada | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: var(--bg-cream) !important; }
+
+    .success-modal-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 70vh;
+        padding: 20px;
+    }
+
+    .success-card {
+        background-color: var(--bg-cream);
+        border: 2px solid var(--text-brown);
+        border-radius: 15px;
+        padding: 50px 40px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+    }
+
+    .btn-close-modal {
+        position: absolute;
+        top: 20px;
+        right: 25px;
+        font-size: 1.5rem;
+        color: var(--text-brown);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .btn-close-modal:hover { color: var(--coral-light); }
+
+    .success-title {
+        color: var(--coral-light);
+        font-weight: bold;
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+    }
+
+    .success-subtitle {
+        color: #D6A476;
+        font-size: 1.1rem;
+        margin-bottom: 40px;
+    }
+
+    .success-text {
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .success-link {
+        display: inline-block;
+        margin-top: 30px;
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        transition: 0.3s;
+    }
+    .success-link:hover { color: var(--coral-light); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-modal-container">
+    <div class="success-card">
+        
+        <a href="{% url 'orders:list' %}" class="btn-close-modal"><i class="bi bi-x-lg"></i></a>
+        
+        <h1 class="success-title">Solicitação enviada com sucesso!</h1>
+        
+        <p class="success-subtitle">Solicitação: #{{ return_req.id|truncatechars:12 }}</p>
+        
+        <p class="success-text">Nossa equipe analisará sua solicitação em até 3 dias úteis.</p>
+        <p class="success-text">Você receberá atualizações pelo seu e-mail cadastrado.</p>
+        <p class="success-text">Fique atento ao seu e-mail.</p>
+        
+        <a href="{% url 'orders:list' %}" class="success-link">Retornar aos meus pedidos</a>
+        
+    </div>
+</div>
+{% endblock %}
