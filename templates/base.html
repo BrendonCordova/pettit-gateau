@@ -143,6 +143,129 @@
             margin-right: 15px;
         }
         .footer-social:hover { color: var(--coral-light); }
+
+        .profile-dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-dropdown-menu {
+            display: none; 
+            position: absolute;
+            right: -10px;
+            top: 45px;
+            background-color: var(--bg-cream);
+            border: 2px solid var(--border-brown);
+            border-radius: 15px;
+            padding: 25px 30px;
+            min-width: 240px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            z-index: 1050;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .profile-dropdown-menu.active {
+            display: flex;
+        }
+
+        .header-icons .profile-dropdown-item {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 15px !important;
+            color: var(--text-brown) !important;
+            font-weight: bold !important;
+            font-size: 1.15rem !important;
+            margin-left: 0 !important;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            font-family: inherit;
+            white-space: nowrap;
+            text-decoration: none !important;
+        }
+
+        .header-icons .profile-dropdown-item:hover {
+            color: var(--coral-light) !important;
+        }
+
+        .header-icons .profile-dropdown-item i {
+            font-size: 1.5rem !important;
+            width: 32px !important; 
+            margin-left: 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+        }
+
+        .logout-modal-overlay {
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .logout-modal-box {
+            background-color: var(--bg-cream);
+            border: 2px solid var(--border-brown);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .logout-modal-title {
+            color: var(--coral-light);
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .logout-modal-text {
+            color: var(--text-brown);
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .logout-modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-modal-cancel {
+            background-color: transparent;
+            border: 2px solid var(--text-brown);
+            color: var(--text-brown);
+            border-radius: 30px;
+            padding: 8px 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-modal-cancel:hover { background-color: #e6ded8; }
+
+        .btn-modal-confirm {
+            background-color: var(--coral-light);
+            border: 2px solid var(--text-brown);
+            color: white;
+            border-radius: 30px;
+            padding: 8px 25px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-modal-confirm:hover { background-color: #e87b6d; color: white; }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -160,13 +283,54 @@
                 <a href="{% url 'products:category_list' 'Feminino' %}">Feminino</a>
                 <a href="{% url 'products:category_list' 'Unissex' %}">Unissex</a>
             </nav>
-            <div class="header-icons d-flex align-items-center">
-                <a href="{% if user.is_authenticated %}{% url 'customers:profile' %}{% else %}{% url 'customers:login' %}{% endif %}" aria-label="Perfil">
-                    <i class="bi bi-person-circle"></i>
-                </a>
+            <div class="header-icons d-flex align-items-center">   
+                {% if user.is_authenticated %}
+                <div class="profile-dropdown-container">
+                    <a href="#" id="profileToggleBtn" aria-label="Perfil">
+                        <i class="bi bi-person-circle"></i>
+                    </a>
+                    <div class="profile-dropdown-menu" id="profileDropdown">
+                        <a href="{% url 'customers:profile' %}" class="profile-dropdown-item">
+                            <i class="bi bi-person-vcard"></i> Meu perfil
+                        </a>
+                        <button class="profile-dropdown-item" onclick="alert('A troca de tema estará disponível em breve!')">
+                            <i class="bi bi-palette"></i> Mudar tema
+                        </button>
+                            <a href="/ajuda/" class="profile-dropdown-item" aria-label="Central de Ajuda">
+                                <i class="bi bi-question-circle"></i> Ajuda
+                            </a>
+                            <button class="profile-dropdown-item" onclick="openLogoutModal()">
+                                <i class="bi bi-box-arrow-right"></i> Sair
+                            </button>
+                        </div>
+                        <div class="logout-modal-overlay" id="logoutModal">
+                            <div class="logout-modal-box">
+                                <h2 class="logout-modal-title">Sair da conta</h2>
+                                <p class="logout-modal-text">Tem certeza que deseja terminar a sessão na Pettit Gateau?</p>
+                                
+                                <div class="logout-modal-actions">
+                                    
+                                    <form action="{% url 'customers:logout' %}" method="POST" style="margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-modal-confirm" style="cursor: pointer;">Sim, sair</button>
+                                    </form>
+                                    
+                                    <button onclick="closeLogoutModal()" class="btn-modal-cancel">Cancelar</button>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'customers:login' %}" aria-label="Perfil">
+                        <i class="bi bi-person-circle"></i>
+                    </a>
+                {% endif %}
+
                 <a href="{% url 'orders:list' %}" aria-label="Meus Pedidos">
                     <i class="bi bi-box-seam-fill"></i>
                 </a>
+                
                 <a href="/carrinho/" aria-label="Carrinho de Compras">
                     <i class="bi bi-cart-fill"></i>
                     <span id="cart-item-count" class="badge rounded-pill cart-badge">0</span>
@@ -265,6 +429,36 @@
                 });
             }, 4000);
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById('profileToggleBtn');
+            const dropdownMenu = document.getElementById('profileDropdown');
+
+            if (toggleBtn && dropdownMenu) {
+                // Abrir/Fechar menu
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    dropdownMenu.classList.toggle('active');
+                });
+
+                // Fechar se clicar fora
+                document.addEventListener('click', function(e) {
+                    const container = document.querySelector('.profile-dropdown-container');
+                    if (!container.contains(e.target)) {
+                        dropdownMenu.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        function openLogoutModal() {
+            document.getElementById('profileDropdown').classList.remove('active');
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
     </script>
 
     {% block scripts %}{% endblock %}

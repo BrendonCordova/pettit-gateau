@@ -14,6 +14,9 @@ from .models import Customer
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from .models import Address
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+from django.contrib import messages
 
 @login_required
 def address_create_view(request):
@@ -87,9 +90,6 @@ def register_view(request):
             text_content = strip_tags(html_content)
 
             subject = 'Confirme sua conta no Pettit Gateau!'
-            # message = f'Olá, {user.first_name}!\n\nPor favor, clique no link abaixo para ativar sua conta:\n\n{verification_link} \
-            #     \n\nCaso tenha alguma dúvida ou questionamento, entre em contato com nosso suport dev.gcbrendon@gmail.com \
-            #     \n\nPettit Gateau'
             
             send_mail(
                 subject,
@@ -99,7 +99,6 @@ def register_view(request):
                 html_message=html_content,
                 fail_silently=False,
             )
-
 
             messages.success(request, 'Conta criada com sucesso! Verifique seu e-mail para ativar seu cadastro.')
             return redirect('customers:login')
@@ -187,3 +186,8 @@ def address_update_view(request, pk):
         form = AddressForm(instance=address)
 
     return render(request, 'customers/address_update.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Sessão terminada com sucesso. Esperamos ver você novamente em breve!")
+    return redirect('customers:login')
