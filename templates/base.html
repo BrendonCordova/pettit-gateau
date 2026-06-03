@@ -266,6 +266,50 @@
             transition: 0.3s;
         }
         .btn-modal-confirm:hover { background-color: #e87b6d; color: white; }
+
+        .banner-container {
+        position: relative;
+        width: 100%;
+    }
+    
+    .admin-upload-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(255, 255, 255, 0.9);
+        color: var(--text-brown);
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        border: 2px solid var(--border-brown);
+        transition: 0.3s;
+        z-index: 10;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .admin-upload-btn:hover {
+        background-color: var(--coral-light);
+        color: white;
+    }
+</style>
+
+<div class="banner-container">
+    <!-- Sua imagem atual da propaganda -->
+    <img src="caminho_para_sua_imagem_lancome.jpg" alt="Propaganda" style="width: 100%; object-fit: cover;">
+
+    <!-- Botão de Upload que SÓ O ADMIN vê -->
+    {% if user.is_staff %}
+        <form action="ROTA_PARA_SALVAR_IMAGEM" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="bannerInput" class="admin-upload-btn">
+                <i class="bi bi-camera-fill"></i> Alterar Propaganda
+            </label>
+            <!-- Este input fica invisível, o clique vai para o 'label' acima -->
+            <input type="file" id="bannerInput" name="nova_propaganda" style="display: none;" onchange="this.form.submit()">
+        </form>
+    {% endif %}
+</div>
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -296,50 +340,62 @@
                         <button class="profile-dropdown-item" onclick="alert('A troca de tema estará disponível em breve!')">
                             <i class="bi bi-palette"></i> Mudar tema
                         </button>
-                            <a href="/conta/ajuda/" class="profile-dropdown-item" aria-label="Central de Ajuda">
-                                <i class="bi bi-question-circle"></i> Ajuda
-                            </a>
-                            <button class="profile-dropdown-item" onclick="openLogoutModal()">
-                                <i class="bi bi-box-arrow-right"></i> Sair
-                            </button>
-                        </div>
-                        <div class="logout-modal-overlay" id="logoutModal">
-                            <div class="logout-modal-box">
-                                <h2 class="logout-modal-title">Sair da conta</h2>
-                                <p class="logout-modal-text">Tem certeza que deseja terminar a sessão na Pettit Gateau?</p>
-                                
-                                <div class="logout-modal-actions">
-                                    
-                                    <form action="{% url 'customers:logout' %}" method="POST" style="margin: 0;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-modal-confirm" style="cursor: pointer;">Sim, sair</button>
-                                    </form>
-                                    
-                                    <button onclick="closeLogoutModal()" class="btn-modal-cancel">Cancelar</button>
-                                </div>
-                                
-                            </div>
-                        </div>
+                        <a href="/conta/ajuda/" class="profile-dropdown-item" aria-label="Central de Ajuda">
+                            <i class="bi bi-question-circle"></i> Ajuda
+                        </a>
+                        <button class="profile-dropdown-item" onclick="openLogoutModal()">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </button>
                     </div>
+                </div>
                 {% else %}
                     <a href="{% url 'customers:login' %}" aria-label="Perfil">
                         <i class="bi bi-person-circle"></i>
                     </a>
                 {% endif %}
 
-                <a href="{% url 'orders:list' %}" aria-label="Meus Pedidos">
-                    <i class="bi bi-box-seam-fill"></i>
-                </a>
+                <!-- 2. SEPARAÇÃO DE CARGOS (ADMIN vs CLIENTE) -->
+                {% if user.is_staff %}
+                    <!-- Ícones Exclusivos do Administrador -->
+                    <a href="#" aria-label="Gerir Produtos">
+                        <i class="bi bi-cart-check-fill"></i>
+                    </a>
+                    <a href="#" aria-label="Gerir Entregas">
+                        <i class="bi bi-truck"></i>
+                    </a>
+                {% else %}
+                    <!-- Ícones do Cliente Normal -->
+                    <a href="{% url 'orders:list' %}" aria-label="Meus Pedidos">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </a>
+                    <a href="/carrinho/" aria-label="Carrinho de Compras">
+                        <i class="bi bi-cart-fill"></i>
+                        <span id="cart-item-count" class="badge rounded-pill cart-badge">0</span>
+                    </a>
+                {% endif %}
+
+            </div>
+            </div>
+        </header>
+        <div class="logout-modal-overlay" id="logoutModal">
+            <div class="logout-modal-box">
+                <h2 class="logout-modal-title">Sair da conta</h2>
+                <p class="logout-modal-text">Tem certeza que deseja terminar a sessão na Pettit Gateau?</p>
                 
-                <a href="/carrinho/" aria-label="Carrinho de Compras">
-                    <i class="bi bi-cart-fill"></i>
-                    <span id="cart-item-count" class="badge rounded-pill cart-badge">0</span>
-                </a>
+                <div class="logout-modal-actions">
+                    
+                    <form action="{% url 'customers:logout' %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-modal-confirm" style="cursor: pointer;">Sim, sair</button>
+                    </form>
+                    
+                    <button onclick="closeLogoutModal()" class="btn-modal-cancel">Cancelar</button>
+                </div>
+                
             </div>
         </div>
-    </header>
-
-    <div class="content-wrapper">
+            
+            <div class="content-wrapper">
         
         {% if messages %}
             <div class="container mb-3">
