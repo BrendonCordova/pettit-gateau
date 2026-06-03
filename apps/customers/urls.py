@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CustomerLoginView, register_view, address_create_view, verify_email_view, profile_view, profile_update_view, address_update_view, logout_view
+from .views import CustomerLoginView, register_view, address_create_view, verify_email_view, profile_view, profile_update_view, address_update_view, logout_view, help_center_view
 
 app_name = 'customers'
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path('perfil/', profile_view, name='profile'),
     path('perfil/editar/', profile_update_view, name='profile-update'),
     path('logout/', logout_view, name='logout'),
+    path('ajuda/', help_center_view, name='help-center'),
 ]

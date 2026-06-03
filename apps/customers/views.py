@@ -191,3 +191,6 @@ def logout_view(request):
     logout(request)
     messages.success(request, "Sessão terminada com sucesso. Esperamos ver você novamente em breve!")
     return redirect('customers:login')
+
+def help_center_view(request):
+    return render(request, 'customers/help_center.html')
