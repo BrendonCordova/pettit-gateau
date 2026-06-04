@@ -318,7 +318,6 @@ def add_brand_quick_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def add_category_quick_view(request):
-    '''Adiciona uma nova Categoria pelo painel rápido.'''
     if request.method == 'POST':
         name = request.POST.get('name')
         if name:
@@ -327,4 +326,63 @@ def add_category_quick_view(request):
                 messages.success(request, f"Categoria '{category.name}' cadastrada com sucesso!")
             else:
                 messages.warning(request, f"A categoria '{category.name}' já existe no sistema.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+@transaction.atomic
+def edit_product_quick_view(request, sku_id):
+    '''Edita as informações de um Produto, SKU (incluindo status ativo) e gere as imagens.'''
+    if request.method == 'POST':
+        try:
+            sku = get_object_or_404(SKU, id=sku_id)
+            produto = sku.product
+
+            new_sku_code = request.POST.get('sku_code')
+            if new_sku_code != sku.sku_code and SKU.objects.filter(sku_code=new_sku_code).exists():
+                messages.error(request, f"O código SKU '{new_sku_code}' já está a ser usado! Alterações não salvas.")
+                return redirect('products:admin-inventory')
+
+            produto.name = request.POST.get('name')
+            produto.description = request.POST.get('description')
+            produto.fragrance = request.POST.get('fragrance')
+            produto.category = get_object_or_404(Category, id=request.POST.get('category'))
+            produto.brand = get_object_or_404(Brand, id=request.POST.get('brand'))
+            produto.save()
+
+            sku.sku_code = new_sku_code
+            sku.concentration = request.POST.get('concentration')
+            sku.volume_ml = request.POST.get('volume_ml')
+            
+            sku.is_active = request.POST.get('is_active') == 'on'
+            
+            raw_price = request.POST.get('price', '0').replace('R$', '').replace(' ', '')
+            if '.' in raw_price and ',' in raw_price:
+                sku.price = raw_price.replace('.', '').replace(',', '.')
+            else:
+                sku.price = raw_price.replace(',', '.')
+                
+            sku.stock_quantity = request.POST.get('stock_quantity')
+            sku.save()
+
+            images_to_delete = request.POST.getlist('delete_images')
+            if images_to_delete:
+                from .models import ProductImage
+                ProductImage.objects.filter(id__in=images_to_delete, product=produto).delete()
+
+            image_file = request.FILES.get('image')
+            if image_file:
+                from .models import ProductImage
+                has_main = ProductImage.objects.filter(product=produto, is_main=True).exists()
+                ProductImage.objects.create(
+                    product=produto,
+                    image=image_file,
+                    is_main=not has_main,
+                    display_order=0
+                )
+
+            messages.success(request, f"Variação '{sku.sku_code}' atualizada com sucesso!")
+        except Exception as e:
+            print(f"ERRO AO EDITAR PRODUTO: {e}")
+            messages.error(request, "Erro ao editar o produto. Verifique os dados inseridos.")
+
     return redirect('products:admin-inventory')

@@ -248,6 +248,25 @@
         border-radius: 30px; padding: 10px 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s;
     }
     .btn-cancel-prod:hover { background-color: #c59567; }
+
+    .row-inactive {
+        background-color: #f7f3f0; /* Fundo levemente acinzentado */
+        opacity: 0.6; /* Fica "apagado" */
+    }
+    .row-inactive td {
+        filter: grayscale(100%); /* Tira a cor viva (coral/dourado) do estoque e do lápis */
+    }
+    .inactive-badge {
+        background-color: #a8968a;
+        color: white;
+        font-size: 0.65rem;
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+        font-weight: bold;
+        vertical-align: middle;
+        letter-spacing: 0.5px;
+    }
 </style>
 {% endblock %}
 
@@ -449,9 +468,16 @@
             </thead>
             <tbody>
                 {% for sku in skus %}
-                <tr>
+                <tr class="{% if not sku.is_active %}row-inactive{% endif %}">
                     <td class="col-id">#{{ sku.id|stringformat:"03d" }}</td>
-                    <td class="col-default">{{ sku.product.name }}</td>
+                    
+                    <td class="col-default">
+                        {{ sku.product.name }}
+                        {% if not sku.is_active %}
+                            <span class="inactive-badge">INATIVO</span>
+                        {% endif %}
+                    </td>
+                    
                     <td class="col-default">{{ sku.sku_code }}</td>
                     <td class="col-default">R$ {{ sku.price }}</td>
                     <td class="col-default" style="text-transform: lowercase;">{{ sku.volume_ml }} ml</td>
@@ -460,7 +486,7 @@
                         Un. {{ sku.stock_quantity }}
                     </td>
                     
-                    <td><i class="bi bi-pencil-square btn-edit-icon"></i></td>
+                    <td><i class="bi bi-pencil-square btn-edit-icon" onclick="openEditModal('{{ sku.id }}')"></i></td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -470,8 +496,119 @@
             </tbody>
         </table>
     </div>
-
 </div>
+{% for sku in skus %}
+<div class="add-modal-overlay" id="edit-modal-{{ sku.id }}">
+    <div class="add-modal-box">
+        <i class="bi bi-x btn-close-modal" onclick="closeEditModal('{{ sku.id }}')"></i>
+        <h2 class="modal-title-add" style="color: var(--text-brown);">Editar Produto</h2>
+        <p style="color: #D6A476; font-weight: bold; margin-bottom: 20px;">ID: <span style="font-weight: normal;">#{{ sku.id|stringformat:"03d" }}</span></p>
+        
+        <form action="{% url 'products:admin-edit-product' sku.id %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div>
+                    <div class="form-group-custom">
+                        <label>Nome do Produto:</label>
+                        <input type="text" name="name" value="{{ sku.product.name }}" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Marca:</label>
+                        <select name="brand" required>
+                            {% for brand in brands %}
+                                <option value="{{ brand.id }}" {% if brand.id == sku.product.brand.id %}selected{% endif %}>{{ brand.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>SKU:</label>
+                        <input type="text" name="sku_code" value="{{ sku.sku_code }}" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Categoria:</label>
+                        <select name="category" required>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if cat.id == sku.product.category.id %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Fragrância:</label>
+                        <select name="fragrance" required>
+                            {% for val, name in fragrances %}
+                                <option value="{{ val }}" {% if val == sku.product.fragrance %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 20px; padding-left: 5px;">
+                            <input type="checkbox" name="is_active" id="active_{{ sku.id }}" {% if sku.is_active %}checked{% endif %} style="width: 20px; height: 20px; accent-color: #D6A476; cursor: pointer;">
+                            <label for="active_{{ sku.id }}" style="color: var(--text-brown); font-weight: bold; cursor: pointer; min-width: auto; font-size: 0.95rem;">Variação (SKU) Ativa na Loja</label>
+                        </div>
+                </div>
+
+                <div>
+                    <div class="input-row-half">
+                        <div class="form-group-custom">
+                            <label>Vol. (ml):</label>
+                            <input type="number" name="volume_ml" value="{{ sku.volume_ml }}" required>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Conc.:</label>
+                            <select name="concentration" required>
+                                {% for val, name in concentrations %}
+                                    <option value="{{ val }}" {% if val == sku.concentration %}selected{% endif %}>{{ val }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label style="min-width: 115px;">Preço (R$):</label>
+                        <input type="text" name="price" value="{{ sku.price }}" required>
+                    </div>
+                    
+                    <div class="form-group-custom">
+                        <label style="min-width: 115px;">Estoque (Un):</label>
+                        <input type="number" name="stock_quantity" value="{{ sku.stock_quantity }}" required>
+                    </div>
+
+                    <div class="media-upload-section">
+                        <label for="editImage_{{ sku.id }}" class="btn-upload-media">Adicionar midia <i class="bi bi-image"></i></label>
+                        <input type="file" id="editImage_{{ sku.id }}" name="image" accept="image/*" onchange="updateFileName(this, 'fileNameDisplay_{{ sku.id }}')" hidden>
+                        <div id="fileNameDisplay_{{ sku.id }}" class="file-name-display" style="margin-bottom: 15px;">Nenhuma nova imagem</div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;">
+                            {% for img in sku.product.images.all %}
+                            <div class="existing-image-row" id="img-row-{{ img.id }}" style="display: flex; align-items: center; gap: 10px;">
+                                <a href="{{ img.image.url }}" target="_blank" style="color: #D6A476; text-decoration: underline; font-size: 0.85rem;">{{ img.image.name|truncatechars:20 }}</a>
+                                <label style="cursor: pointer; color: var(--coral-light); font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="delete_images" value="{{ img.id }}" onchange="toggleStrikethrough(this, 'img-row-{{ img.id }}')"> Remover
+                                </label>
+                            </div>
+                            {% empty %}
+                                <span style="color: #a8968a; font-size: 0.8rem;">Sem imagens prévias.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group-custom" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 25px;">
+                <label>Descrição:</label>
+                <textarea name="description" rows="3" style="width: 100%; border: 2px solid var(--border-brown); border-radius: 10px; padding: 10px;" required>{{ sku.product.description }}</textarea>
+            </div>
+
+            <div class="modal-actions-add">
+                <button type="submit" class="btn-save-prod" style="background-color: var(--text-brown); border-color: var(--text-brown);">Salvar alteração</button>
+                <button type="button" class="btn-cancel-prod" style="background-color: #64493b; color: white;" onclick="closeEditModal('{{ sku.id }}')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
 {% endblock %}
 
 {% block scripts %}
@@ -526,5 +663,35 @@
             e.target.style.display = 'none';
         }
     });
+
+    function openEditModal(skuId) {
+        document.getElementById('edit-modal-' + skuId).style.display = 'flex';
+    }
+
+    function closeEditModal(skuId) {
+        document.getElementById('edit-modal-' + skuId).style.display = 'none';
+    }
+
+    // Riscar o nome da imagem quando clica em remover
+    function toggleStrikethrough(checkbox, rowId) {
+        var row = document.getElementById(rowId);
+        if (checkbox.checked) {
+            row.style.textDecoration = "line-through";
+            row.style.opacity = "0.6";
+        } else {
+            row.style.textDecoration = "none";
+            row.style.opacity = "1";
+        }
+    }
+
+    // Atualizado updateFileName para aceitar ID dinâmico na edição
+    function updateFileName(input, displayId) {
+        var display = document.getElementById(displayId);
+        if (input.files && input.files.length > 0) {
+            display.innerText = input.files[0].name;
+        } else {
+            display.innerText = "Nenhuma imagem selecionada";
+        }
+    }
 </script>
 {% endblock %}

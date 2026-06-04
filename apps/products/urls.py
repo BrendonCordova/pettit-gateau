@@ -13,4 +13,5 @@ urlpatterns = [
     path('painel/estoque/adicionar/', views.add_product_quick_view, name='admin-add-product'),
     path('painel/estoque/adicionar-marca/', views.add_brand_quick_view, name='admin-add-brand'),
     path('painel/estoque/adicionar-categoria/', views.add_category_quick_view, name='admin-add-category'),
+    path('painel/estoque/editar/<uuid:sku_id>/', views.edit_product_quick_view, name='admin-edit-product'),
 ]
