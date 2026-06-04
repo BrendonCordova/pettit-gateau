@@ -16,6 +16,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Sum, Count
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponse
+import csv
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
@@ -365,3 +367,36 @@ def update_order_status_view(request):
         messages.success(request, f"Status do pedido #{str(order.id)[:8]} atualizado com sucesso!")
         
     return redirect('orders:admin-dashboard')
+
+@staff_member_required(login_url='/conta/login/')
+def export_data_view(request, export_type):
+    response = HttpResponse(content_type='text/csv')
+    nome_arquivo = f"relatorio_{export_type}_{timezone.now().strftime('%Y-%m-%d')}.csv"
+    response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'
+    
+    response.write(u'\ufeff'.encode('utf8'))
+    
+    writer = csv.writer(response, delimiter=';')
+
+    if export_type == 'faturamento':
+        writer.writerow(['ID do Pedido', 'Data da Compra', 'Cliente', 'Status', 'Método de Pagamento', 'Total (R$)'])
+        orders = Order.objects.all().select_related('customer')
+        for order in orders:
+            preco_br = str(order.total_price).replace('.', ',')
+            writer.writerow([order.id, order.created_at.strftime("%d/%m/%Y %H:%M"), order.customer.first_name, order.get_status_display(), order.payment_method, preco_br])
+
+    elif export_type == 'clientes':
+        writer.writerow(['Nome', 'E-mail', 'Qtd de Pedidos Feitos'])
+        from apps.customers.models import Customer
+        customers = Customer.objects.all()
+        for c in customers:
+            writer.writerow([c.first_name, c.email, c.orders.count()])
+
+    elif export_type == 'todos_os_dados':
+        writer.writerow(['ID do Pedido', 'Data', 'Cliente', 'Produto', 'Volume (ml)', 'Quantidade', 'Preço Unitário na Compra (R$)'])
+        items = OrderItem.objects.all().select_related('order', 'sku__product', 'order__customer')
+        for item in items:
+            preco_br = str(item.price).replace('.', ',')
+            writer.writerow([item.order.id, item.order.created_at.strftime("%d/%m/%Y"), item.order.customer.first_name, item.sku.product.name, item.sku.volume_ml, item.quantity, preco_br])
+
+    return response

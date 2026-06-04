@@ -172,7 +172,10 @@
         color: #D6A476; font-weight: bold; font-size: 0.95rem;
         display: flex; align-items: center; gap: 10px;
         margin-bottom: 12px; cursor: pointer;
+        text-decoration: none;
+        transition: 0.3s;
     }
+    .export-item:hover { color: var(--coral-light); }
     .export-item:last-child { margin-bottom: 0; }
     .export-item i { color: var(--text-brown); font-size: 1.2rem;}
 
@@ -211,7 +214,6 @@
         display: flex; flex-direction: column; gap: 15px; margin-top: 20px;
     }
 
-    /* Estilização Customizada dos Radio Buttons */
     .status-radio-label {
         display: flex; align-items: center; gap: 10px;
         font-weight: bold; color: var(--coral-light);
@@ -221,7 +223,7 @@
         appearance: none; width: 20px; height: 20px;
         border: 2px solid var(--border-brown); border-radius: 50%;
         outline: none; cursor: pointer; position: relative;
-        background-color: #D6A476; /* Fundo padrão */
+        background-color: #D6A476;
     }
     .status-radio-label input[type="radio"]:checked::before {
         content: ""; position: absolute; top: 3px; left: 3px;
@@ -341,7 +343,6 @@
                                     <h6 style="text-align: left;">Subtotal</h6>
                                     <div class="subtotal-value" style="text-align: left;">R$ {{ order.total_price }}</div>
                                     <div class="payment-method" style="text-align: left;">{{ order.payment_method|default:"Processando Pagamento" }}</div>
-                                    <!-- Link do Comprovante removido daqui -->
                                 </div>
                             </div>
 
@@ -410,9 +411,15 @@
 
             <div class="export-box">
                 <h3 class="summary-title" style="text-align: left; font-size: 1.1rem;">Exportar dados</h3>
-                <div class="export-item"><i class="bi bi-database"></i> Todos os dados</div>
-                <div class="export-item"><i class="bi bi-cash-stack"></i> Faturamento</div>
-                <div class="export-item"><i class="bi bi-people-fill"></i> Tabela clientes</div>
+                <a href="{% url 'orders:export-data' 'todos_os_dados' %}" class="export-item">
+                    <i class="bi bi-database"></i> Detalhamento de Produtos
+                </a>
+                <a href="{% url 'orders:export-data' 'faturamento' %}" class="export-item">
+                    <i class="bi bi-cash-stack"></i> Relatório de Faturamento
+                </a>
+                <a href="{% url 'orders:export-data' 'clientes' %}" class="export-item">
+                    <i class="bi bi-people-fill"></i> Tabela de Clientes
+                </a>
             </div>
         </div>
 
