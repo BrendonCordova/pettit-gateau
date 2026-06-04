@@ -279,6 +279,7 @@
         <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
         <a href="#" class="btn-secondary-action" onclick="openBrandModal()"><i class="bi bi-bookmark-star"></i> Nova Marca</a>
         <a href="#" class="btn-secondary-action" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Nova Categoria</a>
+        <a href="#" class="btn-secondary-action" onclick="openBannerModal()"><i class="bi bi-images"></i> Histórico de Banners</a>
     </div>
 
     <div class="add-modal-overlay" id="add-brand-modal">
@@ -312,6 +313,67 @@
                     <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Categoria</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="add-modal-overlay" id="history-banner-modal">
+        <div class="mini-modal-box" style="max-width: 550px;">
+            <i class="bi bi-x btn-close-modal" onclick="closeBannerModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Gerir Banners da Loja</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 15px;">Ative, remova ou adicione novas propagandas.</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px; border-bottom: 2px solid var(--border-brown); margin-bottom: 20px; padding-bottom: 10px;">
+                {% for banner in banners %}
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background-color: {% if banner.is_active %}#fff{% else %}#f7f3f0{% endif %}; border: 1px solid {% if banner.is_active %}var(--gold-accent){% else %}var(--border-brown){% endif %}; border-radius: 10px;">
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="{{ banner.image.url }}" style="height: 50px; width: 90px; object-fit: cover; border-radius: 5px; border: 1px solid var(--border-brown);">
+                        <div>
+                            {% if banner.is_active %}
+                                <span style="font-size: 0.75rem; font-weight: bold; color: #D6A476;">
+                                    <i class="bi bi-star-fill"></i> NA VITRINE
+                                </span>
+                            {% else %}
+                                <span style="font-size: 0.75rem; font-weight: bold; color: var(--text-brown);">
+                                    NO ARQUIVO
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        {% if not banner.is_active %}
+                        <form action="{% url 'products:admin-toggle-banner' banner.id %}" method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-secondary-action" style="padding: 5px 15px; font-size: 0.8rem; background-color: var(--text-brown); color: var(--bg-cream);">Ativar</button>
+                        </form>
+                        {% endif %}
+                        
+                        <form action="{% url 'products:admin-delete-banner' banner.id %}" method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; font-size: 1.2rem; color: var(--coral-light); cursor: pointer;" title="Excluir Definitivamente" onclick="return confirm('Tem certeza que deseja apagar este banner do histórico?')"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+
+                </div>
+                {% empty %}
+                    <p style="color: #D6A476; font-size: 0.9rem; text-align: center; margin-top: 10px;">Nenhum banner cadastrado.</p>
+                {% endfor %}
+            </div>
+
+            <form action="{% url 'products:admin-add-banner-inventory' %}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column;">
+                {% csrf_token %}
+                <h3 style="color: var(--text-brown); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;"><i class="bi bi-cloud-arrow-up"></i> Adicionar Novo Banner</h3>
+                
+                <div class="media-upload-section" style="margin-top: 0; width: 100%; flex-direction: row; justify-content: space-between; align-items: center; border: none;">
+                    <label for="newBannerImage" class="btn-upload-media" style="padding: 6px 15px; font-size: 0.9rem;">Escolher Imagem <i class="bi bi-image"></i></label>
+                    <input type="file" id="newBannerImage" name="image" accept="image/*" onchange="updateFileName(this, 'newBannerFileDisplay')" hidden required>
+                    <div id="newBannerFileDisplay" class="file-name-display" style="margin-top: 0;">Nenhuma imagem</div>
+                </div>
+
+                <button type="submit" class="btn-save-prod" style="margin-top: 20px; width: 100%; padding: 10px; border-radius: 10px;">Salvar e Ativar na Loja</button>
+            </form>
+
         </div>
     </div>
     
@@ -672,7 +734,6 @@
         document.getElementById('edit-modal-' + skuId).style.display = 'none';
     }
 
-    // Riscar o nome da imagem quando clica em remover
     function toggleStrikethrough(checkbox, rowId) {
         var row = document.getElementById(rowId);
         if (checkbox.checked) {
@@ -684,7 +745,6 @@
         }
     }
 
-    // Atualizado updateFileName para aceitar ID dinâmico na edição
     function updateFileName(input, displayId) {
         var display = document.getElementById(displayId);
         if (input.files && input.files.length > 0) {
@@ -693,5 +753,8 @@
             display.innerText = "Nenhuma imagem selecionada";
         }
     }
+
+    function openBannerModal() { document.getElementById('history-banner-modal').style.display = 'flex'; }
+    function closeBannerModal() { document.getElementById('history-banner-modal').style.display = 'none'; }
 </script>
 {% endblock %}

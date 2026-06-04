@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
+from django.utils import timezone
 
 def product_list(request, category_name=None):
     '''
@@ -235,6 +236,7 @@ def admin_inventory_view(request):
     brands = Brand.objects.all()
     fragrance_choices = Product.Fragrance.choices
     concentration_choices = SKU.Concentration.choices
+    banners = Banner.objects.all().order_by('-created_at')
 
     context = {
         'skus': skus,
@@ -244,6 +246,7 @@ def admin_inventory_view(request):
         'brands': brands,
         'fragrances': fragrance_choices,
         'concentrations': concentration_choices,
+        'banners': banners,
     }
     return render(request, 'products/admin_inventory.html', context)
 
@@ -331,7 +334,6 @@ def add_category_quick_view(request):
 @staff_member_required(login_url='/conta/login/')
 @transaction.atomic
 def edit_product_quick_view(request, sku_id):
-    '''Edita as informações de um Produto, SKU (incluindo status ativo) e gere as imagens.'''
     if request.method == 'POST':
         try:
             sku = get_object_or_404(SKU, id=sku_id)
@@ -385,4 +387,42 @@ def edit_product_quick_view(request, sku_id):
             print(f"ERRO AO EDITAR PRODUTO: {e}")
             messages.error(request, "Erro ao editar o produto. Verifique os dados inseridos.")
 
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def toggle_banner_view(request, banner_id):
+    if request.method == 'POST':
+        banner = get_object_or_404(Banner, id=banner_id)
+        
+        Banner.objects.all().update(is_active=False)
+        
+        banner.is_active = True
+        banner.save()
+        messages.success(request, 'Propaganda da página inicial atualizada com sucesso!')
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def delete_banner_view(request, banner_id):
+    if request.method == 'POST':
+        banner = get_object_or_404(Banner, id=banner_id)
+        banner.delete()
+        messages.success(request, 'Banner removido do histórico.')
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_banner_inventory_view(request):
+    if request.method == 'POST':
+        image = request.FILES.get('image')
+        if image:
+            Banner.objects.all().update(is_active=False)
+            
+            Banner.objects.create(
+                title=f"Campanha {timezone.now().strftime('%d/%m/%Y')}",
+                image=image,
+                is_active=True
+            )
+            messages.success(request, 'Novo banner adicionado e ativado na loja!')
+        else:
+            messages.error(request, 'Por favor, selecione uma imagem.')
+            
     return redirect('products:admin-inventory')

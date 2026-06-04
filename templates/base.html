@@ -294,22 +294,8 @@
     }
 </style>
 
-<div class="banner-container">
-    <img src="caminho_para_sua_imagem_lancome.jpg" alt="Propaganda" style="width: 100%; object-fit: cover;">
+{% block extra_css %}{% endblock %}
 
-    {% if user.is_staff %}
-        <form action="ROTA_PARA_SALVAR_IMAGEM" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <label for="bannerInput" class="admin-upload-btn">
-                <i class="bi bi-camera-fill"></i> Alterar Propaganda
-            </label>
-            <input type="file" id="bannerInput" name="nova_propaganda" style="display: none;" onchange="this.form.submit()">
-        </form>
-    {% endif %}
-</div>
-    </style>
-
-    {% block extra_css %}{% endblock %}
 </head>
 
 <body>

@@ -14,4 +14,7 @@ urlpatterns = [
     path('painel/estoque/adicionar-marca/', views.add_brand_quick_view, name='admin-add-brand'),
     path('painel/estoque/adicionar-categoria/', views.add_category_quick_view, name='admin-add-category'),
     path('painel/estoque/editar/<uuid:sku_id>/', views.edit_product_quick_view, name='admin-edit-product'),
+    path('painel/estoque/banner/ativar/<uuid:banner_id>/', views.toggle_banner_view, name='admin-toggle-banner'),
+    path('painel/estoque/banner/deletar/<uuid:banner_id>/', views.delete_banner_view, name='admin-delete-banner'),
+    path('painel/estoque/banner/adicionar/', views.add_banner_inventory_view, name='admin-add-banner-inventory'),
 ]
