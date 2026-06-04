@@ -37,6 +37,7 @@ class Order(BaseModel):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='PENDING', verbose_name='Status')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Preço Total')
+    payment_method = models.CharField(max_length=50, blank=True, null=True, verbose_name='Forma de Pagamento')
 
     # Relationships
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='orders', verbose_name='Cliente')

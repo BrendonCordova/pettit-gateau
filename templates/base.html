@@ -295,17 +295,14 @@
 </style>
 
 <div class="banner-container">
-    <!-- Sua imagem atual da propaganda -->
     <img src="caminho_para_sua_imagem_lancome.jpg" alt="Propaganda" style="width: 100%; object-fit: cover;">
 
-    <!-- Botão de Upload que SÓ O ADMIN vê -->
     {% if user.is_staff %}
         <form action="ROTA_PARA_SALVAR_IMAGEM" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <label for="bannerInput" class="admin-upload-btn">
                 <i class="bi bi-camera-fill"></i> Alterar Propaganda
             </label>
-            <!-- Este input fica invisível, o clique vai para o 'label' acima -->
             <input type="file" id="bannerInput" name="nova_propaganda" style="display: none;" onchange="this.form.submit()">
         </form>
     {% endif %}
@@ -354,17 +351,14 @@
                     </a>
                 {% endif %}
 
-                <!-- 2. SEPARAÇÃO DE CARGOS (ADMIN vs CLIENTE) -->
                 {% if user.is_staff %}
-                    <!-- Ícones Exclusivos do Administrador -->
                     <a href="#" aria-label="Gerir Produtos">
                         <i class="bi bi-cart-check-fill"></i>
                     </a>
-                    <a href="#" aria-label="Gerir Entregas">
+                    <a href="/pedidos/painel/admin/" aria-label="Gerir Entregas">
                         <i class="bi bi-truck"></i>
                     </a>
                 {% else %}
-                    <!-- Ícones do Cliente Normal -->
                     <a href="{% url 'orders:list' %}" aria-label="Meus Pedidos">
                         <i class="bi bi-box-seam-fill"></i>
                     </a>

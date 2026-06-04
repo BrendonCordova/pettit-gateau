@@ -14,6 +14,8 @@ from django.db.models import Q
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Sum, Count
+from django.contrib.admin.views.decorators import staff_member_required
 
 @login_required(login_url='/conta/login/')
 def checkout_view(request):
@@ -146,12 +148,31 @@ def mercado_pago_webhook(request):
                 status = payment_data.get('status')
                 order_id = payment_data.get('external_reference')
 
+                payment_type = payment_data.get('payment_type_id')
+                payment_method_id = payment_data.get('payment_method_id')
+                installments = payment_data.get('installments', 1)
+
+                format_method = "Mercado Pago"
+                if payment_method_id == 'pix':
+                    format_method = "Pagamento via PIX"
+                elif payment_type == 'credit_card':
+                    format_method = f"Cartão de Crédito - {installments}x"
+                elif payment_type == 'debit_card':
+                    format_method = "Cartão de Débito"
+                elif payment_type == 'ticket':
+                    format_method = "Boleto Bancário"
+                elif payment_type == 'account_money':
+                    format_method = "Saldo Mercado Pago"
+
                 if order_id:
                     order = Order.objects.filter(id=order_id).first()
 
                     if order and status == 'approved' and order.status != 'PAID':
                         order.status = 'PAID'
                         order.payment_approved_at = timezone.now()
+                        order.save()
+
+                        order.payment_method = format_method 
                         order.save()
 
                         for item in order.items.all():
@@ -162,7 +183,7 @@ def mercado_pago_webhook(request):
                         if cart:
                             cart.items.all().delete()
 
-                        print(f'✅ Pedido {order_id} atualizado para PAGO via webhook!')
+                        print(f'✅ Pedido {order_id} PAGO via {format_method}!')
 
             return JsonResponse({'status': 'sucesso'}, status=200)
         
@@ -305,3 +326,28 @@ def confirm_delivery_view(request, pk):
         messages.success(request, "Entrega confirmada! Esperamos que adore a sua nova fragrância.")
         
     return redirect('orders:detail', pk=order.id)
+
+@staff_member_required(login_url='/conta/login/')
+def admin_orders_dashboard_view(request):
+    orders = Order.objects.all().order_by('-created_at')
+
+    agregado = orders.filter(
+        status__in=['PAID', 'PREPARING', 'SHIPPED', 'DELIVERED']
+    ).aggregate(total=Sum('total_price'))
+    
+    total_revenue = agregado['total'] if agregado['total'] is not None else 0.00
+
+    status_counts = {
+        'a_caminho': orders.filter(status='SHIPPED').count(),
+        'a_enviar': orders.filter(status__in=['PAID', 'PREPARING']).count(),
+        'aguardando': orders.filter(status='PENDING').count(),
+        'cancelado': orders.filter(status='CANCELED').count(),
+    }
+
+    context = {
+        'orders': orders,
+        'total_revenue': total_revenue,
+        'status_counts': status_counts,
+        'total_pedidos': orders.count(),
+    }
+    return render(request, 'orders/admin_dashboard.html', context)
