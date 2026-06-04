@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import checkout_view, order_success_view, mercado_pago_webhook, order_list_view, order_detail_view, order_return_view, confirm_delivery_view, order_return_success_view, admin_orders_dashboard_view
+from .views import checkout_view, order_success_view, mercado_pago_webhook, order_list_view, order_detail_view, \
+order_return_view, confirm_delivery_view, order_return_success_view, admin_orders_dashboard_view, \
+update_order_status_view
 
 app_name = 'orders'
 
@@ -13,4 +15,5 @@ urlpatterns = [
     path('meus-pedidos/devolucao/sucesso/<uuid:return_id>/', order_return_success_view, name='return-success'),
     path('meus-pedidos/<uuid:pk>/confirmar-entrega/', confirm_delivery_view, name='confirm-delivery'),
     path('painel/admin/', admin_orders_dashboard_view, name='admin-dashboard'),
+    path('painel/admin/atualizar-status/', update_order_status_view, name='update-order-status'),
 ]

@@ -351,3 +351,17 @@ def admin_orders_dashboard_view(request):
         'total_pedidos': orders.count(),
     }
     return render(request, 'orders/admin_dashboard.html', context)
+
+@staff_member_required(login_url='/conta/login/')
+def update_order_status_view(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        new_status = request.POST.get('status')
+        
+        order = get_object_or_404(Order, id=order_id)
+        order.status = new_status
+        order.save()
+        
+        messages.success(request, f"Status do pedido #{str(order.id)[:8]} atualizado com sucesso!")
+        
+    return redirect('orders:admin-dashboard')
