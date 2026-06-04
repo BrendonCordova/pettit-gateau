@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% block title %}Controle de Estoque | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    .inventory-container {
+        max-width: 1200px;
+        margin: 40px auto 80px;
+        padding: 0 20px;
+    }
+
+    .inventory-title {
+        color: var(--text-brown);
+        font-weight: 800;
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+    }
+
+    .btn-add-product {
+        display: inline-block;
+        background-color: #D6A476;
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 10px 25px;
+        border: 2px solid var(--border-brown);
+        border-radius: 30px;
+        text-decoration: none;
+        margin-bottom: 35px;
+        transition: 0.3s;
+    }
+    .btn-add-product:hover { background-color: #c59567; color: var(--text-brown); }
+
+    .controls-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .search-form {
+        flex-grow: 1;
+        position: relative;
+        display: flex;
+        margin: 0;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 10px 45px 10px 45px;
+        border: 2px solid var(--border-brown);
+        border-radius: 30px;
+        background-color: transparent;
+        color: var(--text-brown);
+        font-weight: bold;
+        outline: none;
+    }
+    .search-input::placeholder { color: #a8968a; font-weight: normal; }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        cursor: pointer; 
+        transition: 0.2s;
+    }
+    .search-icon:hover { color: var(--coral-light); }
+
+    .clear-icon {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-brown);
+        font-size: 1.2rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .filter-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .filter-btn {
+        padding: 10px 25px;
+        border: 2px solid var(--border-brown);
+        border-radius: 30px;
+        background-color: transparent;
+        color: var(--text-brown);
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .filter-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 5px;
+        background-color: var(--bg-cream);
+        min-width: 180px;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+        border: 2px solid var(--border-brown);
+        border-radius: 10px;
+        z-index: 10;
+        overflow: hidden;
+    }
+    .filter-content.show {
+        display: block;
+    }
+    .filter-content a {
+        color: var(--text-brown);
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        font-weight: bold;
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--border-brown);
+    }
+    .filter-content a:last-child { border-bottom: none; }
+    .filter-content a:hover { background-color: #f1ebe6; color: var(--coral-light); }
+
+    /* Tabela */
+    .table-wrapper {
+        max-height: 60vh;
+        overflow-y: auto;
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: var(--bg-cream);
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-brown) transparent;
+    }
+    .table-wrapper::-webkit-scrollbar { width: 8px; }
+    .table-wrapper::-webkit-scrollbar-thumb { background-color: var(--border-brown); border-radius: 10px; }
+
+    .inventory-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+    }
+
+    .inventory-table th {
+        position: sticky;
+        top: 0;
+        background-color: var(--bg-cream);
+        color: var(--text-brown);
+        font-weight: 900;
+        padding: 15px 10px;
+        border-bottom: 2px solid var(--border-brown);
+        z-index: 2;
+    }
+
+    .sortable-header {
+        color: var(--text-brown);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+    .sortable-header:hover { color: var(--coral-light); }
+
+    .inventory-table td {
+        padding: 15px 10px;
+        font-size: 0.95rem;
+        border-bottom: 1px solid var(--border-brown);
+        text-transform: uppercase;
+    }
+
+    .inventory-table tr:last-child td { border-bottom: none; }
+
+    .col-id { color: #D6A476; font-weight: bold; }
+    .col-default { color: #D6A476; font-weight: bold; }
+    
+    .stock-high { color: #D6A476; font-weight: bold; }
+    .stock-medium { color: var(--text-brown); font-weight: 900; }
+    .stock-low { color: var(--coral-light); font-weight: 900; }
+
+    .btn-edit-icon {
+        color: #D6A476;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-edit-icon:hover { color: var(--coral-light); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inventory-container">
+    
+    <h1 class="inventory-title">Controle de Estoque</h1>
+    
+    <a href="#" class="btn-add-product">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
+
+    <div class="controls-row">
+        <form class="search-form" method="GET" action="{% url 'products:admin-inventory' %}">
+            <i class="bi bi-search search-icon" onclick="this.closest('form').submit()"></i>
+            
+            <input type="text" name="q" class="search-input" placeholder="Busque por nome do produto..." value="{{ search_query }}">
+            
+            <input type="hidden" name="sort" value="{{ current_sort }}">
+
+            {% if search_query %}
+                <a href="{% url 'products:admin-inventory' %}?sort={{ current_sort }}" class="clear-icon"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+        </form>
+
+        <div class="filter-dropdown">
+            <button class="filter-btn" type="button" onclick="toggleFilterDropdown()">
+                Filtro <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="filter-content" id="filterOptions">
+                <a href="?q={{ search_query }}&sort=newest">Últimos Lançados</a>
+                <a href="?q={{ search_query }}&sort=price_desc">Maior Preço</a>
+                <a href="?q={{ search_query }}&sort=price_asc">Menor Preço</a>
+                <a href="?q={{ search_query }}&sort=name_asc">Ordem A-Z</a>
+                <a href="?q={{ search_query }}&sort=name_desc">Ordem Z-A</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'id_asc' %}id_desc{% else %}id_asc{% endif %}" class="sortable-header">
+                            ID <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'name_asc' %}name_desc{% else %}name_asc{% endif %}" class="sortable-header">
+                            Produto <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'sku_asc' %}sku_desc{% else %}sku_asc{% endif %}" class="sortable-header">
+                            SKU <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'price_asc' %}price_desc{% else %}price_asc{% endif %}" class="sortable-header">
+                            Preço <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'volume_asc' %}volume_desc{% else %}volume_asc{% endif %}" class="sortable-header">
+                            Tamanho <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'stock_asc' %}stock_desc{% else %}stock_asc{% endif %}" class="sortable-header">
+                            Estoque <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>-</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sku in skus %}
+                <tr>
+                    <td class="col-id">#{{ sku.id|stringformat:"03d" }}</td>
+                    <td class="col-default">{{ sku.product.name }}</td>
+                    <td class="col-default">{{ sku.sku_code }}</td>
+                    <td class="col-default">R$ {{ sku.price }}</td>
+                    <td class="col-default" style="text-transform: lowercase;">{{ sku.volume_ml }} ml</td>
+                    
+                    <td class="{% if sku.stock_quantity <= 25 %}stock-low{% elif sku.stock_quantity <= 50 %}stock-medium{% else %}stock-high{% endif %}">
+                        Un. {{ sku.stock_quantity }}
+                    </td>
+                    
+                    <td><i class="bi bi-pencil-square btn-edit-icon"></i></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="padding: 30px; color: var(--text-brown);">Nenhum produto encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleFilterDropdown() {
+        document.getElementById("filterOptions").classList.toggle("show");
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.filter-btn') && !event.target.matches('.filter-btn *')) {
+            var dropdowns = document.getElementsByClassName("filter-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

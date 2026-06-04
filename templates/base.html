@@ -352,7 +352,7 @@
                 {% endif %}
 
                 {% if user.is_staff %}
-                    <a href="#" aria-label="Gerir Produtos">
+                    <a href="/produtos/painel/estoque/" aria-label="Gerir Produtos">
                         <i class="bi bi-cart-check-fill"></i>
                     </a>
                     <a href="/pedidos/painel/admin/" aria-label="Gerir Entregas">
@@ -485,13 +485,11 @@
             const dropdownMenu = document.getElementById('profileDropdown');
 
             if (toggleBtn && dropdownMenu) {
-                // Abrir/Fechar menu
                 toggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     dropdownMenu.classList.toggle('active');
                 });
 
-                // Fechar se clicar fora
                 document.addEventListener('click', function(e) {
                     const container = document.querySelector('.profile-dropdown-container');
                     if (!container.contains(e.target)) {

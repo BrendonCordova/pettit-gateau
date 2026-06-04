@@ -1,12 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Brand, Category, Banner
+from .models import Product, Brand, Category, Banner, SKU
 from django.core.paginator import Paginator
 from django.db.models import Q, Avg, Count
 from apps.orders.models import Order
 from .forms import ReviewForm, Review
 from django.http import JsonResponse
-from django.core.paginator import Paginator
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 
 def product_list(request, category_name=None):
     '''
@@ -189,3 +189,50 @@ def home_view(request):
         'newest': newest,
     }
     return render(request, 'products/home.html', context)
+
+@staff_member_required(login_url='/conta/login/')
+def admin_inventory_view(request):
+    skus = SKU.objects.select_related('product').all()
+
+    search_query = request.GET.get('q', '')
+    if search_query:
+        skus = skus.filter(
+            Q(product__name__icontains=search_query) | 
+            Q(sku_code__icontains=search_query)
+        )
+
+    sort_by = request.GET.get('sort', 'id_asc')
+    
+    if sort_by == 'price_desc':
+        skus = skus.order_by('-price')
+    elif sort_by == 'price_asc':
+        skus = skus.order_by('price')
+    elif sort_by == 'newest':
+        skus = skus.order_by('-created_at')
+    elif sort_by == 'name_asc':
+        skus = skus.order_by('product__name')
+    elif sort_by == 'name_desc':
+        skus = skus.order_by('-product__name')
+    elif sort_by == 'id_desc':
+        skus = skus.order_by('-id')
+    elif sort_by == 'sku_asc':
+        skus = skus.order_by('sku_code')
+    elif sort_by == 'sku_desc':
+        skus = skus.order_by('-sku_code')
+    elif sort_by == 'volume_asc':
+        skus = skus.order_by('volume_ml')
+    elif sort_by == 'volume_desc':
+        skus = skus.order_by('-volume_ml')
+    elif sort_by == 'stock_asc':
+        skus = skus.order_by('stock_quantity')
+    elif sort_by == 'stock_desc':
+        skus = skus.order_by('-stock_quantity')
+    else:
+        skus = skus.order_by('id')
+
+    context = {
+        'skus': skus,
+        'search_query': search_query,
+        'current_sort': sort_by,
+    }
+    return render(request, 'products/admin_inventory.html', context)
