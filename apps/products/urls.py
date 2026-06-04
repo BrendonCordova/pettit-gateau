@@ -10,4 +10,5 @@ urlpatterns = [
     path('<slug:slug>/', views.product_detail, name='detail'),
     path('<slug:slug>/avaliacoes/api/', views.load_more_reviews_api, name='api_reviews'),
     path('painel/estoque/', views.admin_inventory_view, name='admin-inventory'),
+    path('painel/estoque/adicionar/', views.add_product_quick_view, name='admin-add-product'),
 ]

@@ -7,6 +7,7 @@ from .forms import ReviewForm, Review
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db import transaction
 
 def product_list(request, category_name=None):
     '''
@@ -230,9 +231,76 @@ def admin_inventory_view(request):
     else:
         skus = skus.order_by('id')
 
+    categories = Category.objects.all()
+    brands = Brand.objects.all()
+    fragrance_choices = Product.Fragrance.choices
+    concentration_choices = SKU.Concentration.choices
+
     context = {
         'skus': skus,
         'search_query': search_query,
         'current_sort': sort_by,
+        'categories': categories,
+        'brands': brands,
+        'fragrances': fragrance_choices,
+        'concentrations': concentration_choices,
     }
     return render(request, 'products/admin_inventory.html', context)
+
+@staff_member_required(login_url='/conta/login/')
+@transaction.atomic
+def add_product_quick_view(request):
+    '''Recebe os dados do modal, trata os formatos financeiros e salva Produto e SKU.'''
+    if request.method == 'POST':
+        try:
+            sku_code = request.POST.get('sku_code')
+            if SKU.objects.filter(sku_code=sku_code).exists():
+                messages.error(request, f"O SKU '{sku_code}' já existe no sistema! Tente outro.")
+                return redirect('products:admin-inventory')
+
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            fragrance = request.POST.get('fragrance')
+            category = get_object_or_404(Category, id=request.POST.get('category'))
+            brand = get_object_or_404(Brand, id=request.POST.get('brand'))
+
+            produto = Product.objects.create(
+                name=name,
+                description=description,
+                fragrance=fragrance,
+                category=category,
+                brand=brand
+            )
+
+            raw_price = request.POST.get('price', '0').replace('R$', '').replace(' ', '')
+            if '.' in raw_price and ',' in raw_price:
+                clean_price = raw_price.replace('.', '').replace(',', '.')
+            else:
+                clean_price = raw_price.replace(',', '.')
+
+            SKU.objects.create(
+                product=produto,
+                sku_code=sku_code,
+                concentration=request.POST.get('concentration'),
+                volume_ml=request.POST.get('volume_ml'),
+                price=clean_price,
+                stock_quantity=request.POST.get('stock_quantity')
+            )
+
+            image_file = request.FILES.get('image')
+            if image_file:
+                from .models import ProductImage
+                ProductImage.objects.create(
+                    product=produto,
+                    image=image_file,
+                    is_main=True,
+                    display_order=0
+                )
+
+            messages.success(request, f"Produto '{name}' salvo com sucesso!")
+            
+        except Exception as e:
+            print(f"ERRO AO SALVAR PRODUTO: {e}")
+            messages.error(request, "Erro ao salvar o produto. Verifique se preencheu todos os campos corretamente.")
+
+    return redirect('products:admin-inventory')

@@ -8,14 +8,12 @@
         margin: 40px auto 80px;
         padding: 0 20px;
     }
-
     .inventory-title {
         color: var(--text-brown);
         font-weight: 800;
         font-size: 1.8rem;
         margin-bottom: 25px;
     }
-
     .btn-add-product {
         display: inline-block;
         background-color: #D6A476;
@@ -30,21 +28,18 @@
         transition: 0.3s;
     }
     .btn-add-product:hover { background-color: #c59567; color: var(--text-brown); }
-
     .controls-row {
         display: flex;
         gap: 15px;
         margin-bottom: 20px;
         align-items: center;
     }
-
     .search-form {
         flex-grow: 1;
         position: relative;
         display: flex;
         margin: 0;
     }
-
     .search-input {
         width: 100%;
         padding: 10px 45px 10px 45px;
@@ -56,7 +51,6 @@
         outline: none;
     }
     .search-input::placeholder { color: #a8968a; font-weight: normal; }
-
     .search-icon {
         position: absolute;
         left: 18px;
@@ -68,7 +62,6 @@
         transition: 0.2s;
     }
     .search-icon:hover { color: var(--coral-light); }
-
     .clear-icon {
         position: absolute;
         right: 18px;
@@ -79,7 +72,6 @@
         cursor: pointer;
         text-decoration: none;
     }
-
     .filter-dropdown {
         position: relative;
         display: inline-block;
@@ -124,8 +116,6 @@
     }
     .filter-content a:last-child { border-bottom: none; }
     .filter-content a:hover { background-color: #f1ebe6; color: var(--coral-light); }
-
-    /* Tabela */
     .table-wrapper {
         max-height: 60vh;
         overflow-y: auto;
@@ -137,13 +127,11 @@
     }
     .table-wrapper::-webkit-scrollbar { width: 8px; }
     .table-wrapper::-webkit-scrollbar-thumb { background-color: var(--border-brown); border-radius: 10px; }
-
     .inventory-table {
         width: 100%;
         border-collapse: collapse;
         text-align: center;
     }
-
     .inventory-table th {
         position: sticky;
         top: 0;
@@ -154,7 +142,6 @@
         border-bottom: 2px solid var(--border-brown);
         z-index: 2;
     }
-
     .sortable-header {
         color: var(--text-brown);
         text-decoration: none;
@@ -165,23 +152,18 @@
         transition: 0.2s;
     }
     .sortable-header:hover { color: var(--coral-light); }
-
     .inventory-table td {
         padding: 15px 10px;
         font-size: 0.95rem;
         border-bottom: 1px solid var(--border-brown);
         text-transform: uppercase;
     }
-
     .inventory-table tr:last-child td { border-bottom: none; }
-
     .col-id { color: #D6A476; font-weight: bold; }
     .col-default { color: #D6A476; font-weight: bold; }
-    
     .stock-high { color: #D6A476; font-weight: bold; }
     .stock-medium { color: var(--text-brown); font-weight: 900; }
     .stock-low { color: var(--coral-light); font-weight: 900; }
-
     .btn-edit-icon {
         color: #D6A476;
         font-size: 1.2rem;
@@ -189,6 +171,66 @@
         transition: 0.3s;
     }
     .btn-edit-icon:hover { color: var(--coral-light); }
+
+    .add-modal-overlay {
+        display: none;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6); z-index: 2000;
+        align-items: center; justify-content: center; backdrop-filter: blur(3px);
+    }
+    .add-modal-box {
+        background-color: var(--bg-cream); border: 2px solid var(--border-brown);
+        border-radius: 20px; padding: 40px; width: 95%; max-width: 850px;
+        position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .add-modal-box::-webkit-scrollbar { width: 6px; }
+    .add-modal-box::-webkit-scrollbar-thumb { background-color: var(--border-brown); border-radius: 10px; }
+    .modal-title-add {
+        color: var(--coral-light); font-weight: 900; font-size: 1.6rem; margin-bottom: 20px;
+    }
+    .btn-close-modal {
+        position: absolute; top: 20px; right: 25px;
+        font-size: 1.8rem; color: var(--text-brown); cursor: pointer; transition: 0.3s;
+    }
+    .btn-close-modal:hover { color: var(--coral-light); }
+    .form-group-custom {
+        display: flex; align-items: center; gap: 15px; margin-bottom: 15px;
+    }
+    .form-group-custom label {
+        color: var(--text-brown); font-weight: bold; min-width: 145px; font-size: 1.05rem;
+        white-space: nowrap;
+    }
+    .form-group-custom input, .form-group-custom select, .form-group-custom textarea {
+        flex-grow: 1; border: none; border-bottom: 2px solid var(--border-brown); width: 100%;
+        background: transparent; color: #D6A476; font-weight: bold; font-size: 1.05rem;
+        padding: 5px; outline: none; font-family: inherit;
+    }
+    .form-group-custom input::placeholder, .form-group-custom textarea::placeholder {
+        color: #dcbfa5; font-weight: normal;
+    }
+    .input-row-half { display: flex; gap: 20px; width: 100%; margin-bottom: 15px;}
+    .input-row-half .form-group-custom { margin-bottom: 0; flex: 1; }
+    .input-row-half .form-group-custom label { min-width: auto; }
+    .media-upload-section {
+        display: flex; flex-direction: column; align-items: center; margin-top: 20px;
+    }
+    .btn-upload-media {
+        border: 2px solid var(--text-brown); border-radius: 30px; padding: 10px 25px;
+        color: var(--text-brown); font-weight: bold; cursor: pointer; display: flex; gap: 10px; transition: 0.3s;
+    }
+    .btn-upload-media:hover { background-color: var(--text-brown); color: var(--bg-cream); }
+    .file-name-display { color: #D6A476; font-size: 0.85rem; margin-top: 8px; text-decoration: underline; }
+    .modal-actions-add { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; }
+    .btn-save-prod {
+        background-color: var(--coral-light); color: white; border: 2px solid var(--border-brown);
+        border-radius: 30px; padding: 10px 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+    }
+    .btn-save-prod:hover { background-color: #e87b6d; }
+    .btn-cancel-prod {
+        background-color: #D6A476; color: var(--text-brown); border: 2px solid var(--border-brown);
+        border-radius: 30px; padding: 10px 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+    }
+    .btn-cancel-prod:hover { background-color: #c59567; }
 </style>
 {% endblock %}
 
@@ -196,8 +238,95 @@
 <div class="inventory-container">
     
     <h1 class="inventory-title">Controle de Estoque</h1>
+
+    <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
     
-    <a href="#" class="btn-add-product">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
+    <div class="add-modal-overlay" id="add-product-modal">
+        <div class="add-modal-box">
+            <i class="bi bi-x btn-close-modal" onclick="closeAddProductModal()"></i>
+            <h2 class="modal-title-add">Novo Produto</h2>
+            <p style="color: #D6A476; font-weight: bold; margin-bottom: 20px;">ID: <span style="font-weight: normal;">Gerado automaticamente</span></p>
+            
+            <form action="{% url 'products:admin-add-product' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div>
+                        <div class="form-group-custom">
+                            <label>Nome do Produto:</label>
+                            <input type="text" name="name" placeholder="Ex: Britney Spears" required>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Marca:</label>
+                            <select name="brand" required>
+                                <option value="">Selecione...</option>
+                                {% for brand in brands %}<option value="{{ brand.id }}">{{ brand.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>SKU:</label>
+                            <input type="text" name="sku_code" placeholder="Ex: PERF-FEM-023" required>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Categoria:</label>
+                            <select name="category" required>
+                                <option value="">Selecione...</option>
+                                {% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Fragrância:</label>
+                            <select name="fragrance" required>
+                                <option value="">Selecione...</option>
+                                {% for val, name in fragrances %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="input-row-half">
+                            <div class="form-group-custom">
+                                <label>Vol. (ml):</label>
+                                <input type="number" name="volume_ml" placeholder="100" required>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Conc.:</label>
+                                <select name="concentration" required>
+                                    {% for val, name in concentrations %}<option value="{{ val }}">{{ val }}</option>{% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label style="min-width: 115px;">Preço (R$):</label>
+                            <input type="text" name="price" placeholder="260,00" required>
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label style="min-width: 115px;">Estoque (Un):</label>
+                            <input type="number" name="stock_quantity" placeholder="15" required>
+                        </div>
+
+                        <div class="media-upload-section">
+                            <label for="productImage" class="btn-upload-media">Adicionar midia <i class="bi bi-image"></i></label>
+                            <input type="file" id="productImage" name="image" accept="image/*" onchange="updateFileName(this)" hidden required>
+                            <div id="fileNameDisplay" class="file-name-display">Nenhuma imagem selecionada</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-custom" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 25px;">
+                    <label>Descrição:</label>
+                    <textarea name="description" rows="3" style="width: 100%; border: 2px solid var(--border-brown); border-radius: 10px; padding: 10px;" placeholder="Notas de ameixa e cereja amarga..." required></textarea>
+                </div>
+
+                <div class="modal-actions-add">
+                    <button type="submit" class="btn-save-prod">Salvar Produto</button>
+                    <button type="button" class="btn-cancel-prod" onclick="closeAddProductModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="controls-row">
         <form class="search-form" method="GET" action="{% url 'products:admin-inventory' %}">
@@ -307,5 +436,29 @@
             }
         }
     }
+
+    function openAddProductModal() {
+        document.getElementById('add-product-modal').style.display = 'flex';
+    }
+
+    function closeAddProductModal() {
+        document.getElementById('add-product-modal').style.display = 'none';
+    }
+
+    function updateFileName(input) {
+        var display = document.getElementById('fileNameDisplay');
+        if (input.files && input.files.length > 0) {
+            display.innerText = input.files[0].name;
+        } else {
+            display.innerText = "Nenhuma imagem selecionada";
+        }
+    }
+
+    window.addEventListener('click', function(e) {
+        var modal = document.getElementById('add-product-modal');
+        if (e.target === modal) {
+            closeAddProductModal();
+        }
+    });
 </script>
 {% endblock %}
