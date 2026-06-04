@@ -11,4 +11,6 @@ urlpatterns = [
     path('<slug:slug>/avaliacoes/api/', views.load_more_reviews_api, name='api_reviews'),
     path('painel/estoque/', views.admin_inventory_view, name='admin-inventory'),
     path('painel/estoque/adicionar/', views.add_product_quick_view, name='admin-add-product'),
+    path('painel/estoque/adicionar-marca/', views.add_brand_quick_view, name='admin-add-brand'),
+    path('painel/estoque/adicionar-categoria/', views.add_category_quick_view, name='admin-add-category'),
 ]

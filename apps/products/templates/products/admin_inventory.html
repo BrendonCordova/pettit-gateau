@@ -24,7 +24,6 @@
         border: 2px solid var(--border-brown);
         border-radius: 30px;
         text-decoration: none;
-        margin-bottom: 35px;
         transition: 0.3s;
     }
     .btn-add-product:hover { background-color: #c59567; color: var(--text-brown); }
@@ -34,6 +33,24 @@
         margin-bottom: 20px;
         align-items: center;
     }
+
+    .top-actions-row {
+        display: flex; gap: 15px; align-items: center; margin-bottom: 35px; flex-wrap: wrap;
+    }
+    .btn-secondary-action {
+        display: inline-block; background-color: transparent; color: var(--text-brown);
+        font-weight: bold; font-size: 0.95rem; padding: 8px 20px;
+        border: 2px solid var(--border-brown); border-radius: 30px;
+        text-decoration: none; transition: 0.3s;
+    }
+    .btn-secondary-action:hover { background-color: var(--border-brown); color: var(--bg-cream); }
+
+    .mini-modal-box {
+        background-color: var(--bg-cream); border: 2px solid var(--border-brown);
+        border-radius: 20px; padding: 30px; width: 90%; max-width: 450px;
+        position: relative;
+    }
+
     .search-form {
         flex-grow: 1;
         position: relative;
@@ -239,7 +256,45 @@
     
     <h1 class="inventory-title">Controle de Estoque</h1>
 
-    <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
+    <div class="top-actions-row">
+        <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
+        <a href="#" class="btn-secondary-action" onclick="openBrandModal()"><i class="bi bi-bookmark-star"></i> Nova Marca</a>
+        <a href="#" class="btn-secondary-action" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Nova Categoria</a>
+    </div>
+
+    <div class="add-modal-overlay" id="add-brand-modal">
+        <div class="mini-modal-box">
+            <i class="bi bi-x btn-close-modal" onclick="closeBrandModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Marca</h2>
+            <form action="{% url 'products:admin-add-brand' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group-custom" style="margin-top: 20px;">
+                    <label style="min-width: 60px;">Nome:</label>
+                    <input type="text" name="name" placeholder="Ex: Dior, Chanel..." required>
+                </div>
+                <div class="modal-actions-add" style="margin-top: 20px;">
+                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Marca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="add-modal-overlay" id="add-category-modal">
+        <div class="mini-modal-box">
+            <i class="bi bi-x btn-close-modal" onclick="closeCategoryModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Categoria</h2>
+            <form action="{% url 'products:admin-add-category' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group-custom" style="margin-top: 20px;">
+                    <label style="min-width: 60px;">Nome:</label>
+                    <input type="text" name="name" placeholder="Ex: Unissex, Infantil..." required>
+                </div>
+                <div class="modal-actions-add" style="margin-top: 20px;">
+                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Categoria</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <div class="add-modal-overlay" id="add-product-modal">
         <div class="add-modal-box">
@@ -458,6 +513,17 @@
         var modal = document.getElementById('add-product-modal');
         if (e.target === modal) {
             closeAddProductModal();
+        }
+    });
+
+    function openBrandModal() { document.getElementById('add-brand-modal').style.display = 'flex'; }
+    function closeBrandModal() { document.getElementById('add-brand-modal').style.display = 'none'; }
+    function openCategoryModal() { document.getElementById('add-category-modal').style.display = 'flex'; }
+    function closeCategoryModal() { document.getElementById('add-category-modal').style.display = 'none'; }
+
+    window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-modal-overlay')) {
+            e.target.style.display = 'none';
         }
     });
 </script>

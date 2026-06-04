@@ -250,7 +250,6 @@ def admin_inventory_view(request):
 @staff_member_required(login_url='/conta/login/')
 @transaction.atomic
 def add_product_quick_view(request):
-    '''Recebe os dados do modal, trata os formatos financeiros e salva Produto e SKU.'''
     if request.method == 'POST':
         try:
             sku_code = request.POST.get('sku_code')
@@ -303,4 +302,29 @@ def add_product_quick_view(request):
             print(f"ERRO AO SALVAR PRODUTO: {e}")
             messages.error(request, "Erro ao salvar o produto. Verifique se preencheu todos os campos corretamente.")
 
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_brand_quick_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            brand, created = Brand.objects.get_or_create(name=name.strip())
+            if created:
+                messages.success(request, f"Marca '{brand.name}' cadastrada com sucesso!")
+            else:
+                messages.warning(request, f"A marca '{brand.name}' já existe no sistema.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_category_quick_view(request):
+    '''Adiciona uma nova Categoria pelo painel rápido.'''
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            category, created = Category.objects.get_or_create(name=name.strip())
+            if created:
+                messages.success(request, f"Categoria '{category.name}' cadastrada com sucesso!")
+            else:
+                messages.warning(request, f"A categoria '{category.name}' já existe no sistema.")
     return redirect('products:admin-inventory')
