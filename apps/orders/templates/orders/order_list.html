@@ -190,7 +190,11 @@
             
             <div>
                 <div class="order-status-main">
-                    {{ order.get_status_display }}
+                    {% if order.return_requests.exists %}
+                        Devolução Solicitada
+                    {% else %}
+                        {{ order.get_status_display }}
+                    {% endif %}
                 </div>
 
                 {% for item in order.items.all %}
@@ -221,7 +225,9 @@
                 
                 <div>
                     <div class="order-delivery-label">
-                        {% if order.status == 'DELIVERED' %}
+                        {% if order.return_requests.exists %}
+                            Status
+                        {% elif order.status == 'DELIVERED' %}
                             Entregue
                         {% elif order.status == 'CANCELED' %}
                             Cancelado
@@ -230,7 +236,11 @@
                         {% endif %}
                     </div>
                     <div class="order-delivery-date">
-                        {{ order.expected_delivery_date|date:"d \d\e F \d\e Y" }}
+                        {% if order.return_requests.exists %}
+                            Em Análise
+                        {% else %}
+                            {{ order.expected_delivery_date|date:"d \d\e F \d\e Y" }}
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -167,10 +167,18 @@
 
             <div class="status-side">
                 <div class="status-label">
-                    {{ order.get_status_display }}
+                    {% if order.return_requests.exists %}
+                        Devolução Solicitada
+                    {% else %}
+                        {{ order.get_status_display }}
+                    {% endif %}
                 </div>
                 <div class="status-date">
-                    {{ order.expected_delivery_date|date:"d \d\e F \d\e Y" }}
+                    {% if order.return_requests.exists %}
+                        Em Análise
+                    {% else %}
+                        {{ order.expected_delivery_date|date:"d \d\e F \d\e Y" }}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -178,6 +186,13 @@
         <div class="address-box">
             {{ order.address.street }}, {{ order.address.number }}. {{ order.address.neighborhood }}, {{ order.address.city }}-{{ order.address.state }}.
         </div>
+
+        {% if order.return_requests.exists %}
+            <div style="background-color: rgba(214, 164, 118, 0.1); border: 1.5px solid #D6A476; border-radius: 15px; padding: 15px 20px; text-align: center; color: var(--text-brown); font-weight: bold; margin-bottom: 25px;">
+                <i class="bi bi-info-circle me-2" style="color: var(--coral-light);"></i> 
+                Sua solicitação de devolução está em análise. Você será atualizado através do e-mail cadastrado.
+            </div>
+        {% endif %}
 
         <div class="action-buttons">
             
@@ -203,7 +218,7 @@
                 </form>
             {% endif %}
 
-            {% if order.status == 'DELIVERED' %}
+            {% if order.status == 'DELIVERED' and not order.return_requests.exists %}
                 <a href="{% url 'orders:return' order.id %}" class="btn-return">Devolver produto</a>
             {% endif %}
             
