@@ -18,6 +18,34 @@
             --footer-bg: #050505;
         }
 
+        body.dark-theme {
+            --bg-cream: #1c1917;
+            --text-brown: #EAE0D5;
+            --border-brown: #44403c; 
+            --footer-bg: #0a0a0a; 
+        }
+        
+        body.dark-theme .custom-input, 
+        body.dark-theme .search-input {
+            background-color: #292524 !important;
+            color: #EAE0D5 !important;
+        }
+
+        body.dark-theme select {
+            background-color: transparent;
+            color: #EAE0D5;
+        }
+
+        body.dark-theme select option {
+            background-color: #292524;
+            color: #EAE0D5;
+        }
+
+        body.dark-theme .btn-add-catalog:hover {
+            background-color: var(--text-brown) !important;
+            color: var(--bg-cream) !important;
+        }
+
         html, body {
             height: 100%;
             margin: 0;
@@ -320,8 +348,8 @@
                         <a href="{% url 'customers:profile' %}" class="profile-dropdown-item">
                             <i class="bi bi-person-vcard"></i> Meu perfil
                         </a>
-                        <button class="profile-dropdown-item" onclick="alert('A troca de tema estará disponível em breve!')">
-                            <i class="bi bi-palette"></i> Mudar tema
+                        <button class="profile-dropdown-item" onclick="toggleTheme()">
+                            <i class="bi bi-moon-stars"></i> Mudar tema
                         </button>
                         <a href="/conta/ajuda/" class="profile-dropdown-item" aria-label="Central de Ajuda">
                             <i class="bi bi-question-circle"></i> Ajuda
@@ -492,6 +520,27 @@
 
         function closeLogoutModal() {
             document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('pettit_theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+        });
+
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark-theme');
+            
+            if (body.classList.contains('dark-theme')) {
+                localStorage.setItem('pettit_theme', 'dark');
+            } else {
+                localStorage.setItem('pettit_theme', 'light');
+            }
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if(dropdown) dropdown.classList.remove('active');
         }
     </script>
 
