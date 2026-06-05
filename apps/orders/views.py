@@ -231,6 +231,36 @@ def order_detail_view(request, pk):
     return render(request, 'orders/order_detail.html', {'order': order})
 
 @login_required(login_url='/conta/login/')
+def retry_payment_view(request, pk):
+    '''
+    Generate a new Mercado Pago payment link for a pending order.
+    '''
+    order = get_object_or_404(Order, pk=pk, customer=request.user, status='PENDING')
+    
+    try:
+        mp_service = MercadoPagoService()
+        preference = mp_service.create_payment_preference(order, order.items.all())
+        payment_url = preference['sandbox_init_point']
+        return redirect(payment_url)
+    except Exception as e:
+        messages.error(request, 'Ocorreu um erro ao gerar o novo link de pagamento. Tente novamente mais tarde.')
+        return redirect('orders:detail', pk=order.id)
+
+@login_required(login_url='/conta/login/')
+def cancel_order_view(request, pk):
+    '''
+    It allows the customer to cancel an order that is awaiting payment.
+    '''
+    order = get_object_or_404(Order, pk=pk, customer=request.user, status='PENDING')
+    
+    if request.method == 'POST':
+        order.status = 'CANCELED'
+        order.save()
+        messages.success(request, 'Seu pedido foi cancelado com sucesso.')
+        
+    return redirect('orders:detail', pk=order.id)
+
+@login_required(login_url='/conta/login/')
 def order_return_view(request, pk):
     '''
     Handles the creation of a product return request.

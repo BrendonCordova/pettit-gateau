@@ -181,6 +181,19 @@
 
         <div class="action-buttons">
             
+            {% if order.status == 'PENDING' %}
+                <a href="{% url 'orders:retry-payment' order.id %}" class="btn-return" style="background-color: #28a745; border-color: #28a745;">
+                    Pagar Agora <i class="bi bi-credit-card ms-1"></i>
+                </a>
+                
+                <form method="POST" action="{% url 'orders:cancel-order' order.id %}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.');">
+                    {% csrf_token %}
+                    <button type="submit" style="background-color: transparent; color: var(--coral-light); border: 2px solid var(--coral-light); border-radius: 30px; padding: 8px 30px; font-weight: bold; font-size: 1.05rem; transition: 0.3s; cursor: pointer;" onmouseover="this.style.backgroundColor='var(--coral-light)'; this.style.color='white';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--coral-light)';">
+                        Cancelar Pedido
+                    </button>
+                </form>
+            {% endif %}
+            
             {% if order.status == 'SHIPPED' %}
                 <form method="POST" action="{% url 'orders:confirm-delivery' order.id %}" style="display: inline;">
                     {% csrf_token %}
