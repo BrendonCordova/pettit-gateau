@@ -41,6 +41,30 @@
             color: #EAE0D5;
         }
 
+        body.dark-theme .card,
+        body.dark-theme .bg-white,
+        body.dark-theme .bg-light,
+        body.dark-theme [style*="background-color: white"],
+        body.dark-theme [style*="background: white"] {
+            background-color: transparent !important;
+            border-color: var(--border-brown) !important;
+        }
+
+        body.dark-theme textarea,
+        body.dark-theme .form-control,
+        body.dark-theme .form-select {
+            background-color: #292524 !important;
+            color: #EAE0D5 !important;
+            border-color: var(--border-brown) !important;
+        }
+
+        body.dark-theme label,
+        body.dark-theme .text-muted,
+        body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, 
+        body.dark-theme h4, body.dark-theme h5, body.dark-theme h6 {
+            color: var(--text-brown) !important;
+        }
+
         body.dark-theme .btn-add-catalog:hover {
             background-color: var(--text-brown) !important;
             color: var(--bg-cream) !important;
