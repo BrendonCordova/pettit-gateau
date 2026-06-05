@@ -17,6 +17,9 @@ from .models import Address
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.contrib import messages
+from apps.carts.models import Cart
+from django.urls import reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 
 @login_required
 def address_create_view(request):
@@ -47,10 +50,43 @@ def address_create_view(request):
 class CustomerLoginView(LoginView):
     '''
     Class-based view handling customer authentication.
-    Overrides the default Django template and automatically redirects authenticated users.
+    Overrides the default Django template, handles cart merging for anonymous users,
+    and automatically redirects to the appropriate URL after login.
     '''
     template_name = 'customers/login.html'
     redirect_authenticated_user = True
+
+    def form_valid(self, form):
+        session_key = self.request.session.session_key
+
+        response = super().form_valid(form)
+
+        if session_key:
+            try:
+                anon_cart = Cart.objects.get(session_key=session_key, user__isnull=True)
+                anon_cart.merge_with_user_cart(self.request.user)
+            except Cart.DoesNotExist:
+                pass
+
+        return response
+
+        '''
+        '''
+    def get_success_url(self):
+        '''
+        Redirects the user to the correct page after login.
+        If they came from the shopping cart (parameter ?next=), returns to the checkout page.
+        '''
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        
+        if next_url and url_has_allowed_host_and_scheme(
+            url=next_url,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return next_url
+            
+        return reverse_lazy('customers:profile')
 
 def register_view(request):
     '''
