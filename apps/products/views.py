@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
 from django.utils import timezone
+from django.db.models.functions import Coalesce
 
 def product_list(request, category_name=None):
     '''
@@ -47,7 +48,9 @@ def product_list(request, category_name=None):
     elif sort_by == 'z-a':
         products = products.order_by('-name')
     elif sort_by == 'top_rated':
-        products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating', '-created_at')
+        products = products.annotate(
+            avg_rating=Coalesce(Avg('reviews__rating'), 0.0)
+        ).order_by('-avg_rating', '-created_at')
     elif sort_by == 'best_selling':
         products = products.annotate(num_reviews=Count('reviews')).order_by('-num_reviews', '-created_at')
     else: 
