@@ -310,14 +310,12 @@
 
 {% block scripts %}
 <script>
-    // 1. GALERIA: Mudar imagem principal ao clicar na miniatura
     function changeMainImage(element) {
         document.getElementById('main-product-image').src = element.getAttribute('data-main');
         document.querySelectorAll('.thumbnail-img').forEach(el => el.classList.remove('active'));
         element.classList.add('active');
     }
 
-    // 2. CONTROLE DE QUANTIDADE (+ e -)
     function updateQty(change) {
         let qtyInput = document.getElementById('quantity');
         let currentVal = parseInt(qtyInput.value);
@@ -326,7 +324,6 @@
         }
     }
 
-    // 3. SELEÇÃO DE SKU E PREÇO
     document.addEventListener('DOMContentLoaded', function() {
         const priceDisplay = document.getElementById('price-display');
         const hiddenSkuInput = document.getElementById('selected-sku-id');
@@ -346,7 +343,6 @@
         });
     });
 
-    // 4. API: Adicionar ao Carrinho
     async function addToCart() {
         const SkuId = document.getElementById('selected-sku-id').value;
         const quantity = document.getElementById('quantity').value;
@@ -385,7 +381,6 @@
         }
     }
 
-    // 5. API: Carregar Mais Avaliações (Adaptado para o novo CSS limpo)
     const loadMoreBtn = document.getElementById('load-more-btn');
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', async function() {
@@ -427,5 +422,15 @@
             }
         });
     }
+    
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            const btn = document.getElementById('add-to-cart-btn');
+            if (btn) {
+                btn.innerText = "Adicionar ao Carrinho";
+                btn.disabled = false;
+            }
+        }
+    });
 </script>
 {% endblock scripts %}
