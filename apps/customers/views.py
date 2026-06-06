@@ -179,14 +179,11 @@ def verify_email_view(request, uidb64, token):
 def profile_view(request):
     '''
     Renders the user profile page.
-    Fetches the user's default address (or the first available one) to display 
-    on the profile dashboard.
+    Retrieves all customer addresses, with the default address listed first.
     '''
-    address = request.user.addresses.filter(is_default=True).first()
-    if not address:
-        address = request.user.addresses.first()
+    addresses = request.user.addresses.all().order_by('-is_default', '-created_at')
         
-    return render(request, 'customers/profile.html', {'address': address})
+    return render(request, 'customers/profile.html', {'addresses': addresses})
 
 @login_required
 def profile_update_view(request):
