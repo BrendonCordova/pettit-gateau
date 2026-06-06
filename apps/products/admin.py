@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Brand, Category, Product, SKU, ProductImage, Review
+from .models import Brand, Category, Product, SKU, ProductImage, Review, Banner
 
 admin.site.register(Brand)
 admin.site.register(Category)
@@ -31,3 +31,9 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('product', 'customer', 'rating', 'created_at')
     list_filter = ('rating', 'created_at')
     search_fields = ('customer__first_name', 'product__name')
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active', 'created_at')
+    list_editable = ('is_active',)
+    search_fields = ('title',)

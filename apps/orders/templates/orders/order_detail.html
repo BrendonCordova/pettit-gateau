@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Status da Compra | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: var(--bg-cream) !important; }
+
+    .order-detail-container {
+        max-width: 850px;
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    .page-title {
+        color: var(--text-brown);
+        font-size: 1.6rem;
+        margin-bottom: 25px;
+    }
+
+    .detail-card {
+        border: 1.5px solid var(--border-brown);
+        border-radius: 15px;
+        padding: 35px 40px;
+        background: transparent;
+        margin-bottom: 40px;
+    }
+
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 30px;
+    }
+
+    .detail-title {
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 1.3rem;
+        margin: 0;
+    }
+
+    .detail-date-top {
+        font-weight: bold;
+        color: var(--text-brown);
+        font-size: 1.3rem;
+    }
+
+    .detail-body {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+    }
+
+    .items-list {
+        flex: 1;
+        padding-right: 30px;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: var(--text-brown);
+        text-transform: uppercase;
+        max-width: 500px;
+    }
+    .item-price { color: #D6A476; margin-left: 20px; }
+
+    .status-side {
+        text-align: center;
+        min-width: 220px;
+    }
+
+    .status-label {
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+
+    .status-date {
+        color: var(--coral-light);
+        font-weight: bold;
+        font-size: 1.15rem;
+    }
+
+    .address-box {
+        text-align: center;
+        color: #D6A476;
+        font-weight: bold;
+        font-size: 1.05rem;
+        margin: 30px 0;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 30px;
+    }
+
+    .btn-return {
+        background-color: var(--coral-light);
+        color: white;
+        border: 2px solid var(--text-brown);
+        border-radius: 30px;
+        padding: 8px 30px;
+        font-weight: bold;
+        font-size: 1.05rem;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+    .btn-return:hover {
+        background-color: #e87b6d;
+        color: white;
+    }
+
+    .btn-help {
+        background-color: #D6A476;
+        color: var(--text-brown);
+        border: 2px solid var(--text-brown);
+        border-radius: 30px;
+        padding: 8px 35px;
+        font-weight: bold;
+        font-size: 1.05rem;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+    .btn-help:hover {
+        background-color: #c49468;
+        color: var(--text-brown);
+    }
+
+    @media (max-width: 768px) {
+        .detail-body { flex-direction: column; gap: 30px; }
+        .status-side { text-align: left; }
+        .detail-header { flex-direction: column; gap: 15px; align-items: flex-start; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-detail-container">
+    <h1 class="page-title">Status Compra</h1>
+
+    <div class="detail-card">
+        
+        <div class="detail-header">
+            <h2 class="detail-title">Produtos</h2>
+            <div class="detail-date-top">
+                {{ order.created_at|date:"d \d\e F \d\e Y" }}
+            </div>
+        </div>
+
+        <div class="detail-body">
+            <div class="items-list">
+                {% for item in order.items.all %}
+                    <div class="item-row">
+                        <span>{{ item.quantity }}x {{ item.sku.product.name }}</span>
+                        <span class="item-price">R$ {{ item.get_subtotal }}</span>
+                    </div>
+                {% endfor %}
+                
+                <div class="item-row" style="margin-top: 20px; border-top: 1px dashed var(--border-brown); padding-top: 15px;">
+                    <span style="font-size: 0.85rem;">Frete {% if order.shipping_method %}({{ order.shipping_method.name }}){% endif %}</span>
+                    <span class="item-price" style="font-size: 0.95rem;">
+                        {% if order.shipping_method and order.shipping_method.price > 0 %}R$ {{ order.shipping_method.price }}{% else %}Grátis{% endif %}
+                    </span>
+                </div>
+                
+                <div class="item-row" style="margin-top: 5px;">
+                    <span style="color: var(--coral-light); font-size: 1.1rem;">TOTAL DO PEDIDO</span>
+                    <span class="item-price" style="color: var(--coral-light); font-size: 1.15rem;">R$ {{ order.total_price }}</span>
+                </div>
+            </div>
+
+            <div class="status-side">
+                <div class="status-label">
+                    {% if order.return_requests.exists %}
+                        Devolução Solicitada
+                    {% else %}
+                        {{ order.get_status_display }}
+                    {% endif %}
+                </div>
+                <div class="status-date">
+                    {% if order.return_requests.exists %}
+                        Em Análise
+                    {% else %}
+                        {{ order.expected_delivery_date|date:"d \d\e F \d\e Y" }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="address-box" style="line-height: 1.6;">
+            <span style="color: var(--text-brown); text-transform: uppercase;">{{ order.address.name }}</span><br>
+            {{ order.address.street }}, {{ order.address.number }}. {{ order.address.neighborhood }}, {{ order.address.city }}-{{ order.address.state }}.
+        </div>
+
+        {% if order.return_requests.exists %}
+            <div style="background-color: rgba(214, 164, 118, 0.1); border: 1.5px solid #D6A476; border-radius: 15px; padding: 15px 20px; text-align: center; color: var(--text-brown); font-weight: bold; margin-bottom: 25px;">
+                <i class="bi bi-info-circle me-2" style="color: var(--coral-light);"></i> 
+                Sua solicitação de devolução está em análise. Você será atualizado através do e-mail cadastrado.
+            </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            
+            {% if order.status == 'PENDING' %}
+                <a href="{% url 'orders:retry-payment' order.id %}" class="btn-return" style="background-color: #28a745; border-color: #28a745;">
+                    Pagar Agora <i class="bi bi-credit-card ms-1"></i>
+                </a>
+                
+                <form method="POST" action="{% url 'orders:cancel-order' order.id %}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.');">
+                    {% csrf_token %}
+                    <button type="submit" style="background-color: transparent; color: var(--coral-light); border: 2px solid var(--coral-light); border-radius: 30px; padding: 8px 30px; font-weight: bold; font-size: 1.05rem; transition: 0.3s; cursor: pointer;" onmouseover="this.style.backgroundColor='var(--coral-light)'; this.style.color='white';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--coral-light)';">
+                        Cancelar Pedido
+                    </button>
+                </form>
+            {% endif %}
+            
+            {% if order.status == 'SHIPPED' %}
+                <form method="POST" action="{% url 'orders:confirm-delivery' order.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-return" style="background-color: #28a745; border-color: #28a745; cursor: pointer;">
+                        Confirmar Entrega <i class="bi bi-check-circle ms-1"></i>
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if order.status == 'DELIVERED' and not order.return_requests.exists %}
+                <a href="{% url 'orders:return' order.id %}" class="btn-return">Devolver produto</a>
+            {% endif %}
+            
+            <a href="/conta/ajuda/" class="btn-help">Ajuda <i class="bi bi-question-circle"></i></a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

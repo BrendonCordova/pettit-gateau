@@ -2,55 +2,173 @@
 
 {% block title %}Meu Carrinho | Pettit Gateau{% endblock%}
 
-{% block content %}
+{% block extra_css %}
+<style>
+    /* Variáveis de Cor baseadas na imagem */
+    :root {
+        --bg-cream: #FFFDF9;
+        --border-brown: #4A3B32;
+        --text-brown: #4A3B32;
+        --coral-light: #FF8A7A;
+        --btn-pink-light: #F4D3CE;
+    }
 
+    body {
+        background-color: var(--bg-cream) !important;
+        color: var(--text-brown);
+        font-family: sans-serif;
+    }
+
+    /* Estilização dos Cartões */
+    .custom-card {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: transparent;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .title-coral {
+        color: var(--coral-light);
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 1.2rem;
+    }
+
+    /* Seletor de Quantidade estilo Cápsula */
+    .qty-capsule {
+        border: 2px solid var(--border-brown);
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 15px;
+        width: 120px;
+        justify-content: space-between;
+    }
+    
+    .qty-capsule button {
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--text-brown);
+        cursor: pointer;
+    }
+
+    .btn-remover {
+        color: var(--coral-light);
+        text-decoration: underline;
+        background: none;
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    /* Botões do Resumo */
+    .btn-checkout {
+        background-color: var(--coral-light);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: 0.3s;
+    }
+    .btn-checkout:hover { background-color: #e87b6d; color: white;}
+
+    .btn-continue {
+        background-color: var(--btn-pink-light);
+        color: var(--text-brown);
+        border: 2px solid var(--border-brown);
+        border-radius: 25px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .cupom-box {
+        background-color: #D6A476; /* Cor dourada do cupom da imagem */
+        border: 2px solid var(--border-brown);
+        border-radius: 20px;
+        text-align: center;
+        padding: 8px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 {% csrf_token %}
 
-<div class="container mt-5">
-    <h1 class="mb-4">Meu Carrinho de Compras</h1>
+<div class="container mt-5 mb-5">
+    <div class="mb-4">
+        <h2 style="color: #D6A476; font-weight: bold; margin-bottom: 0;">CARRINHO</h2>
+        <h5 class="text-muted"><span id="header-qty">0</span> Produtos</h5>
+    </div>
     
     <div class="row">
-        <section class="col-md-8" aria-label="Itens do Carrinho">
-            <div class="card">
-                <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Produto</th>
-                                <th scope="col">Volume</th>
-                                <th scope="col">Preço Unit.</th>
-                                <th scope="col">Qtd.</th>
-                                <th scope="col">Subtotal</th>
-                                <th scope="col">Ações</th>
-                            </tr>
-                        </thead>
-                      
-                        <tbody id="cart-items-body">
-                            <tr><td colspan="6" class="text-center">Carregando...</td></tr>
-                        </tbody>
-                    </table>
+        <section class="col-md-7" aria-label="Itens do Carrinho">
+            
+            <div class="custom-card mb-4 d-flex align-items-center justify-content-between">
+                <div class="w-100 me-3">
+                    <label class="form-label small text-muted mb-1">Consulte o frete com seu CEP</label>
+                    <input type="text" class="form-control" placeholder="Digite seu CEP..." style="border: 1px solid var(--border-brown); border-radius: 20px;">
                 </div>
+                <button class="btn" style="background-color: var(--btn-pink-light); border: 1px solid var(--border-brown); border-radius: 20px; padding: 6px 20px; margin-top: 20px;">Ok</button>
+                <a href="#" class="small text-muted ms-3 mt-4 text-decoration-underline" style="white-space: nowrap;">Não sei meu CEP</a>
             </div>
+
+            <div class="custom-card" id="cart-items-container">
+                <div class="text-center py-4">Carregando seus produtos...</div>
+            </div>
+
         </section>
 
-        <section class="col-md-4" aria-labelledby="summary-title">
-            <div class="card">
-                <div class="card-body">
-                    <h2 id="summary-title" class="card-title h5">Resumo do Pedido</h2>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-3">
-                        <strong>Total:</strong>
-                        <strong id="cart-total">R$ 0.00</strong>
-                    </div>
-                    <a href="{% url 'orders:checkout' %}" class="btn btn-dark w-100">
-                        Finalizar Compra
-                    </a>
+        <section class="col-md-5" aria-labelledby="summary-title">
+            <div class="custom-card">
+                <h3 id="summary-title" class="fw-bold mb-4">Resumo do pedido</h3>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <strong style="color: var(--text-brown);">Produtos ( <span id="summary-qty">0</span> )</strong>
+                    <strong style="color: #D6A476;" id="summary-subtotal">R$ 0,00</strong>
                 </div>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <strong style="color: var(--text-brown);">Frete</strong>
+                    <strong style="color: #D6A476;">Grátis</strong>
+                </div>
+
+                <div class="d-flex justify-content-between mb-4">
+                    <strong style="color: var(--text-brown);">Descontos</strong>
+                    <strong style="color: var(--coral-light);">- R$ 0,00</strong>
+                </div>
+                
+                <hr style="border-top: 2px dashed var(--border-brown); opacity: 0.3;">
+                
+                <div class="mb-4 mt-3">
+                    <h4 class="fw-bold mb-1">Total</h4>
+                    <h2 class="fw-bold text-center mt-3" style="color: #D6A476;" id="cart-total">R$ 0,00</h2>
+                </div>
+
+                <div class="mb-4">
+                    <label class="small fw-bold mb-1" style="color: var(--text-brown);">Cupom de Desconto?</label>
+                    <div class="d-flex">
+                        <input type="text" class="form-control" placeholder="Digite seu cupom" style="border: 2px solid var(--border-brown); border-radius: 20px 0 0 20px; background-color: transparent;">
+                        <button class="btn" style="background-color: #D6A476; color: white; border: 2px solid var(--border-brown); border-left: none; border-radius: 0 20px 20px 0; font-weight: bold; padding: 6px 20px;">Aplicar</button>
+                    </div>
+                </div>
+
+                <a href="{% url 'orders:checkout' %}" class="btn btn-checkout w-100 mb-3 d-block text-center text-decoration-none">
+                    Finalizar Compra
+                </a>
+                <a href="/produtos/" class="btn btn-continue w-100 d-block text-center text-decoration-none">
+                    Continuar Comprando
+                </a>
             </div>
         </section>
     </div>
 </div>
-
 {% endblock content %}
 
 {% block scripts %}
@@ -68,44 +186,67 @@
             const response = await fetch(apiUrl);
             const cart = await response.json();
             
-            const tbody = document.getElementById('cart-items-body');
+            const container = document.getElementById('cart-items-container');
             const totalEl = document.getElementById('cart-total');
+            const subtotalEl = document.getElementById('summary-subtotal');
             
-            tbody.innerHTML = '';
+            container.innerHTML = '';
 
             const totalItemsCount = cart.items ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
 
+            document.getElementById('header-qty').innerText = totalItemsCount;
+            document.getElementById('summary-qty').innerText = totalItemsCount;
+
             const cartBadge = document.getElementById('cart-item-count');
-            if (cartBadge) {
-                cartBadge.innerText = totalItemsCount;
-            }
+            if (cartBadge) cartBadge.innerText = totalItemsCount;
 
             if (cart.items.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">Seu carrinho está vazio.</td></tr>';
-                totalEl.innerText = 'R$ 0.00';
+                container.innerHTML = '<div class="text-center py-4">Seu carrinho está vazio.</div>';
+                totalEl.innerText = 'R$ 0,00';
+                subtotalEl.innerText = 'R$ 0,00';
                 return;
             }
 
-            cart.items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item.product_name}</td>
-                    <td>${item.volume_ml}ml</td>
-                    <td>R$ ${item.price}</td>
-                    <td style="width: 120px;">
-                        <input type="number" class="form-control form-control-sm" 
-                               value="${item.quantity}" min="0" 
-                               onchange="updateQuantity('${item.sku}', this.value)">
-                    </td>
-                    <td>R$ ${item.subtotal}</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger" onclick="removeItem('${item.sku}')">X</button>
-                    </td>
+            cart.items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `d-flex py-3 ${index !== cart.items.length - 1 ? 'border-bottom' : ''}`;
+                itemDiv.style.borderBottomColor = 'var(--border-brown) !important';
+                itemDiv.style.borderBottomStyle = 'dashed !important';
+                
+                itemDiv.innerHTML = `
+                    <div style="width: 100px; height: 120px; background-color: white; border: 1px solid var(--border-brown); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 5px;">
+                        ${item.image_url 
+                            ? `<img src="${item.image_url}" alt="${item.product_name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">` 
+                            : `<span class="small text-muted">Sem Imagem</span>`
+                        }
+                    </div>
+                    
+                    <div class="ms-4 flex-grow-1 d-flex flex-column justify-content-between">
+                        <div>
+                            <h5 class="title-coral mb-1">${item.product_name}</h5>
+                            <p class="text-muted small mb-0">${item.product_name} - ${item.volume_ml}ml</p>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-end mt-2">
+                            <div>
+                                <div class="qty-capsule mb-2">
+                                    <button onclick="updateQuantity('${item.sku}', ${item.quantity - 1})">-</button>
+                                    <span>${item.quantity}</span>
+                                    <button onclick="updateQuantity('${item.sku}', ${item.quantity + 1})">+</button>
+                                </div>
+                                <br>
+                                <h4 class="fw-bold mb-0" style="color: var(--text-brown);">R$ ${item.price}</h4>
+                            </div>
+                            <button class="btn-remover mb-1" onclick="removeItem('${item.sku}')">Remover</button>
+                        </div>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(itemDiv);
             });
 
+            // O formato do R$
             totalEl.innerText = `R$ ${cart.total_price}`;
+            subtotalEl.innerText = `R$ ${cart.total_price}`;
 
         } catch (error) {
             console.error("Erro ao carregar o carrinho:", error);
@@ -113,6 +254,10 @@
     }
 
     async function updateQuantity(skuId, newQuantity) {
+        if(newQuantity <= 0) {
+            removeItem(skuId);
+            return;
+        }
         try {
             await fetch(apiUrl, {
                 method: 'PATCH',
@@ -126,8 +271,6 @@
     }
 
     async function removeItem(skuId) {
-        if(!confirm("Tem certeza que deseja remover este item?")) return;
-        
         try {
             await fetch(apiUrl, {
                 method: 'DELETE',

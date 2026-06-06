@@ -12,10 +12,18 @@ class CartItemSerializer(serializers.ModelSerializer):
     volume_ml = serializers.IntegerField(source='sku.volume_ml', read_only=True)
     price = serializers.DecimalField(source='sku.price', max_digits=10, decimal_places=2, read_only=True)
     subtotal = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
-        fields = ['id', 'sku', 'product_name', 'volume_ml', 'price', 'quantity', 'subtotal']
+        fields = ['id', 'sku', 'product_name', 'volume_ml', 'price', 'quantity', 'subtotal', 'image_url']
+
+    def get_image_url(self, obj):
+        # Vai até o Produto, busca as imagens e filtra a principal
+        main_image = obj.sku.product.images.filter(is_main=True).first()
+        if main_image and main_image.image:
+            return main_image.image.url
+        return None
 
 class CartSerializer(serializers.ModelSerializer):
     '''

@@ -6,47 +6,484 @@
     <title>{% block title %}Pettit Gateau{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    {% block extra_css %}{% endblock %}
+    <style>
+        :root {
+            --bg-cream: #FFFDF9;
+            --border-brown: #4A3B32;
+            --text-brown: #4A3B32;
+            --coral-light: #FF8A7A;
+            --gold-accent: #D6A476;
+            --footer-bg: #050505;
+        }
+
+        body.dark-theme {
+            --bg-cream: #1c1917;
+            --text-brown: #EAE0D5;
+            --border-brown: #44403c; 
+            --footer-bg: #0a0a0a; 
+        }
+        
+        body.dark-theme .custom-input, 
+        body.dark-theme .search-input {
+            background-color: #292524 !important;
+            color: #EAE0D5 !important;
+        }
+
+        body.dark-theme select {
+            background-color: transparent;
+            color: #EAE0D5;
+        }
+
+        body.dark-theme select option {
+            background-color: #292524;
+            color: #EAE0D5;
+        }
+
+        body.dark-theme .card,
+        body.dark-theme .bg-white,
+        body.dark-theme .bg-light,
+        body.dark-theme [style*="background-color: white"],
+        body.dark-theme [style*="background: white"] {
+            background-color: transparent !important;
+            border-color: var(--border-brown) !important;
+        }
+
+        body.dark-theme textarea,
+        body.dark-theme .form-control,
+        body.dark-theme .form-select {
+            background-color: #292524 !important;
+            color: #EAE0D5 !important;
+            border-color: var(--border-brown) !important;
+        }
+
+        body.dark-theme label,
+        body.dark-theme .text-muted,
+        body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, 
+        body.dark-theme h4, body.dark-theme h5, body.dark-theme h6 {
+            color: var(--text-brown) !important;
+        }
+
+        body.dark-theme .btn-add-catalog:hover {
+            background-color: var(--text-brown) !important;
+            color: var(--bg-cream) !important;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-cream) !important;
+            color: var(--text-brown);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content-wrapper {
+            flex: 1 0 auto;
+            padding-top: 110px;
+            width: 100%;
+        }
+
+        .custom-header {
+            background-color: var(--bg-cream);
+            border-bottom: 1.5px solid var(--border-brown);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1030;
+        }
+        
+        .header-logo {
+            font-family: 'Arial Black', Impact, sans-serif;
+            color: var(--coral-light);
+            font-size: 1.8rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+        .header-logo:hover { color: var(--coral-light); }
+        
+        .nav-center a {
+            color: var(--text-brown);
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-center a:hover { color: var(--coral-light); }
+
+        .header-icons a {
+            color: var(--text-brown);
+            font-size: 1.8rem;
+            margin-left: 25px;
+            position: relative;
+            text-decoration: none;
+        }
+        .header-icons a:hover { color: var(--coral-light); }
+        
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -10px;
+            font-size: 0.7rem;
+            background-color: var(--coral-light);
+            border: 2px solid var(--bg-cream);
+        }
+
+        .custom-footer {
+            background-color: var(--footer-bg);
+            color: #E0E0E0;
+            padding: 60px 0 40px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .footer-logo {
+            font-family: 'Georgia', serif;
+            color: var(--gold-accent);
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .footer-heading {
+            color: var(--gold-accent);
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .footer-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .footer-contact {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        .footer-contact i {
+            font-size: 1.3rem;
+            margin-right: 15px;
+            color: #E0E0E0;
+        }
+        .footer-social {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            text-decoration: none;
+            color: #E0E0E0;
+        }
+        .footer-social i {
+            font-size: 1.3rem;
+            margin-right: 15px;
+        }
+        .footer-social:hover { color: var(--coral-light); }
+
+        .profile-dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-dropdown-menu {
+            display: none; 
+            position: absolute;
+            right: -10px;
+            top: 45px;
+            background-color: var(--bg-cream);
+            border: 2px solid var(--border-brown);
+            border-radius: 15px;
+            padding: 25px 30px;
+            min-width: 240px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            z-index: 1050;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .profile-dropdown-menu.active {
+            display: flex;
+        }
+
+        .header-icons .profile-dropdown-item {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 15px !important;
+            color: var(--text-brown) !important;
+            font-weight: bold !important;
+            font-size: 1.15rem !important;
+            margin-left: 0 !important;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            font-family: inherit;
+            white-space: nowrap;
+            text-decoration: none !important;
+        }
+
+        .header-icons .profile-dropdown-item:hover {
+            color: var(--coral-light) !important;
+        }
+
+        .header-icons .profile-dropdown-item i {
+            font-size: 1.5rem !important;
+            width: 32px !important; 
+            margin-left: 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+        }
+
+        .logout-modal-overlay {
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .logout-modal-box {
+            background-color: var(--bg-cream);
+            border: 2px solid var(--border-brown);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .logout-modal-title {
+            color: var(--coral-light);
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .logout-modal-text {
+            color: var(--text-brown);
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .logout-modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-modal-cancel {
+            background-color: transparent;
+            border: 2px solid var(--text-brown);
+            color: var(--text-brown);
+            border-radius: 30px;
+            padding: 8px 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-modal-cancel:hover { background-color: #e6ded8; }
+
+        .btn-modal-confirm {
+            background-color: var(--coral-light);
+            border: 2px solid var(--text-brown);
+            color: white;
+            border-radius: 30px;
+            padding: 8px 25px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-modal-confirm:hover { background-color: #e87b6d; color: white; }
+
+        .banner-container {
+        position: relative;
+        width: 100%;
+    }
+    
+    .admin-upload-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(255, 255, 255, 0.9);
+        color: var(--text-brown);
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        border: 2px solid var(--border-brown);
+        transition: 0.3s;
+        z-index: 10;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .admin-upload-btn:hover {
+        background-color: var(--coral-light);
+        color: white;
+    }
+</style>
+
+{% block extra_css %}{% endblock %}
+
 </head>
-<body class="bg-light">
 
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4" aria-label="Navegação Principal">
-            <div class="container">
-                <a class="navbar-brand" href="/">Pettit Gateau</a>
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Perfumes</a>
-                        </li>
-                    </ul>
+<body>
 
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link text-warning fw-bold" href="/carrinho/">
-                                Carrinho 
-                                <span id="cart-item-count" class="badge bg-danger rounded-pill">0</span>
-                            </a>
-                        </li>
-                    </ul>
+    <header class="custom-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="/" class="header-logo">
+                Pettit Gateau <span aria-hidden="true" style="font-size: 1.4rem;">🐾</span>
+            </a>
+            <nav class="nav-center d-none d-md-block">
+                <a href="{% url 'products:category_list' 'Masculino' %}">Masculino</a>
+                <a href="{% url 'products:category_list' 'Feminino' %}">Feminino</a>
+                <a href="{% url 'products:category_list' 'Unissex' %}">Unissex</a>
+            </nav>
+            <div class="header-icons d-flex align-items-center">   
+                {% if user.is_authenticated %}
+                <div class="profile-dropdown-container">
+                    <a href="#" id="profileToggleBtn" aria-label="Perfil">
+                        <i class="bi bi-person-circle"></i>
+                    </a>
+                    <div class="profile-dropdown-menu" id="profileDropdown">
+                        <a href="{% url 'customers:profile' %}" class="profile-dropdown-item">
+                            <i class="bi bi-person-vcard"></i> Meu perfil
+                        </a>
+                        <button class="profile-dropdown-item" onclick="toggleTheme()">
+                            <i class="bi bi-moon-stars"></i> Mudar tema
+                        </button>
+                        <a href="/conta/ajuda/" class="profile-dropdown-item" aria-label="Central de Ajuda">
+                            <i class="bi bi-question-circle"></i> Ajuda
+                        </a>
+                        <button class="profile-dropdown-item" onclick="openLogoutModal()">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                    <a href="{% url 'customers:login' %}" aria-label="Perfil">
+                        <i class="bi bi-person-circle"></i>
+                    </a>
+                {% endif %}
+
+                {% if user.is_staff %}
+                    <a href="/produtos/painel/estoque/" aria-label="Gerir Produtos">
+                        <i class="bi bi-cart-check-fill"></i>
+                    </a>
+                    <a href="/pedidos/painel/admin/" aria-label="Gerir Entregas">
+                        <i class="bi bi-truck"></i>
+                    </a>
+                {% else %}
+                    <a href="{% url 'orders:list' %}" aria-label="Meus Pedidos">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </a>
+                    <a href="/carrinho/" aria-label="Carrinho de Compras">
+                        <i class="bi bi-cart-fill"></i>
+                        <span id="cart-item-count" class="badge rounded-pill cart-badge">0</span>
+                    </a>
+                {% endif %}
+
+            </div>
+            </div>
+        </header>
+        <div class="logout-modal-overlay" id="logoutModal">
+            <div class="logout-modal-box">
+                <h2 class="logout-modal-title">Sair da conta</h2>
+                <p class="logout-modal-text">Tem certeza que deseja terminar a sessão na Pettit Gateau?</p>
+                
+                <div class="logout-modal-actions">
+                    
+                    <form action="{% url 'customers:logout' %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-modal-confirm" style="cursor: pointer;">Sim, sair</button>
+                    </form>
+                    
+                    <button onclick="closeLogoutModal()" class="btn-modal-cancel">Cancelar</button>
+                </div>
+                
+            </div>
+        </div>
+            
+            <div class="content-wrapper">
+        
+        {% if messages %}
+            <div class="container mb-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border: 1px solid var(--border-brown);">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block hero %}
+        {% endblock hero %}
+
+        <main class="container">
+            {% block content %}
+            {% endblock content %}
+        </main>
+
+    </div>
+
+    <footer class="custom-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5 col-md-12 mb-5 mb-lg-0 pe-lg-5">
+                    <span class="footer-logo">Pettit Gateau</span>
+                    <p class="footer-text">
+                        Na Perfumaria Pettit Gateau, Cada Fragrância Conta Uma História. Trazemos O Charme E A Elegância De Diferentes Partes Do Mundo, Reunindo Perfumes Renomados E Altamente Avaliados Para Oferecer Uma Experiência Sensorial Inesquecível. Aqui, Cada Detalhe É Pensado Para Transformar O Simples Ato De Escolher Um Perfume Em Um Momento Especial.
+                    </p>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-5 mb-md-0">
+                    <h5 class="footer-heading">Entre em Contato</h5>
+                    <div class="footer-contact">
+                        <i class="bi bi-whatsapp"></i> (48) 9 88218022
+                    </div>
+                    <div class="footer-contact">
+                        <i class="bi bi-telephone-fill"></i> (48) 9 88218022
+                    </div>
+                    <div class="footer-contact">
+                        <i class="bi bi-envelope"></i> dev.gcbrendon@gmail.com
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-heading">Siga Nossas Redes Sociais</h5>
+                    <a href="#" class="footer-social">
+                        <i class="bi bi-instagram"></i> Pettit Gateau
+                    </a>
+                    <a href="#" class="footer-social">
+                        <i class="bi bi-tiktok"></i> Pettit_Gateau
+                    </a>
                 </div>
             </div>
-        </nav>
-    </header>
-
-    <main class="container">
-        {% block content %}
-        {% endblock content %}
-    </main>
-
-    <footer class="text-center mt-5 p-4 text-muted border-top">
-        <small>&copy; 2026 Pettit Gateau. Todos os direitos reservados.</small>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -57,7 +494,6 @@
                 const response = await fetch('/carrinho/api/my-cart/');
                 if (response.ok) {
                     const cart = await response.json();
-            
                     const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
                     
                     const counterElement = document.getElementById('cart-item-count');
@@ -71,6 +507,65 @@
         }
 
         document.addEventListener('DOMContentLoaded', updateCartCounter);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                let alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    let bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 4000);
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById('profileToggleBtn');
+            const dropdownMenu = document.getElementById('profileDropdown');
+
+            if (toggleBtn && dropdownMenu) {
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    dropdownMenu.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function(e) {
+                    const container = document.querySelector('.profile-dropdown-container');
+                    if (!container.contains(e.target)) {
+                        dropdownMenu.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        function openLogoutModal() {
+            document.getElementById('profileDropdown').classList.remove('active');
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('pettit_theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+        });
+
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark-theme');
+            
+            if (body.classList.contains('dark-theme')) {
+                localStorage.setItem('pettit_theme', 'dark');
+            } else {
+                localStorage.setItem('pettit_theme', 'light');
+            }
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if(dropdown) dropdown.classList.remove('active');
+        }
     </script>
 
     {% block scripts %}{% endblock %}

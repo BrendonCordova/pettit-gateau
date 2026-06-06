@@ -6,6 +6,7 @@ from .models import Cart, CartItem
 from apps.products.models import SKU
 from .serializers import CartSerializer
 from django.views.generic import TemplateView
+from django.contrib import messages
 
 class CartDetailAPIView(APIView):
     '''
@@ -83,12 +84,14 @@ class CartDetailAPIView(APIView):
         if existing_item:
             existing_item.quantity += quantity
             existing_item.save()
+            messages.success(request, f"A quantidade de {sku.product.name} foi atualizada no seu carrinho!")
         else:
             CartItem.objects.get_or_create(
                 cart=cart,
                 sku=sku,
                 quantity=quantity
             )
+            messages.success(request, f"🐾 {sku.product.name} foi adicionado ao seu carrinho com sucesso!")
         
         serializer = CartSerializer(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)

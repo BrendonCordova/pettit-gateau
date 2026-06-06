@@ -1,0 +1,760 @@
+{% extends 'base.html' %}
+{% block title %}Controle de Estoque | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    .inventory-container {
+        max-width: 1200px;
+        margin: 40px auto 80px;
+        padding: 0 20px;
+    }
+    .inventory-title {
+        color: var(--text-brown);
+        font-weight: 800;
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+    }
+    .btn-add-product {
+        display: inline-block;
+        background-color: #D6A476;
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 10px 25px;
+        border: 2px solid var(--border-brown);
+        border-radius: 30px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .btn-add-product:hover { background-color: #c59567; color: var(--text-brown); }
+    .controls-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .top-actions-row {
+        display: flex; gap: 15px; align-items: center; margin-bottom: 35px; flex-wrap: wrap;
+    }
+    .btn-secondary-action {
+        display: inline-block; background-color: transparent; color: var(--text-brown);
+        font-weight: bold; font-size: 0.95rem; padding: 8px 20px;
+        border: 2px solid var(--border-brown); border-radius: 30px;
+        text-decoration: none; transition: 0.3s;
+    }
+    .btn-secondary-action:hover { background-color: var(--border-brown); color: var(--bg-cream); }
+
+    .mini-modal-box {
+        background-color: var(--bg-cream); border: 2px solid var(--border-brown);
+        border-radius: 20px; padding: 30px; width: 90%; max-width: 450px;
+        position: relative;
+    }
+
+    .search-form {
+        flex-grow: 1;
+        position: relative;
+        display: flex;
+        margin: 0;
+    }
+    .search-input {
+        width: 100%;
+        padding: 10px 45px 10px 45px;
+        border: 2px solid var(--border-brown);
+        border-radius: 30px;
+        background-color: transparent;
+        color: var(--text-brown);
+        font-weight: bold;
+        outline: none;
+    }
+    .search-input::placeholder { color: #a8968a; font-weight: normal; }
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        cursor: pointer; 
+        transition: 0.2s;
+    }
+    .search-icon:hover { color: var(--coral-light); }
+    .clear-icon {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-brown);
+        font-size: 1.2rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .filter-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .filter-btn {
+        padding: 10px 25px;
+        border: 2px solid var(--border-brown);
+        border-radius: 30px;
+        background-color: transparent;
+        color: var(--text-brown);
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .filter-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 5px;
+        background-color: var(--bg-cream);
+        min-width: 180px;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+        border: 2px solid var(--border-brown);
+        border-radius: 10px;
+        z-index: 10;
+        overflow: hidden;
+    }
+    .filter-content.show {
+        display: block;
+    }
+    .filter-content a {
+        color: var(--text-brown);
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        font-weight: bold;
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--border-brown);
+    }
+    .filter-content a:last-child { border-bottom: none; }
+    .filter-content a:hover { background-color: #f1ebe6; color: var(--coral-light); }
+    .table-wrapper {
+        max-height: 60vh;
+        overflow-y: auto;
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: var(--bg-cream);
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-brown) transparent;
+    }
+    .table-wrapper::-webkit-scrollbar { width: 8px; }
+    .table-wrapper::-webkit-scrollbar-thumb { background-color: var(--border-brown); border-radius: 10px; }
+    .inventory-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+    }
+    .inventory-table th {
+        position: sticky;
+        top: 0;
+        background-color: var(--bg-cream);
+        color: var(--text-brown);
+        font-weight: 900;
+        padding: 15px 10px;
+        border-bottom: 2px solid var(--border-brown);
+        z-index: 2;
+    }
+    .sortable-header {
+        color: var(--text-brown);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+    .sortable-header:hover { color: var(--coral-light); }
+    .inventory-table td {
+        padding: 15px 10px;
+        font-size: 0.95rem;
+        border-bottom: 1px solid var(--border-brown);
+        text-transform: uppercase;
+    }
+    .inventory-table tr:last-child td { border-bottom: none; }
+    .col-id { color: #D6A476; font-weight: bold; }
+    .col-default { color: #D6A476; font-weight: bold; }
+    .stock-high { color: #D6A476; font-weight: bold; }
+    .stock-medium { color: var(--text-brown); font-weight: 900; }
+    .stock-low { color: var(--coral-light); font-weight: 900; }
+    .btn-edit-icon {
+        color: #D6A476;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-edit-icon:hover { color: var(--coral-light); }
+
+    .add-modal-overlay {
+        display: none;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6); z-index: 2000;
+        align-items: center; justify-content: center; backdrop-filter: blur(3px);
+    }
+    .add-modal-box {
+        background-color: var(--bg-cream); border: 2px solid var(--border-brown);
+        border-radius: 20px; padding: 40px; width: 95%; max-width: 850px;
+        position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .add-modal-box::-webkit-scrollbar { width: 6px; }
+    .add-modal-box::-webkit-scrollbar-thumb { background-color: var(--border-brown); border-radius: 10px; }
+    .modal-title-add {
+        color: var(--coral-light); font-weight: 900; font-size: 1.6rem; margin-bottom: 20px;
+    }
+    .btn-close-modal {
+        position: absolute; top: 20px; right: 25px;
+        font-size: 1.8rem; color: var(--text-brown); cursor: pointer; transition: 0.3s;
+    }
+    .btn-close-modal:hover { color: var(--coral-light); }
+    .form-group-custom {
+        display: flex; align-items: center; gap: 15px; margin-bottom: 15px;
+    }
+    .form-group-custom label {
+        color: var(--text-brown); font-weight: bold; min-width: 145px; font-size: 1.05rem;
+        white-space: nowrap;
+    }
+    .form-group-custom input, .form-group-custom select, .form-group-custom textarea {
+        flex-grow: 1; border: none; border-bottom: 2px solid var(--border-brown); width: 100%;
+        background: transparent; color: #D6A476; font-weight: bold; font-size: 1.05rem;
+        padding: 5px; outline: none; font-family: inherit;
+    }
+    .form-group-custom input::placeholder, .form-group-custom textarea::placeholder {
+        color: #dcbfa5; font-weight: normal;
+    }
+    .input-row-half { display: flex; gap: 20px; width: 100%; margin-bottom: 15px;}
+    .input-row-half .form-group-custom { margin-bottom: 0; flex: 1; }
+    .input-row-half .form-group-custom label { min-width: auto; }
+    .media-upload-section {
+        display: flex; flex-direction: column; align-items: center; margin-top: 20px;
+    }
+    .btn-upload-media {
+        border: 2px solid var(--text-brown); border-radius: 30px; padding: 10px 25px;
+        color: var(--text-brown); font-weight: bold; cursor: pointer; display: flex; gap: 10px; transition: 0.3s;
+    }
+    .btn-upload-media:hover { background-color: var(--text-brown); color: var(--bg-cream); }
+    .file-name-display { color: #D6A476; font-size: 0.85rem; margin-top: 8px; text-decoration: underline; }
+    .modal-actions-add { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; }
+    .btn-save-prod {
+        background-color: var(--coral-light); color: white; border: 2px solid var(--border-brown);
+        border-radius: 30px; padding: 10px 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+    }
+    .btn-save-prod:hover { background-color: #e87b6d; }
+    .btn-cancel-prod {
+        background-color: #D6A476; color: var(--text-brown); border: 2px solid var(--border-brown);
+        border-radius: 30px; padding: 10px 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+    }
+    .btn-cancel-prod:hover { background-color: #c59567; }
+
+    .row-inactive {
+        background-color: #f7f3f0; /* Fundo levemente acinzentado */
+        opacity: 0.6; /* Fica "apagado" */
+    }
+    .row-inactive td {
+        filter: grayscale(100%); /* Tira a cor viva (coral/dourado) do estoque e do lápis */
+    }
+    .inactive-badge {
+        background-color: #a8968a;
+        color: white;
+        font-size: 0.65rem;
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+        font-weight: bold;
+        vertical-align: middle;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inventory-container">
+    
+    <h1 class="inventory-title">Controle de Estoque</h1>
+
+    <div class="top-actions-row">
+        <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
+        <a href="#" class="btn-secondary-action" onclick="openBrandModal()"><i class="bi bi-bookmark-star"></i> Nova Marca</a>
+        <a href="#" class="btn-secondary-action" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Nova Categoria</a>
+        <a href="#" class="btn-secondary-action" onclick="openBannerModal()"><i class="bi bi-images"></i> Histórico de Banners</a>
+    </div>
+
+    <div class="add-modal-overlay" id="add-brand-modal">
+        <div class="mini-modal-box">
+            <i class="bi bi-x btn-close-modal" onclick="closeBrandModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Marca</h2>
+            <form action="{% url 'products:admin-add-brand' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group-custom" style="margin-top: 20px;">
+                    <label style="min-width: 60px;">Nome:</label>
+                    <input type="text" name="name" placeholder="Ex: Dior, Chanel..." required>
+                </div>
+                <div class="modal-actions-add" style="margin-top: 20px;">
+                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Marca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="add-modal-overlay" id="add-category-modal">
+        <div class="mini-modal-box">
+            <i class="bi bi-x btn-close-modal" onclick="closeCategoryModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Categoria</h2>
+            <form action="{% url 'products:admin-add-category' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group-custom" style="margin-top: 20px;">
+                    <label style="min-width: 60px;">Nome:</label>
+                    <input type="text" name="name" placeholder="Ex: Unissex, Infantil..." required>
+                </div>
+                <div class="modal-actions-add" style="margin-top: 20px;">
+                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Categoria</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="add-modal-overlay" id="history-banner-modal">
+        <div class="mini-modal-box" style="max-width: 550px;">
+            <i class="bi bi-x btn-close-modal" onclick="closeBannerModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Gerir Banners da Loja</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 15px;">Ative, remova ou adicione novas propagandas.</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px; border-bottom: 2px solid var(--border-brown); margin-bottom: 20px; padding-bottom: 10px;">
+                {% for banner in banners %}
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background-color: {% if banner.is_active %}#fff{% else %}#f7f3f0{% endif %}; border: 1px solid {% if banner.is_active %}var(--gold-accent){% else %}var(--border-brown){% endif %}; border-radius: 10px;">
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="{{ banner.image.url }}" style="height: 50px; width: 90px; object-fit: cover; border-radius: 5px; border: 1px solid var(--border-brown);">
+                        <div>
+                            {% if banner.is_active %}
+                                <span style="font-size: 0.75rem; font-weight: bold; color: #D6A476;">
+                                    <i class="bi bi-star-fill"></i> NA VITRINE
+                                </span>
+                            {% else %}
+                                <span style="font-size: 0.75rem; font-weight: bold; color: var(--text-brown);">
+                                    NO ARQUIVO
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        {% if not banner.is_active %}
+                        <form action="{% url 'products:admin-toggle-banner' banner.id %}" method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-secondary-action" style="padding: 5px 15px; font-size: 0.8rem; background-color: var(--text-brown); color: var(--bg-cream);">Ativar</button>
+                        </form>
+                        {% endif %}
+                        
+                        <form action="{% url 'products:admin-delete-banner' banner.id %}" method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; font-size: 1.2rem; color: var(--coral-light); cursor: pointer;" title="Excluir Definitivamente" onclick="return confirm('Tem certeza que deseja apagar este banner do histórico?')"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+
+                </div>
+                {% empty %}
+                    <p style="color: #D6A476; font-size: 0.9rem; text-align: center; margin-top: 10px;">Nenhum banner cadastrado.</p>
+                {% endfor %}
+            </div>
+
+            <form action="{% url 'products:admin-add-banner-inventory' %}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column;">
+                {% csrf_token %}
+                <h3 style="color: var(--text-brown); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;"><i class="bi bi-cloud-arrow-up"></i> Adicionar Novo Banner</h3>
+                
+                <div class="media-upload-section" style="margin-top: 0; width: 100%; flex-direction: row; justify-content: space-between; align-items: center; border: none;">
+                    <label for="newBannerImage" class="btn-upload-media" style="padding: 6px 15px; font-size: 0.9rem;">Escolher Imagem <i class="bi bi-image"></i></label>
+                    <input type="file" id="newBannerImage" name="image" accept="image/*" onchange="updateFileName(this, 'newBannerFileDisplay')" hidden required>
+                    <div id="newBannerFileDisplay" class="file-name-display" style="margin-top: 0;">Nenhuma imagem</div>
+                </div>
+
+                <button type="submit" class="btn-save-prod" style="margin-top: 20px; width: 100%; padding: 10px; border-radius: 10px;">Salvar e Ativar na Loja</button>
+            </form>
+
+        </div>
+    </div>
+    
+    <div class="add-modal-overlay" id="add-product-modal">
+        <div class="add-modal-box">
+            <i class="bi bi-x btn-close-modal" onclick="closeAddProductModal()"></i>
+            <h2 class="modal-title-add">Novo Produto</h2>
+            <p style="color: #D6A476; font-weight: bold; margin-bottom: 20px;">ID: <span style="font-weight: normal;">Gerado automaticamente</span></p>
+            
+            <form action="{% url 'products:admin-add-product' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div>
+                        <div class="form-group-custom">
+                            <label>Nome do Produto:</label>
+                            <input type="text" name="name" placeholder="Ex: Britney Spears" required>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Marca:</label>
+                            <select name="brand" required>
+                                <option value="">Selecione...</option>
+                                {% for brand in brands %}<option value="{{ brand.id }}">{{ brand.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>SKU:</label>
+                            <input type="text" name="sku_code" placeholder="Ex: PERF-FEM-023" required>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Categoria:</label>
+                            <select name="category" required>
+                                <option value="">Selecione...</option>
+                                {% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Fragrância:</label>
+                            <select name="fragrance" required>
+                                <option value="">Selecione...</option>
+                                {% for val, name in fragrances %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="input-row-half">
+                            <div class="form-group-custom">
+                                <label>Vol. (ml):</label>
+                                <input type="number" name="volume_ml" placeholder="100" required>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Conc.:</label>
+                                <select name="concentration" required>
+                                    {% for val, name in concentrations %}<option value="{{ val }}">{{ val }}</option>{% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label style="min-width: 115px;">Preço (R$):</label>
+                            <input type="text" name="price" placeholder="260,00" required>
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label style="min-width: 115px;">Estoque (Un):</label>
+                            <input type="number" name="stock_quantity" placeholder="15" required>
+                        </div>
+
+                        <div class="media-upload-section">
+                            <label for="productImage" class="btn-upload-media">Adicionar midia <i class="bi bi-image"></i></label>
+                            <input type="file" id="productImage" name="image" accept="image/*" onchange="updateFileName(this)" hidden required>
+                            <div id="fileNameDisplay" class="file-name-display">Nenhuma imagem selecionada</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-custom" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 25px;">
+                    <label>Descrição:</label>
+                    <textarea name="description" rows="3" style="width: 100%; border: 2px solid var(--border-brown); border-radius: 10px; padding: 10px;" placeholder="Notas de ameixa e cereja amarga..." required></textarea>
+                </div>
+
+                <div class="modal-actions-add">
+                    <button type="submit" class="btn-save-prod">Salvar Produto</button>
+                    <button type="button" class="btn-cancel-prod" onclick="closeAddProductModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="controls-row">
+        <form class="search-form" method="GET" action="{% url 'products:admin-inventory' %}">
+            <i class="bi bi-search search-icon" onclick="this.closest('form').submit()"></i>
+            
+            <input type="text" name="q" class="search-input" placeholder="Busque por nome do produto..." value="{{ search_query }}">
+            
+            <input type="hidden" name="sort" value="{{ current_sort }}">
+
+            {% if search_query %}
+                <a href="{% url 'products:admin-inventory' %}?sort={{ current_sort }}" class="clear-icon"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+        </form>
+
+        <div class="filter-dropdown">
+            <button class="filter-btn" type="button" onclick="toggleFilterDropdown()">
+                Filtro <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="filter-content" id="filterOptions">
+                <a href="?q={{ search_query }}&sort=newest">Últimos Lançados</a>
+                <a href="?q={{ search_query }}&sort=price_desc">Maior Preço</a>
+                <a href="?q={{ search_query }}&sort=price_asc">Menor Preço</a>
+                <a href="?q={{ search_query }}&sort=name_asc">Ordem A-Z</a>
+                <a href="?q={{ search_query }}&sort=name_desc">Ordem Z-A</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'id_asc' %}id_desc{% else %}id_asc{% endif %}" class="sortable-header">
+                            ID <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'name_asc' %}name_desc{% else %}name_asc{% endif %}" class="sortable-header">
+                            Produto <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'sku_asc' %}sku_desc{% else %}sku_asc{% endif %}" class="sortable-header">
+                            SKU <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'price_asc' %}price_desc{% else %}price_asc{% endif %}" class="sortable-header">
+                            Preço <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'volume_asc' %}volume_desc{% else %}volume_asc{% endif %}" class="sortable-header">
+                            Tamanho <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?q={{ search_query }}&sort={% if current_sort == 'stock_asc' %}stock_desc{% else %}stock_asc{% endif %}" class="sortable-header">
+                            Estoque <i class="bi bi-caret-up-down-fill" style="color: #D6A476; font-size: 0.8rem;"></i>
+                        </a>
+                    </th>
+                    <th>-</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sku in skus %}
+                <tr class="{% if not sku.is_active %}row-inactive{% endif %}">
+                    <td class="col-id">#{{ sku.id|stringformat:"03d" }}</td>
+                    
+                    <td class="col-default">
+                        {{ sku.product.name }}
+                        {% if not sku.is_active %}
+                            <span class="inactive-badge">INATIVO</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td class="col-default">{{ sku.sku_code }}</td>
+                    <td class="col-default">R$ {{ sku.price }}</td>
+                    <td class="col-default" style="text-transform: lowercase;">{{ sku.volume_ml }} ml</td>
+                    
+                    <td class="{% if sku.stock_quantity <= 25 %}stock-low{% elif sku.stock_quantity <= 50 %}stock-medium{% else %}stock-high{% endif %}">
+                        Un. {{ sku.stock_quantity }}
+                    </td>
+                    
+                    <td><i class="bi bi-pencil-square btn-edit-icon" onclick="openEditModal('{{ sku.id }}')"></i></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="padding: 30px; color: var(--text-brown);">Nenhum produto encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% for sku in skus %}
+<div class="add-modal-overlay" id="edit-modal-{{ sku.id }}">
+    <div class="add-modal-box">
+        <i class="bi bi-x btn-close-modal" onclick="closeEditModal('{{ sku.id }}')"></i>
+        <h2 class="modal-title-add" style="color: var(--text-brown);">Editar Produto</h2>
+        <p style="color: #D6A476; font-weight: bold; margin-bottom: 20px;">ID: <span style="font-weight: normal;">#{{ sku.id|stringformat:"03d" }}</span></p>
+        
+        <form action="{% url 'products:admin-edit-product' sku.id %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div>
+                    <div class="form-group-custom">
+                        <label>Nome do Produto:</label>
+                        <input type="text" name="name" value="{{ sku.product.name }}" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Marca:</label>
+                        <select name="brand" required>
+                            {% for brand in brands %}
+                                <option value="{{ brand.id }}" {% if brand.id == sku.product.brand.id %}selected{% endif %}>{{ brand.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>SKU:</label>
+                        <input type="text" name="sku_code" value="{{ sku.sku_code }}" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Categoria:</label>
+                        <select name="category" required>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if cat.id == sku.product.category.id %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Fragrância:</label>
+                        <select name="fragrance" required>
+                            {% for val, name in fragrances %}
+                                <option value="{{ val }}" {% if val == sku.product.fragrance %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 20px; padding-left: 5px;">
+                            <input type="checkbox" name="is_active" id="active_{{ sku.id }}" {% if sku.is_active %}checked{% endif %} style="width: 20px; height: 20px; accent-color: #D6A476; cursor: pointer;">
+                            <label for="active_{{ sku.id }}" style="color: var(--text-brown); font-weight: bold; cursor: pointer; min-width: auto; font-size: 0.95rem;">Variação (SKU) Ativa na Loja</label>
+                        </div>
+                </div>
+
+                <div>
+                    <div class="input-row-half">
+                        <div class="form-group-custom">
+                            <label>Vol. (ml):</label>
+                            <input type="number" name="volume_ml" value="{{ sku.volume_ml }}" required>
+                        </div>
+                        <div class="form-group-custom">
+                            <label>Conc.:</label>
+                            <select name="concentration" required>
+                                {% for val, name in concentrations %}
+                                    <option value="{{ val }}" {% if val == sku.concentration %}selected{% endif %}>{{ val }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label style="min-width: 115px;">Preço (R$):</label>
+                        <input type="text" name="price" value="{{ sku.price }}" required>
+                    </div>
+                    
+                    <div class="form-group-custom">
+                        <label style="min-width: 115px;">Estoque (Un):</label>
+                        <input type="number" name="stock_quantity" value="{{ sku.stock_quantity }}" required>
+                    </div>
+
+                    <div class="media-upload-section">
+                        <label for="editImage_{{ sku.id }}" class="btn-upload-media">Adicionar midia <i class="bi bi-image"></i></label>
+                        <input type="file" id="editImage_{{ sku.id }}" name="image" accept="image/*" onchange="updateFileName(this, 'fileNameDisplay_{{ sku.id }}')" hidden>
+                        <div id="fileNameDisplay_{{ sku.id }}" class="file-name-display" style="margin-bottom: 15px;">Nenhuma nova imagem</div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;">
+                            {% for img in sku.product.images.all %}
+                            <div class="existing-image-row" id="img-row-{{ img.id }}" style="display: flex; align-items: center; gap: 10px;">
+                                <a href="{{ img.image.url }}" target="_blank" style="color: #D6A476; text-decoration: underline; font-size: 0.85rem;">{{ img.image.name|truncatechars:20 }}</a>
+                                <label style="cursor: pointer; color: var(--coral-light); font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="delete_images" value="{{ img.id }}" onchange="toggleStrikethrough(this, 'img-row-{{ img.id }}')"> Remover
+                                </label>
+                            </div>
+                            {% empty %}
+                                <span style="color: #a8968a; font-size: 0.8rem;">Sem imagens prévias.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group-custom" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 25px;">
+                <label>Descrição:</label>
+                <textarea name="description" rows="3" style="width: 100%; border: 2px solid var(--border-brown); border-radius: 10px; padding: 10px;" required>{{ sku.product.description }}</textarea>
+            </div>
+
+            <div class="modal-actions-add">
+                <button type="submit" class="btn-save-prod" style="background-color: var(--text-brown); border-color: var(--text-brown);">Salvar alteração</button>
+                <button type="button" class="btn-cancel-prod" style="background-color: #64493b; color: white;" onclick="closeEditModal('{{ sku.id }}')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleFilterDropdown() {
+        document.getElementById("filterOptions").classList.toggle("show");
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.filter-btn') && !event.target.matches('.filter-btn *')) {
+            var dropdowns = document.getElementsByClassName("filter-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+    function openAddProductModal() {
+        document.getElementById('add-product-modal').style.display = 'flex';
+    }
+
+    function closeAddProductModal() {
+        document.getElementById('add-product-modal').style.display = 'none';
+    }
+
+    function updateFileName(input) {
+        var display = document.getElementById('fileNameDisplay');
+        if (input.files && input.files.length > 0) {
+            display.innerText = input.files[0].name;
+        } else {
+            display.innerText = "Nenhuma imagem selecionada";
+        }
+    }
+
+    window.addEventListener('click', function(e) {
+        var modal = document.getElementById('add-product-modal');
+        if (e.target === modal) {
+            closeAddProductModal();
+        }
+    });
+
+    function openBrandModal() { document.getElementById('add-brand-modal').style.display = 'flex'; }
+    function closeBrandModal() { document.getElementById('add-brand-modal').style.display = 'none'; }
+    function openCategoryModal() { document.getElementById('add-category-modal').style.display = 'flex'; }
+    function closeCategoryModal() { document.getElementById('add-category-modal').style.display = 'none'; }
+
+    window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-modal-overlay')) {
+            e.target.style.display = 'none';
+        }
+    });
+
+    function openEditModal(skuId) {
+        document.getElementById('edit-modal-' + skuId).style.display = 'flex';
+    }
+
+    function closeEditModal(skuId) {
+        document.getElementById('edit-modal-' + skuId).style.display = 'none';
+    }
+
+    function toggleStrikethrough(checkbox, rowId) {
+        var row = document.getElementById(rowId);
+        if (checkbox.checked) {
+            row.style.textDecoration = "line-through";
+            row.style.opacity = "0.6";
+        } else {
+            row.style.textDecoration = "none";
+            row.style.opacity = "1";
+        }
+    }
+
+    function updateFileName(input, displayId) {
+        var display = document.getElementById(displayId);
+        if (input.files && input.files.length > 0) {
+            display.innerText = input.files[0].name;
+        } else {
+            display.innerText = "Nenhuma imagem selecionada";
+        }
+    }
+
+    function openBannerModal() { document.getElementById('history-banner-modal').style.display = 'flex'; }
+    function closeBannerModal() { document.getElementById('history-banner-modal').style.display = 'none'; }
+</script>
+{% endblock %}

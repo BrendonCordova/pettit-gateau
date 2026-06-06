@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block title %}Central de Ajuda | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    .help-container {
+        max-width: 800px;
+        margin: 40px auto 80px;
+        padding: 0 20px;
+    }
+
+    .help-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 50px;
+    }
+
+    .help-title {
+        color: var(--text-brown);
+        font-size: 1.8rem;
+        font-weight: normal;
+        margin: 0;
+    }
+
+    .btn-back-help {
+        color: var(--text-brown);
+        font-size: 2rem;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .btn-back-help:hover {
+        color: var(--coral-light);
+    }
+
+    .help-section-title {
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 25px;
+        margin-top: 40px;
+    }
+
+    .help-accordion {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .accordion-item {
+        border-bottom: 1px solid transparent;
+    }
+
+    .accordion-btn {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 10px 15px;
+        color: var(--coral-light);
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: opacity 0.3s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .accordion-btn:hover { opacity: 0.8; }
+    
+    .accordion-btn::after {
+        content: '\F282';
+        font-family: 'bootstrap-icons';
+        font-size: 0.9rem;
+        transition: transform 0.3s ease;
+    }
+    .accordion-btn.active::after {
+        transform: rotate(180deg);
+    }
+
+    .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, padding 0.4s ease;
+        background-color: transparent;
+        padding: 0 15px;
+    }
+    
+    .accordion-text {
+        color: var(--text-brown);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 10px 0 20px;
+        padding-left: 10px;
+        border-left: 2px solid var(--gold-accent);
+    }
+
+    .help-divider {
+        border-top: 1.5px solid var(--text-brown);
+        margin: 40px 0;
+        opacity: 1;
+    }
+
+    .return-link-wrapper {
+        text-align: center;
+        margin-top: 60px;
+    }
+
+    .return-link {
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        transition: 0.3s;
+    }
+    .return-link:hover { color: var(--coral-light); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="help-container">
+    
+    <div class="help-header">
+        <h1 class="help-title">Central de Ajuda</h1>
+        <a href="javascript:history.back()" class="btn-back-help"><i class="bi bi-arrow-left-circle-fill"></i></a>
+    </div>
+
+    <h2 class="help-section-title">O que precisa?</h2>
+    
+    <div class="help-accordion">
+        <div class="accordion-item">
+            <button class="accordion-btn">Rastrear pedido</button>
+            <div class="accordion-content">
+                <div class="accordion-text">Para rastrear o pedido, pegue o ID do mesmo e entre em contato diretamente com a empresa responsável pelo transporte.</div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-btn">Solicitar Devolução</button>
+            <div class="accordion-content">
+                <div class="accordion-text">Entre no ícone pedidos, identifique e acesse o desejado &rarr; clique no botão devolução, preencha os dados e siga com a confirmação.</div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-btn">Problema com Pagamento</button>
+            <div class="accordion-content">
+                <div class="accordion-text">
+                    Favor entrar em contato com nosso suporte e o do seu banco.<br>
+                    <strong>Nosso contato:</strong><br>
+                    e-mail: dev.gcbrendon@gmail.com
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-btn">Falar com o Suporte</button>
+            <div class="accordion-content">
+                <div class="accordion-text">
+                    <strong>e-mail:</strong> dev.gcbrendon@gmail.com
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="help-divider">
+
+    <h2 class="help-section-title">Perguntas Frequentes</h2>
+    
+    <div class="help-accordion">
+        <div class="accordion-item">
+            <button class="accordion-btn">Onde vejo meu pedido</button>
+            <div class="accordion-content">
+                <div class="accordion-text">No ícone <i class="bi bi-box-seam-fill" style="color: var(--text-brown);"></i> na barra de navegação.</div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-btn">Como cancelo minha compra</button>
+            <div class="accordion-content">
+                <div class="accordion-text">Ainda estamos implementando o cancelamento automático. Por enquanto, favor entrar em contato diretamente com o nosso suporte para efetuarmos o cancelamento.</div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-btn">Como trocar meu produto</button>
+            <div class="accordion-content">
+                <div class="accordion-text">A troca de produto é feita apenas através do processo de devolução. Antes de receber o produto, aconselhamos cancelar a compra atual e comprar o produto desejado novamente.</div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-btn">Como trocar meu endereço</button>
+            <div class="accordion-content">
+                <div class="accordion-text">
+                    Se a compra já foi efetuada e enviada, favor entrar em contato com o suporte.<br><br>
+                    Para alterar o endereço da sua conta, acesse o ícone de perfil na navbar e clique em <strong>Meu perfil</strong>. Lá terá suas informações e, abaixo, o seu endereço. Clique em <strong>Editar Endereço</strong>, preencha as informações corretas e salve!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="return-link-wrapper">
+        <a href="{% url 'orders:list' %}" class="return-link">Retornar aos meus pedidos</a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const accordionBtns = document.querySelectorAll(".accordion-btn");
+
+        accordionBtns.forEach(btn => {
+            btn.addEventListener("click", function() {
+                this.classList.toggle("active");
+                
+                const content = this.nextElementSibling;
+                
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

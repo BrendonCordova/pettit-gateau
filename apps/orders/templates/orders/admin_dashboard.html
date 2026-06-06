@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+{% block title %}Painel de Pedidos | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-dashboard-container {
+        max-width: 1200px;
+        margin: 40px auto 80px;
+        padding: 0 20px;
+    }
+
+    .dashboard-title {
+        color: #D6A476;
+        font-weight: 800;
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+    
+    .dashboard-subtitle {
+        color: var(--text-brown);
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 40px;
+        align-items: start;
+    }
+
+    .orders-feed {
+        max-height: 75vh;
+        overflow-y: auto;
+        padding-right: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .orders-feed::-webkit-scrollbar { width: 8px; }
+    .orders-feed::-webkit-scrollbar-thumb { background-color: var(--border-brown); border-radius: 10px; }
+
+    .order-card {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        padding: 20px;
+        background-color: var(--bg-cream);
+        position: relative;
+    }
+
+    .order-card-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .order-number { 
+        color: var(--text-brown); 
+        font-size: 1.1rem; 
+        white-space: nowrap; 
+    }
+    .customer-name { 
+        color: #D6A476; 
+        font-size: 1.1rem; 
+        margin-left: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+        display: inline-block;
+        vertical-align: bottom;
+    }
+    .order-status { color: var(--coral-light); font-weight: bold; text-align: right; font-size: 1rem;}
+
+    .order-body {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .order-products h6, .order-subtotal h6, .order-delivery h6 {
+        color: var(--text-brown);
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 0.95rem;
+    }
+
+    .product-list { color: #D6A476; font-size: 0.85rem; line-height: 1.4; text-transform: uppercase;}
+    
+    .delivery-info { color: #D6A476; font-size: 0.85rem; margin-top: 15px;}
+    .delivery-address { color: #D6A476; font-size: 0.8rem; margin-top: 5px; font-weight: bold;}
+
+    .order-subtotal { text-align: right; }
+    .subtotal-value { color: #D6A476; font-size: 1.3rem; font-weight: bold; }
+    .payment-method { color: #D6A476; font-size: 0.8rem; margin-top: 5px;}
+    .receipt-link { 
+        color: #D6A476; 
+        font-size: 0.8rem; 
+        text-decoration: underline; 
+        display: block; 
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+
+    .edit-icon {
+        position: absolute;
+        bottom: 10px;
+        right: 30px;
+        color: var(--text-brown);
+        font-size: 1.3rem;
+        cursor: pointer;
+    }
+
+    .summary-box {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        padding: 25px;
+        background-color: var(--bg-cream);
+        position: sticky;
+        top: 130px;
+    }
+
+    .summary-title {
+        color: var(--text-brown);
+        font-weight: bold;
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .summary-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #D6A476;
+        padding-bottom: 20px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-brown);
+        font-size: 0.95rem;
+    }
+    .summary-item span:last-child { color: #D6A476; font-weight: bold; }
+
+    .total-revenue-section { text-align: center; margin-bottom: 25px; }
+    .total-revenue-title { color: var(--text-brown); font-weight: bold; font-size: 1.2rem; }
+    .total-revenue-value { color: #D6A476; font-size: 2rem; font-weight: 900; letter-spacing: 1px; }
+
+    .status-counters {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        font-weight: bold;
+        color: var(--text-brown);
+    }
+    .status-counters i { font-size: 1.2rem; margin-right: 10px; }
+    .status-count-val { color: var(--coral-light); }
+
+    .export-box {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+        background-color: var(--bg-cream);
+    }
+    .export-item {
+        color: #D6A476; font-weight: bold; font-size: 0.95rem;
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 12px; cursor: pointer;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .export-item:hover { color: var(--coral-light); }
+    .export-item:last-child { margin-bottom: 0; }
+    .export-item i { color: var(--text-brown); font-size: 1.2rem;}
+
+    .order-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        align-items: center; justify-content: center;
+        backdrop-filter: blur(3px);
+    }
+
+    .order-modal-box {
+        background-color: var(--bg-cream);
+        border: 2px solid var(--border-brown);
+        border-radius: 20px;
+        padding: 40px;
+        width: 90%;
+        max-width: 750px;
+        position: relative;
+    }
+
+    .btn-close-order-modal {
+        position: absolute; top: 20px; right: 25px;
+        font-size: 1.8rem; color: var(--text-brown);
+        cursor: pointer; transition: 0.3s; line-height: 1;
+    }
+    .btn-close-order-modal:hover { color: var(--coral-light); }
+
+    .modal-grid {
+        display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;
+    }
+
+    .status-radio-group {
+        display: flex; flex-direction: column; gap: 15px; margin-top: 20px;
+    }
+
+    .status-radio-label {
+        display: flex; align-items: center; gap: 10px;
+        font-weight: bold; color: var(--coral-light);
+        cursor: pointer; font-size: 1.05rem;
+    }
+    .status-radio-label input[type="radio"] {
+        appearance: none; width: 20px; height: 20px;
+        border: 2px solid var(--border-brown); border-radius: 50%;
+        outline: none; cursor: pointer; position: relative;
+        background-color: #D6A476;
+    }
+    .status-radio-label input[type="radio"]:checked::before {
+        content: ""; position: absolute; top: 3px; left: 3px;
+        width: 10px; height: 10px; background-color: var(--border-brown);
+        border-radius: 50%;
+    }
+
+    .modal-actions {
+        display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; grid-column: 1 / -1;
+    }
+
+    .btn-save-status {
+        background-color: var(--coral-light); color: white;
+        border: 2px solid var(--border-brown); border-radius: 30px;
+        padding: 10px 30px; font-weight: bold; font-size: 1.1rem;
+        cursor: pointer; transition: 0.3s;
+    }
+    .btn-save-status:hover { background-color: #e87b6d; }
+
+    .btn-cancel-status {
+        background-color: #D6A476; color: var(--text-brown);
+        border: 2px solid var(--border-brown); border-radius: 30px;
+        padding: 10px 30px; font-weight: bold; font-size: 1.1rem;
+        cursor: pointer; transition: 0.3s;
+    }
+    .btn-cancel-status:hover { background-color: #c59567; }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    
+    <h1 class="dashboard-title">Pedidos Recebidos</h1>
+    <p class="dashboard-subtitle">{{ total_pedidos }} Pedidos</p>
+
+    <div class="dashboard-grid">
+        
+        <div class="orders-feed">
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-card-header">
+                    <div>
+                        <span class="order-number">Pedido #{{ order.id|truncatechars:8 }}</span>
+                        <span class="customer-name">{{ order.customer.first_name }} {{ order.customer.last_name }}</span>
+                    </div>
+                    <div>
+                        <span style="color: #D6A476; font-size: 0.8rem; margin-right: 15px; text-decoration: underline;">Detalhes</span>
+                        <span class="order-status">{{ order.get_status_display }}</span>
+                    </div>
+                </div>
+
+                <div class="order-body">
+                    <div class="order-info-left">
+                        <div class="order-products">
+                            <h6>Produtos ( {{ order.items.count }} )</h6>
+                            <div class="product-list">
+                                {% for item in order.items.all %}
+                                    {{ item.sku.product.name }}<br>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="order-delivery mt-3">
+                            <h6>Entrega <span style="color:#D6A476; font-weight:normal;">{{ order.shipping_method.name|default:"Correios" }}</span></h6>
+                            <div class="delivery-address">
+                                Endereço: CEP {{ order.address.zipcode }}<br>
+                                {{ order.address.street }}, {{ order.address.number }}. {{ order.address.neighborhood }}, {{ order.address.city }}-{{ order.address.state }}.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-subtotal">
+                        <h6>Subtotal</h6>
+                        <div class="subtotal-value">R$ {{ order.total_price }}</div>
+                        <div class="payment-method">
+                            {{ order.payment_method|default:"Processando Pagamento" }}
+                        </div>
+                    </div>
+                </div>
+                <i class="bi bi-pencil-square edit-icon" onclick="openOrderModal('{{ order.id }}')"></i>
+            </div>
+
+            <div class="order-modal-overlay" id="modal-{{ order.id }}">
+                <div class="order-modal-box">
+                    <i class="bi bi-x btn-close-order-modal" onclick="closeOrderModal('{{ order.id }}')"></i>
+                    
+                    <form action="{% url 'orders:update-order-status' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        
+                        <div class="modal-grid">
+                            <div>
+                                <div style="margin-bottom: 25px;">
+                                    <span class="order-number" style="font-size: 1.4rem; font-weight: 900;">Pedido #{{ order.id|truncatechars:8 }}</span>
+                                    <span class="customer-name" style="font-size: 1.4rem; margin-left: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; display: inline-block; vertical-align: bottom;">{{ order.customer.first_name }}</span>
+                                </div>
+                                
+                                <div class="order-products mb-3">
+                                    <h6>Produtos ( {{ order.items.count }} )</h6>
+                                    <div class="product-list">
+                                        {% for item in order.items.all %}
+                                            {{ item.sku.product.name }}<br>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="order-delivery mb-3">
+                                    <h6>Entrega <span style="color:#D6A476; font-weight:normal;">{{ order.shipping_method.name|default:"Correios" }}</span></h6>
+                                    <div class="delivery-address">
+                                        CEP {{ order.address.zipcode }}<br>
+                                        {{ order.address.street }}, {{ order.address.number }}. {{ order.address.neighborhood }}, {{ order.address.city }}-{{ order.address.state }}.
+                                    </div>
+                                </div>
+
+                                <div class="order-subtotal">
+                                    <h6 style="text-align: left;">Subtotal</h6>
+                                    <div class="subtotal-value" style="text-align: left;">R$ {{ order.total_price }}</div>
+                                    <div class="payment-method" style="text-align: left;">{{ order.payment_method|default:"Processando Pagamento" }}</div>
+                                </div>
+                            </div>
+
+                            <div style="border-left: 2px solid var(--border-brown); padding-left: 30px;">
+                                <h3 style="color: var(--text-brown); font-weight: 900; font-size: 1.3rem;">Status</h3>
+                                
+                                <div class="status-radio-group">
+                                    <label class="status-radio-label">
+                                        <input type="radio" name="status" value="SHIPPED" {% if order.status == 'SHIPPED' or order.status == 'DELIVERED' %}checked{% endif %}>
+                                        A caminho
+                                    </label>
+                                    <label class="status-radio-label">
+                                        <input type="radio" name="status" value="PREPARING" {% if order.status == 'PREPARING' or order.status == 'PAID' %}checked{% endif %}>
+                                        A enviar
+                                    </label>
+                                    <label class="status-radio-label">
+                                        <input type="radio" name="status" value="PENDING" {% if order.status == 'PENDING' %}checked{% endif %}>
+                                        Aguardando Pagamento
+                                    </label>
+                                    <label class="status-radio-label" style="color: #c59567;">
+                                        <input type="radio" name="status" value="CANCELED" {% if order.status == 'CANCELED' %}checked{% endif %}>
+                                        Cancelar
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="submit" class="btn-save-status">Salvar Pedido</button>
+                                <button type="button" class="btn-cancel-status" onclick="closeOrderModal('{{ order.id }}')">Cancelar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <p>Nenhum pedido recebido ainda.</p>
+            {% endfor %}
+        </div>
+
+        <div>
+            <div class="summary-box">
+                <h3 class="summary-title">Resumo do pedidos</h3>
+                
+                <h6 style="color: var(--text-brown); font-weight: bold; margin-bottom: 15px;">Pedidos ({{ total_pedidos }})</h6>
+                <div class="summary-list">
+                    {% for order in orders|slice:":5" %}
+                    <div class="summary-item">
+                        <span>{{ order.customer.first_name }} {{ order.customer.last_name }}</span>
+                        <span>R$ {{ order.total_price }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="total-revenue-section">
+                    <div class="total-revenue-title">Total</div>
+                    <div class="total-revenue-value">R$ {{ total_revenue|floatformat:2 }}</div>
+                </div>
+
+                <div class="status-counters">
+                    <div><i class="bi bi-truck"></i> A caminho - <span class="status-count-val">{{ status_counts.a_caminho }}</span></div>
+                    <div><i class="bi bi-box-seam"></i> A enviar - <span class="status-count-val">{{ status_counts.a_enviar }}</span></div>
+                    <div><i class="bi bi-wallet2"></i> Aguardando Pagamento - <span class="status-count-val">{{ status_counts.aguardando }}</span></div>
+                    <div><i class="bi bi-x-circle-fill"></i> Removido - <span class="status-count-val">{{ status_counts.cancelado }}</span></div>
+                </div>
+            </div>
+
+            <div class="export-box">
+                <h3 class="summary-title" style="text-align: left; font-size: 1.1rem;">Exportar dados</h3>
+                <a href="{% url 'orders:export-data' 'todos_os_dados' %}" class="export-item">
+                    <i class="bi bi-database"></i> Detalhamento de Produtos
+                </a>
+                <a href="{% url 'orders:export-data' 'faturamento' %}" class="export-item">
+                    <i class="bi bi-cash-stack"></i> Relatório de Faturamento
+                </a>
+                <a href="{% url 'orders:export-data' 'clientes' %}" class="export-item">
+                    <i class="bi bi-people-fill"></i> Tabela de Clientes
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    function openOrderModal(orderId) {
+        document.getElementById('modal-' + orderId).style.display = 'flex';
+    }
+
+    function closeOrderModal(orderId) {
+        document.getElementById('modal-' + orderId).style.display = 'none';
+    }
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('order-modal-overlay')) {
+            e.target.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}Página Inicial | Pettit Gateau{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: var(--bg-cream) !important; }
+
+    .hero-banner {
+        width: 100%;
+        max-height: 480px;
+        object-fit: cover;
+        margin-bottom: 50px;
+    }
+
+    .section-title {
+        color: var(--text-brown);
+        font-family: sans-serif;
+        font-size: 2.2rem;
+        margin-bottom: 40px;
+        font-weight: normal;
+        line-height: 1.2;
+    }
+
+    .category-pills-container {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin: 70px 0;
+        flex-wrap: wrap;
+    }
+    .cat-pill {
+        background-color: #F4D3CE;
+        color: var(--coral-light);
+        text-decoration: none;
+        padding: 12px 35px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: 0.3s;
+    }
+    .cat-pill:hover {
+        background-color: var(--coral-light);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .catalog-card {
+        background: transparent;
+        border: none;
+        margin-bottom: 20px;
+        text-decoration: none;
+        display: block;
+    }
+    .catalog-img-wrapper {
+        height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+    .catalog-img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+    .catalog-card:hover .catalog-img { transform: scale(1.05); }
+    .catalog-title {
+        color: var(--coral-light);
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .catalog-subtitle {
+        font-size: 0.75rem;
+        color: var(--text-brown);
+        margin-bottom: 10px;
+        min-height: 35px;
+        line-height: 1.4;
+    }
+    .catalog-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 15px;
+    }
+    .catalog-price {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--text-brown);
+        margin: 0;
+    }
+    .catalog-stock {
+        font-size: 0.75rem;
+        color: var(--coral-light);
+        font-weight: bold;
+    }
+    .btn-add-catalog {
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--text-brown);
+        color: var(--text-brown);
+        padding: 8px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .btn-add-catalog:hover {
+        background: var(--text-brown);
+        color: white;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block hero %}
+    {% if banner %}
+        <a href="{{ banner.link|default:'#' }}">
+            <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="hero-banner">
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h2 class="section-title">Mais<br>Vendidos</h2>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+        {% for product in best_sellers %}
+            <div class="col">
+                <div class="catalog-card">
+                    <a href="{% url 'products:detail' product.slug %}" style="text-decoration: none;">
+                        <div class="catalog-img-wrapper">
+                            {% for img in product.images.all %}
+                                {% if img.is_main %}
+                                    <img src="{{ img.image.url }}" alt="{{ product.name }}" class="catalog-img">
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="catalog-title">{{ product.name }}</div>
+                        <div class="catalog-subtitle">
+                            {% with default_sku=product.skus.first %}
+                                {% if default_sku.get_concentration_display %}{{ default_sku.get_concentration_display }} - {% endif %}
+                                Perfume {{ product.category.name }} {% if default_sku %}{{ default_sku.volume_ml }}ml{% endif %}
+                            {% endwith %}
+                        </div>
+                    </a>
+                    <div class="catalog-price-row">
+                        {% with first_sku=product.skus.first %}
+                            {% if first_sku %}
+                                <div class="catalog-price">R$ {{ first_sku.price }}</div>
+                                {% if first_sku.stock_quantity == 0 %}
+                                    <div class="catalog-stock">Esgotado</div>
+                                {% elif first_sku.stock_quantity < 5 %}
+                                    <div class="catalog-stock">Restam apenas {{ first_sku.stock_quantity }}</div>
+                                {% endif %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <a href="{% url 'products:detail' product.slug %}" class="btn btn-add-catalog d-block text-center text-decoration-none">
+                        Adicionar ao Carrinho
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="category-pills-container">
+        <a href="{% url 'products:category_list' 'Masculino' %}" class="cat-pill">
+            <i class="bi bi-stars"></i> MASCULINO
+        </a>
+        <a href="{% url 'products:category_list' 'Feminino' %}" class="cat-pill">
+            <i class="bi bi-stars"></i> FEMININO
+        </a>
+        <a href="{% url 'products:category_list' 'Unissex' %}" class="cat-pill">
+            <i class="bi bi-stars"></i> UNISSEX
+        </a>
+    </div>
+
+    <h2 class="section-title">Lançamentos</h2>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 mb-5">
+        {% for product in newest %}
+            <div class="col">
+                <div class="catalog-card">
+                    <a href="{% url 'products:detail' product.slug %}" style="text-decoration: none;">
+                        <div class="catalog-img-wrapper">
+                            {% for img in product.images.all %}
+                                {% if img.is_main %}
+                                    <img src="{{ img.image.url }}" alt="{{ product.name }}" class="catalog-img">
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="catalog-title">{{ product.name }}</div>
+                        <div class="catalog-subtitle">
+                            {% with default_sku=product.skus.first %}
+                                {% if default_sku.get_concentration_display %}{{ default_sku.get_concentration_display }} - {% endif %}
+                                Perfume {{ product.category.name }} {% if default_sku %}{{ default_sku.volume_ml }}ml{% endif %}
+                            {% endwith %}
+                        </div>
+                    </a>
+                    <div class="catalog-price-row">
+                        {% with first_sku=product.skus.first %}
+                            {% if first_sku %}
+                                <div class="catalog-price">R$ {{ first_sku.price }}</div>
+                                {% if first_sku.stock_quantity == 0 %}
+                                    <div class="catalog-stock">Esgotado</div>
+                                {% elif first_sku.stock_quantity < 5 %}
+                                    <div class="catalog-stock">Restam apenas {{ first_sku.stock_quantity }}</div>
+                                {% endif %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <a href="{% url 'products:detail' product.slug %}" class="btn btn-add-catalog d-block text-center text-decoration-none">
+                        Adicionar ao Carrinho
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

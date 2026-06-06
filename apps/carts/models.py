@@ -27,6 +27,27 @@ class Cart(BaseModel):
         if self.user:
             return f'Carrinho de {self.user.email}'
         return f'Carrinho de {self.session_key}'
+    
+    def merge_with_user_cart(self, user):
+        '''
+        Combines the items in this (anonymous) cart with the user's saved cart.
+        Adds details if the same SKU is already in the account's cart.
+        '''
+        user_cart, created = Cart.objects.get_or_create(user=user)
+        
+        for item in self.items.all():
+            user_item, item_created = CartItem.objects.get_or_create(
+                cart=user_cart,
+                sku=item.sku,
+                defaults={'quantity': item.quantity}
+            )
+            if not item_created:
+                user_item.quantity += item.quantity
+                user_item.save()
+        
+        self.items.all().delete()
+
+        self.delete()
 
 class CartItem(BaseModel):
     '''

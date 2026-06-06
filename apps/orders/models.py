@@ -6,7 +6,20 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from decimal import Decimal
 from django.core.validators import MinValueValidator
+from datetime import timedelta
 
+class ShippingMethod(BaseModel):
+    name = models.CharField(max_length=100, verbose_name="Nome da Transportadora (Ex: PAC, Sedex)")
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço do Frete")
+    delivery_days = models.PositiveIntegerField(default=7, verbose_name="Prazo de Entrega (Dias)")
+    is_active = models.BooleanField(default=True, verbose_name="Ativo")
+
+    class Meta:
+        verbose_name = 'Método de Envio'
+        verbose_name_plural = 'Métodos de Envio'
+
+    def __str__(self):
+        return f"{self.name} ({self.delivery_days} dias) - R$ {self.price}"
 class Order(BaseModel):
     '''
     Represents a customer's purchase order.
@@ -24,10 +37,13 @@ class Order(BaseModel):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='PENDING', verbose_name='Status')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Preço Total')
+    payment_method = models.CharField(max_length=50, blank=True, null=True, verbose_name='Forma de Pagamento')
 
     # Relationships
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='orders', verbose_name='Cliente')
     address = models.ForeignKey(Address, on_delete=models.PROTECT, related_name='orders', verbose_name='Endereço de Entrega')
+    shipping_method = models.ForeignKey(ShippingMethod, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Transportadora')
+    payment_approved_at = models.DateTimeField(null=True, blank=True, verbose_name='Data de Aprovação do Pagamento')
 
     class Meta:
         verbose_name = 'Pedido'
@@ -42,9 +58,21 @@ class Order(BaseModel):
         Dynamically calculates and updates the order's total price based on 
         the sum of all associated order items' subtotals.
         '''
-        total = sum(item.get_subtotal() for item in self.items.all())
-        self.total_price = total
+        total_items = sum(item.get_subtotal() for item in self.items.all())
+        frete = self.shipping_method.price if self.shipping_method else Decimal('0.00')
+        self.total_price = total_items + frete
         self.save()
+
+    @property
+    def expected_delivery_date(self):
+        '''Calcula a data dinamicamente com base nos dias definidos no Admin pela Transportadora'''
+        days = self.shipping_method.delivery_days if self.shipping_method else 7
+
+        base_date = self.payment_approved_at if self.payment_approved_at else self.created_at
+
+        if self.created_at:
+            return self.created_at + timedelta(days=days)
+        return None
     
 class OrderItem(BaseModel):
     '''
@@ -101,3 +129,27 @@ def update_order_total(sender, instance, **kwargs):
     '''
     if instance.order:
         instance.order.update_total()
+
+class ReturnRequest(BaseModel):
+    '''
+    Model to handle customer return requests.
+    Stores the specific items being returned, the reason, action requested (e.g., store credit),
+    and optional media evidence (photos of damaged goods).
+    '''
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='return_requests', verbose_name='Pedido')
+    items = models.ManyToManyField(OrderItem, verbose_name='Itens Devolvidos')
+    
+    reason = models.CharField(max_length=100, verbose_name='Motivo')
+    action = models.CharField(max_length=100, verbose_name='Procedimento (Crédito/Estorno)')
+    description = models.TextField(verbose_name='Descrição do Problema')
+    
+    media = models.ImageField(upload_to='returns/%Y/%m/', blank=True, null=True, verbose_name='Mídia (Foto)')
+    status = models.CharField(max_length=50, default='PENDENTE', verbose_name='Status da Devolução')
+
+    class Meta:
+        verbose_name = 'Solicitação de Devolução'
+        verbose_name_plural = 'Solicitações de Devolução'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Devolução #{self.id} - Pedido #{self.order.id}'

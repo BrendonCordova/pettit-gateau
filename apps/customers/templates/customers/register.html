@@ -1,25 +1,171 @@
 {% extends 'base.html' %}
 {% block title %}Cadastro | Pettit Gateau{% endblock %}
 
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 15px;
+    }
+
+    .auth-card {
+        border: 2px solid var(--border-brown);
+        border-radius: 15px;
+        background-color: white;
+        padding: 40px;
+        width: 100%;
+        max-width: 480px;
+    }
+
+    .auth-logo {
+        font-family: 'Arial Black', Impact, sans-serif;
+        color: var(--coral-light);
+        font-size: 2.2rem;
+        text-align: center;
+        text-transform: uppercase;
+        margin-bottom: 30px;
+        letter-spacing: -0.5px;
+    }
+
+    .auth-title {
+        font-size: 1.3rem;
+        color: var(--text-brown);
+        margin-bottom: 25px;
+        text-align: left;
+    }
+
+    .custom-label {
+        font-size: 0.95rem;
+        color: var(--text-brown);
+        margin-bottom: 5px;
+        display: block;
+        padding-left: 15px;
+    }
+
+    .register-form input:not([type="radio"]):not([type="checkbox"]):not([type="submit"]),
+    .register-form select {
+        background-color: #F4D3CE;
+        border: none;
+        border-radius: 50px;
+        padding: 12px 25px;
+        width: 100%;
+        color: var(--text-brown);
+        font-size: 1rem;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    .register-form input:focus,
+    .register-form select:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--coral-light);
+        background-color: #fae2df;
+    }
+
+    .register-form ul {
+        list-style: none;
+        padding-left: 15px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .register-form ul li {
+        margin-bottom: 8px;
+        color: var(--text-brown);
+        font-size: 0.95rem;
+    }
+
+    .register-form input[type="radio"], 
+    .register-form input[type="checkbox"] {
+        accent-color: var(--coral-light); /* Deixa a "bolinha" com a cor da marca */
+        transform: scale(1.2);
+        margin-right: 8px;
+        cursor: pointer;
+    }
+
+    .btn-continuar {
+        background-color: var(--coral-light);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 12px 0;
+        width: 200px;
+        font-size: 1.1rem;
+        display: block;
+        margin: 30px auto 10px; 
+        transition: 0.3s;
+    }
+
+    .btn-continuar:hover {
+        background-color: #e87b6d;
+        color: white;
+    }
+
+    .login-link {
+        font-size: 0.9rem;
+        color: var(--text-brown);
+        text-align: center;
+        display: block;
+        margin-top: 20px;
+    }
+
+    .login-link a {
+        color: var(--text-brown);
+        text-decoration: underline;
+    }
+
+    .login-link a:hover {
+        color: var(--coral-light);
+    }
+
+    .errorlist {
+        color: #dc3545;
+        font-size: 0.85rem;
+        list-style: none;
+        padding-left: 15px;
+        margin-top: -5px;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock extra_css %}
+
 {% block content %}
-<section class="row justify-content-center mt-5" aria-labelledby="register-title">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h1 id="register-title" class="text-center mb-4 h3">Crie sua Conta</h1>
-                
-                <form method="POST">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    
-                    <button type="submit" class="btn btn-dark w-100 mt-3">Criar Conta</button>
-                </form>
-                
-                <div class="text-center mt-3">
-                    <p>Já possui conta? <a href="{% url 'customers:login' %}">Faça Login</a></p>
+<section class="auth-container" aria-labelledby="register-title">
+    <div class="auth-card shadow-sm">
+        
+        <div class="auth-logo">Pettit Gateau</div>
+        <h1 id="register-title" class="auth-title">Criar Conta</h1>
+        
+        <form method="POST" class="register-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" style="border-radius: 15px;">
+                    {{ form.non_field_errors }}
                 </div>
-            </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="mb-2">
+                    <label for="{{ field.id_for_label }}" class="custom-label">{{ field.label }}</label>
+                    
+                    {{ field }}
+                    
+                    {% if field.errors %}
+                        {{ field.errors }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <button type="submit" class="btn-continuar">Criar Conta</button>
+        </form>
+        
+        <div class="login-link">
+            Já possui conta? <a href="{% url 'customers:login' %}">Faça Login</a>
         </div>
+        
     </div>
 </section>
 {% endblock %}

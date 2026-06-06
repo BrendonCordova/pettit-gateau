@@ -110,3 +110,12 @@ class Address(BaseModel):
 
     def __str__(self):
         return f"{self.name}: {self.street}, {self.number}, {self.neighborhood} - {self.city}/{self.state}"
+    
+    def save(self, *args, **kwargs):
+        '''
+        Ensures that only ONE address is the default at a time.
+        If this one is saved as the default, it will uncheck all others for the same client.
+        '''
+        if self.is_default:
+            Address.objects.filter(customer=self.customer).exclude(pk=self.pk).update(is_default=False)
+        super().save(*args, **kwargs)
