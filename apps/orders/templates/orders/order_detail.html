@@ -159,10 +159,22 @@
             <div class="items-list">
                 {% for item in order.items.all %}
                     <div class="item-row">
-                        <span>{{ item.sku.product.name }}</span>
+                        <span>{{ item.quantity }}x {{ item.sku.product.name }}</span>
                         <span class="item-price">R$ {{ item.get_subtotal }}</span>
                     </div>
                 {% endfor %}
+                
+                <div class="item-row" style="margin-top: 20px; border-top: 1px dashed var(--border-brown); padding-top: 15px;">
+                    <span style="font-size: 0.85rem;">Frete {% if order.shipping_method %}({{ order.shipping_method.name }}){% endif %}</span>
+                    <span class="item-price" style="font-size: 0.95rem;">
+                        {% if order.shipping_method and order.shipping_method.price > 0 %}R$ {{ order.shipping_method.price }}{% else %}Grátis{% endif %}
+                    </span>
+                </div>
+                
+                <div class="item-row" style="margin-top: 5px;">
+                    <span style="color: var(--coral-light); font-size: 1.1rem;">TOTAL DO PEDIDO</span>
+                    <span class="item-price" style="color: var(--coral-light); font-size: 1.15rem;">R$ {{ order.total_price }}</span>
+                </div>
             </div>
 
             <div class="status-side">
@@ -183,7 +195,8 @@
             </div>
         </div>
 
-        <div class="address-box">
+        <div class="address-box" style="line-height: 1.6;">
+            <span style="color: var(--text-brown); text-transform: uppercase;">{{ order.address.name }}</span><br>
             {{ order.address.street }}, {{ order.address.number }}. {{ order.address.neighborhood }}, {{ order.address.city }}-{{ order.address.state }}.
         </div>
 

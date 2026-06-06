@@ -189,22 +189,31 @@
         <a href="{% url 'orders:detail' order.id %}" class="order-card" style="text-decoration: none; color: inherit; display: flex;">
             
             <div>
-                <div class="order-status-main">
-                    {% if order.return_requests.exists %}
-                        Devolução Solicitada
-                    {% else %}
-                        {{ order.get_status_display }}
-                    {% endif %}
+                <div class="order-status-main d-flex justify-content-between align-items-center">
+                    <span>
+                        {% if order.return_requests.exists %}
+                            Devolução Solicitada
+                        {% else %}
+                            {{ order.get_status_display }}
+                        {% endif %}
+                    </span>
+                    <span style="font-size: 0.85rem; color: var(--text-brown); font-weight: normal;">Pedido #{{ order.id|truncatechars:8 }}</span>
                 </div>
 
                 {% for item in order.items.all %}
                     <div class="order-item-row">
-                        <span>{{ item.sku.product.name }}</span>
+                        <span>{{ item.quantity }}x {{ item.sku.product.name }}</span>
                         <span class="order-item-price">R$ {{ item.get_subtotal }}</span>
                     </div>
                 {% endfor %}
+                
+                <div class="order-item-row" style="margin-top: 15px; border-top: 1px dashed var(--border-brown); padding-top: 15px;">
+                    <span>Total do Pedido</span>
+                    <span class="order-item-price" style="color: var(--coral-light); font-size: 1.1rem;">R$ {{ order.total_price }}</span>
+                </div>
 
                 <div class="order-address">
+                    <strong style="color: var(--text-brown); text-transform: uppercase;">{{ order.address.name }}</strong><br>
                     {{ order.address.street }}, {{ order.address.number }}. {{ order.address.neighborhood }}, {{ order.address.city }}-{{ order.address.state }}.
                 </div>
 

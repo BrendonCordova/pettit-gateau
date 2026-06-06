@@ -122,83 +122,96 @@
                 <h5 class="text-muted" style="font-size: 1.1rem;">{{ cart.items.count }} Produtos</h5>
             </div>
 
-            {% if address %}
-                <div class="custom-card mb-4 p-3 px-4">
-                    <div class="address-horizontal">
-                        <div class="d-flex align-items-center">
-                            <div class="address-icon-box">
-                                <i class="bi bi-geo-alt-fill" style="color: var(--coral-light); font-size: 1.6rem;"></i>
+            <form method="POST" id="checkoutForm">
+                {% csrf_token %}
+                
+                <h4 class="mb-3 mt-4" style="color: var(--text-brown); font-weight: bold; font-size: 1.15rem;">Escolha o Endereço de Entrega</h4>
+                
+                <div class="address-selection-group mb-4">
+                    {% for addr in addresses %}
+                        <label class="custom-card p-3 px-4 mb-3 w-100 shadow-sm" style="cursor: pointer; display: block; transition: 0.3s; {% if addr.is_default %}border-color: var(--coral-light);{% endif %}">
+                            <div class="address-horizontal">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <input type="radio" name="selected_address" value="{{ addr.id }}" {% if addr.is_default %}checked{% endif %} style="accent-color: var(--coral-light); transform: scale(1.4);">
+                                    </div>
+                                    <div class="address-icon-box" style="padding: 12px 15px;">
+                                        <i class="bi bi-geo-alt-fill" style="color: var(--coral-light); font-size: 1.4rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1" style="color: var(--text-brown); font-size: 1.05rem;">
+                                            {{ addr.name }}
+                                            {% if addr.is_default %}<span class="badge ms-2" style="background-color: var(--coral-light);">Padrão</span>{% endif %}
+                                        </h6>
+                                        <p class="mb-0" style="color: var(--text-brown); font-size: 0.95rem;">
+                                            {{ addr.street }}, {{ addr.number }} 
+                                            {% if addr.complement %} - {{ addr.complement }}{% endif %}
+                                        </p>
+                                        <p class="mb-0 text-muted" style="font-size: 0.85rem;">{{ addr.city }} / {{ addr.state }} - CEP: {{ addr.zip_code }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <!-- A tag 'z-index' e 'position: relative' garantem que o botão Editar funcione sem acionar a seleção do Radio -->
+                                    <a href="{% url 'customers:address-update' addr.id %}" class="address-edit-btn" style="position: relative; z-index: 10;">Editar</a>
+                                </div>
                             </div>
-                            <div>
-                                <h6 class="fw-bold mb-1" style="color: var(--text-brown); font-size: 1.05rem;">Endereço de Entrega</h6>
-                                <p class="mb-0" style="color: var(--text-brown); font-size: 0.95rem;">
-                                    {{ address.street }}, {{ address.number }} 
-                                    {% if address.complement %} - {{ address.complement }}{% endif %}
-                                </p>
-                                <p class="mb-0 text-muted" style="font-size: 0.85rem;">{{ address.city }} / {{ address.state }} - CEP: {{ address.zip_code }}</p>
+                        </label>
+                    {% endfor %}
+                    
+                    <a href="{% url 'customers:address-create' %}" class="empty-address-card" style="padding: 15px; font-size: 1.05rem;">
+                        <i class="bi bi-plus-lg me-2"></i> Adicionar novo endereço
+                    </a>
+                </div>
+
+                <div class="custom-card shadow-sm">
+                    <h3 id="summary-title" class="summary-title-brown">Resumo do pedido</h3>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong style="color: var(--text-brown); font-size: 1.1rem;">Produtos ( {{ cart.items.count }} )</strong>
+                        <strong style="color: #D6A476; font-size: 1.1rem;">R$ {{ cart.total_price }}</strong>
+                    </div>
+
+                    <div class="mb-3 border-bottom pb-3">
+                        {% for item in cart.items.all %}
+                            <div class="mt-2">
+                                <div class="summary-item-name">{{ item.sku.product.name }}</div>
+                                <div class="summary-item-desc">{{ item.quantity }}x {{ item.sku.volume_ml }}ml</div>
                             </div>
-                        </div>
-                        
-                        <div>
-                            <a href="{% url 'customers:address-update' address.id %}" class="address-edit-btn">Alterar</a>
-                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong style="color: var(--text-brown); font-size: 1.1rem;">Frete</strong>
+                        <strong style="color: #D6A476; font-size: 1.1rem;">Grátis</strong>
+                    </div>
+                    <div class="mb-3 border-bottom pb-3">
+                        <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">Correios</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong style="color: var(--text-brown); font-size: 1.1rem;">Descontos</strong>
+                        <strong style="color: var(--coral-light); font-size: 1.1rem;">- R$ 0,00</strong>
+                    </div>
+                    <div class="mb-4 border-bottom pb-4">
+                        <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">CUPOM APLICADO</span>
+                    </div>
+                    
+                    <div class="mb-4 mt-3 text-center">
+                        <h5 class="fw-bold mb-1" style="color: var(--text-brown); font-size: 1.2rem;">Total a Pagar</h5>
+                        <h1 class="fw-bold mt-2" style="color: #D6A476; font-size: 2.8rem;">R$ {{ cart.total_price }}</h1>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-finalizar">
+                            Ir para o Pagamento <i class="bi bi-lock-fill ms-2"></i>
+                        </button>
+                        <p class="text-center text-muted mt-3 mb-0" style="font-size: 0.8rem;">
+                            Você será redirecionado para o ambiente seguro do Mercado Pago.
+                        </p>
                     </div>
                 </div>
-            {% else %}
-                <a href="{% url 'customers:address-create' %}" class="empty-address-card mb-4">
-                    <i class="bi bi-plus-lg me-2" style="font-size: 1.3rem;"></i> Escolha seu Endereço
-                </a>
-            {% endif %}
-
-            <div class="custom-card">
-                <h3 id="summary-title" class="summary-title-brown">Resumo do pedido</h3>
-                
-                <div class="d-flex justify-content-between mb-2">
-                    <strong style="color: var(--text-brown); font-size: 1.1rem;">Produtos ( {{ cart.items.count }} )</strong>
-                    <strong style="color: #D6A476; font-size: 1.1rem;">R$ {{ cart.total_price }}</strong>
-                </div>
-
-                <div class="mb-3 border-bottom pb-3">
-                    {% for item in cart.items.all %}
-                        <div class="mt-2">
-                            <div class="summary-item-name">{{ item.sku.product.name }}</div>
-                            <div class="summary-item-desc">{{ item.quantity }}x {{ item.sku.volume_ml }}ml</div>
-                        </div>
-                    {% endfor %}
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong style="color: var(--text-brown); font-size: 1.1rem;">Frete</strong>
-                    <strong style="color: #D6A476; font-size: 1.1rem;">Grátis</strong>
-                </div>
-                <div class="mb-3 border-bottom pb-3">
-                    <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">Correios</span>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong style="color: var(--text-brown); font-size: 1.1rem;">Descontos</strong>
-                    <strong style="color: var(--coral-light); font-size: 1.1rem;">- R$ 0,00</strong>
-                </div>
-                <div class="mb-4 border-bottom pb-4">
-                    <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">CUPOM APLICADO</span>
-                </div>
-                
-                <div class="mb-4 mt-3 text-center">
-                    <h5 class="fw-bold mb-1" style="color: var(--text-brown); font-size: 1.2rem;">Total a Pagar</h5>
-                    <h1 class="fw-bold mt-2" style="color: #D6A476; font-size: 2.8rem;">R$ {{ cart.total_price }}</h1>
-                </div>
-
-                <form method="POST" class="text-center mt-4">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-finalizar" {% if not address %}disabled{% endif %}>
-                        Ir para o Pagamento <i class="bi bi-lock-fill ms-2"></i>
-                    </button>
-                    <p class="text-center text-muted mt-3 mb-0" style="font-size: 0.8rem;">
-                        Você será redirecionado para o ambiente seguro do Mercado Pago.
-                    </p>
-                </form>
-                
-            </div>
+            </form>
         </section>
     </div>
 </div>

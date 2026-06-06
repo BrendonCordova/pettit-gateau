@@ -41,15 +41,22 @@ def checkout_view(request):
     if not cart or cart.items.count() == 0:
         return redirect('products:list')
     
-    address = Address.objects.filter(customer=request.user, is_default=True).first() or \
-        Address.objects.filter(customer=request.user).first()
+    addresses = Address.objects.filter(customer=request.user).order_by('-is_default', '-created_at')
 
-    if not address:
-
+    if not addresses.exists():
         messages.info(request, 'Para finalizar sua compra, precisamos que você cadastre um endereço de entrega.')
         return redirect('customers:address-create')
 
     if request.method == 'POST':
+        address_id = request.POST.get('selected_address')
+
+        if not address_id:
+            return render(request, 'orders/checkout.html', {'cart': cart, 'addresses': addresses, 'error': 'Por favor, selecione um endereço de entrega.'})
+        
+        try:
+            chosen_address = Address.objects.get(id=address_id, customer=request.user)
+        except Address.DoesNotExist:
+            return render(request, 'orders/checkout.html', {'cart': cart, 'addresses': addresses, 'error': 'Endereço inválido selecionado.'})
 
         try:
             with transaction.atomic():
@@ -65,7 +72,7 @@ def checkout_view(request):
 
                 order = Order.objects.create(
                     customer=request.user,
-                    address=address,
+                    address=chosen_address,
                     status='PENDING',
                     total_price=final_price,
                     shipping_method=default_shipping
@@ -88,14 +95,14 @@ def checkout_view(request):
             return redirect(payment_url)
        
         except ValueError as e:
-            return render(request, 'orders/checkout.html', {'cart': cart, 'address': address, 'error': str(e)})
+            return render(request, 'orders/checkout.html', {'cart': cart, 'addresses': addresses, 'error': str(e)})
         except Exception as e:
             print("ERRO FATAL:", e)
-            return render(request, 'orders/checkout.html', {'cart': cart, 'address': address, 'error': 'Ocorreu um erro ao comunicar com o banco. Tente novamente.'})
+            return render(request, 'orders/checkout.html', {'cart': cart, 'addresses': addresses, 'error': 'Ocorreu um erro ao comunicar com o banco. Tente novamente.'})
 
     context = {
         'cart': cart,
-        'address': address
+        'addresses': addresses
     }
     return render(request, 'orders/checkout.html', context)
 
