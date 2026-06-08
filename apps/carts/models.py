@@ -2,26 +2,50 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from apps.base.models import BaseModel
 from apps.products.models import SKU
+from apps.orders.models import ShippingMethod
+from decimal import Decimal
 
 User = get_user_model()
 
+class Coupon(BaseModel):
+    '''Model to manage discount codes.'''
+    code = models.CharField(max_length=50, unique=True, verbose_name='Código do Cupom')
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='Desconto em %')
+    discount_fixed = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Desconto Fixo (R$)')
+    is_active = models.BooleanField(default=True, verbose_name='Ativo')
+
+    def __str__(self):
+        return self.code
+
 class Cart(BaseModel):
-    '''
-    Represents a shopping cart, acting as a container for selected products.
-    Can be linked to an authenticated user or an anonymous session.
-    '''
     user = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True, related_name='carts')
     session_key = models.CharField(max_length=40, null=True, blank=True, verbose_name='chave da sessão')
+    
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Cupom Aplicado')
+
+    cep = models.CharField(max_length=9, null=True, blank=True)
+    shipping_name = models.CharField(max_length=100, null=True, blank=True)
+    shipping_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    shipping_days = models.PositiveIntegerField(default=0)
+
+    @property
+    def subtotal_price(self):
+        return sum(item.subtotal for item in self.items.all())
+
+    @property
+    def discount_amount(self):
+        if not self.coupon:
+            return Decimal('0.00')
+        if self.coupon.discount_percentage:
+            return (self.subtotal_price * self.coupon.discount_percentage) / Decimal('100.00')
+        if self.coupon.discount_fixed:
+            return self.coupon.discount_fixed
+        return Decimal('0.00')
 
     @property
     def total_price(self):
-        '''
-        Calculates the dynamic total price of all items currently in the cart.
-
-        Returns:
-            Decimal: The sum of the subtotals of all cart items.
-        '''
-        return sum(item.subtotal for item in self.items.all())
+        total = (self.subtotal_price + self.shipping_price) - self.discount_amount
+        return max(total, Decimal('0.00'))
 
     def __str__(self):
         if self.user:
@@ -29,43 +53,29 @@ class Cart(BaseModel):
         return f'Carrinho de {self.session_key}'
     
     def merge_with_user_cart(self, user):
-        '''
-        Combines the items in this (anonymous) cart with the user's saved cart.
-        Adds details if the same SKU is already in the account's cart.
-        '''
-        user_cart, created = Cart.objects.get_or_create(user=user)
-        
+        user_cart, _ = Cart.objects.get_or_create(user=user)
         for item in self.items.all():
-            user_item, item_created = CartItem.objects.get_or_create(
-                cart=user_cart,
-                sku=item.sku,
-                defaults={'quantity': item.quantity}
-            )
-            if not item_created:
+            user_item, created = CartItem.objects.get_or_create(cart=user_cart, sku=item.sku, defaults={'quantity': item.quantity})
+            if not created:
                 user_item.quantity += item.quantity
                 user_item.save()
-        
+        if self.coupon: user_cart.coupon = self.coupon
+        if self.cep: 
+            user_cart.cep = self.cep
+            user_cart.shipping_name = self.shipping_name
+            user_cart.shipping_price = self.shipping_price
+            user_cart.shipping_days = self.shipping_days
+        user_cart.save()
         self.items.all().delete()
-
         self.delete()
 
 class CartItem(BaseModel):
-    '''
-    Represents an individual SKU added to a specific shopping cart.
-    Tracks the selected quantity for the transaction.
-    '''
     cart = models.ForeignKey(Cart, on_delete=models.PROTECT, related_name='items')
     sku = models.ForeignKey(SKU, on_delete=models.PROTECT, related_name='cart_item')
     quantity = models.PositiveIntegerField(default=1, verbose_name='Quantidade')
 
     @property
     def subtotal(self):
-        '''
-        Calculates the total cost for this specific item line.
-
-        Returns:
-            Decimal: The item price multiplied by the requested quantity.
-        '''
         return self.sku.price * self.quantity
 
     def __str__(self):

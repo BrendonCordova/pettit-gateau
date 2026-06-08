@@ -4,7 +4,6 @@
 
 {% block extra_css %}
 <style>
-    /* Variáveis de Cor baseadas na imagem */
     :root {
         --bg-cream: #FFFDF9;
         --border-brown: #4A3B32;
@@ -19,7 +18,6 @@
         font-family: sans-serif;
     }
 
-    /* Estilização dos Cartões */
     .custom-card {
         border: 2px solid var(--border-brown);
         border-radius: 15px;
@@ -35,7 +33,6 @@
         font-size: 1.2rem;
     }
 
-    /* Seletor de Quantidade estilo Cápsula */
     .qty-capsule {
         border: 2px solid var(--border-brown);
         border-radius: 50px;
@@ -63,7 +60,6 @@
         font-size: 0.9rem;
     }
 
-    /* Botões do Resumo */
     .btn-checkout {
         background-color: var(--coral-light);
         color: white;
@@ -87,7 +83,7 @@
     }
 
     .cupom-box {
-        background-color: #D6A476; /* Cor dourada do cupom da imagem */
+        background-color: #D6A476;
         border: 2px solid var(--border-brown);
         border-radius: 20px;
         text-align: center;
@@ -110,13 +106,16 @@
     <div class="row">
         <section class="col-md-7" aria-label="Itens do Carrinho">
             
-            <div class="custom-card mb-4 d-flex align-items-center justify-content-between">
-                <div class="w-100 me-3">
-                    <label class="form-label small text-muted mb-1">Consulte o frete com seu CEP</label>
-                    <input type="text" class="form-control" placeholder="Digite seu CEP..." style="border: 1px solid var(--border-brown); border-radius: 20px;">
+            <div class="custom-card mb-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="w-100 me-3">
+                        <label class="form-label small text-muted mb-1 fw-bold">Consulte o frete com seu CEP</label>
+                        <input type="text" id="cep-input" class="form-control" placeholder="00000-000" style="border: 2px solid var(--border-brown); border-radius: 20px;">
+                    </div>
+                    <button class="btn" onclick="calculateShipping()" style="background-color: var(--coral-light); color: white; border-radius: 20px; padding: 6px 20px; margin-top: 20px; font-weight: bold;">Calcular</button>
                 </div>
-                <button class="btn" style="background-color: var(--btn-pink-light); border: 1px solid var(--border-brown); border-radius: 20px; padding: 6px 20px; margin-top: 20px;">Ok</button>
-                <a href="#" class="small text-muted ms-3 mt-4 text-decoration-underline" style="white-space: nowrap;">Não sei meu CEP</a>
+                
+                <div id="shipping-options"></div>
             </div>
 
             <div class="custom-card" id="cart-items-container">
@@ -127,35 +126,35 @@
 
         <section class="col-md-5" aria-labelledby="summary-title">
             <div class="custom-card">
-                <h3 id="summary-title" class="fw-bold mb-4">Resumo do pedido</h3>
+                <h3 id="summary-title" class="fw-bold mb-4" style="color: var(--text-brown);">Resumo do pedido</h3>
                 
                 <div class="d-flex justify-content-between mb-3">
                     <strong style="color: var(--text-brown);">Produtos ( <span id="summary-qty">0</span> )</strong>
                     <strong style="color: #D6A476;" id="summary-subtotal">R$ 0,00</strong>
                 </div>
                 
-                <div class="d-flex justify-content-between mb-3">
-                    <strong style="color: var(--text-brown);">Frete</strong>
-                    <strong style="color: #D6A476;">Grátis</strong>
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                    <strong style="color: var(--text-brown);">Frete <span id="summary-shipping-name" class="text-muted small"></span></strong>
+                    <strong style="color: #D6A476;" id="summary-shipping-price">A calcular</strong>
                 </div>
 
-                <div class="d-flex justify-content-between mb-4">
-                    <strong style="color: var(--text-brown);">Descontos</strong>
-                    <strong style="color: var(--coral-light);">- R$ 0,00</strong>
+                <div class="d-flex justify-content-between mb-4 align-items-center">
+                    <strong style="color: var(--text-brown);">Descontos <span id="summary-coupon-code" class="badge ms-2" style="background-color: var(--coral-light); color: white; display: none;"></span></strong>
+                    <strong style="color: var(--coral-light);" id="summary-discount">- R$ 0,00</strong>
                 </div>
                 
                 <hr style="border-top: 2px dashed var(--border-brown); opacity: 0.3;">
                 
-                <div class="mb-4 mt-3">
-                    <h4 class="fw-bold mb-1">Total</h4>
-                    <h2 class="fw-bold text-center mt-3" style="color: #D6A476;" id="cart-total">R$ 0,00</h2>
+                <div class="mb-4 mt-3 text-center">
+                    <h4 class="fw-bold mb-1" style="color: var(--text-brown);">Total</h4>
+                    <h2 class="fw-bold mt-2" style="color: #D6A476; font-size: 2.8rem;" id="cart-total">R$ 0,00</h2>
                 </div>
 
                 <div class="mb-4">
                     <label class="small fw-bold mb-1" style="color: var(--text-brown);">Cupom de Desconto?</label>
                     <div class="d-flex">
-                        <input type="text" class="form-control" placeholder="Digite seu cupom" style="border: 2px solid var(--border-brown); border-radius: 20px 0 0 20px; background-color: transparent;">
-                        <button class="btn" style="background-color: #D6A476; color: white; border: 2px solid var(--border-brown); border-left: none; border-radius: 0 20px 20px 0; font-weight: bold; padding: 6px 20px;">Aplicar</button>
+                        <input type="text" id="coupon-input" class="form-control" placeholder="Digite seu código..." style="border: 2px solid var(--border-brown); border-radius: 20px 0 0 20px; background-color: transparent; text-transform: uppercase;">
+                        <button class="btn" id="btn-coupon" onclick="applyCoupon()" style="background-color: #D6A476; color: white; border: 2px solid var(--border-brown); border-left: none; border-radius: 0 20px 20px 0; font-weight: bold; padding: 6px 20px;">Aplicar</button>
                     </div>
                 </div>
 
@@ -187,23 +186,15 @@
             const cart = await response.json();
             
             const container = document.getElementById('cart-items-container');
-            const totalEl = document.getElementById('cart-total');
-            const subtotalEl = document.getElementById('summary-subtotal');
-            
             container.innerHTML = '';
 
             const totalItemsCount = cart.items ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
-
             document.getElementById('header-qty').innerText = totalItemsCount;
             document.getElementById('summary-qty').innerText = totalItemsCount;
-
-            const cartBadge = document.getElementById('cart-item-count');
-            if (cartBadge) cartBadge.innerText = totalItemsCount;
+            if (document.getElementById('cart-item-count')) document.getElementById('cart-item-count').innerText = totalItemsCount;
 
             if (cart.items.length === 0) {
                 container.innerHTML = '<div class="text-center py-4">Seu carrinho está vazio.</div>';
-                totalEl.innerText = 'R$ 0,00';
-                subtotalEl.innerText = 'R$ 0,00';
                 return;
             }
 
@@ -215,18 +206,13 @@
                 
                 itemDiv.innerHTML = `
                     <div style="width: 100px; height: 120px; background-color: white; border: 1px solid var(--border-brown); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 5px;">
-                        ${item.image_url 
-                            ? `<img src="${item.image_url}" alt="${item.product_name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">` 
-                            : `<span class="small text-muted">Sem Imagem</span>`
-                        }
+                        ${item.image_url ? `<img src="${item.image_url}" alt="${item.product_name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">` : `<span class="small text-muted">Sem Imagem</span>`}
                     </div>
-                    
                     <div class="ms-4 flex-grow-1 d-flex flex-column justify-content-between">
                         <div>
                             <h5 class="title-coral mb-1">${item.product_name}</h5>
-                            <p class="text-muted small mb-0">${item.product_name} - ${item.volume_ml}ml</p>
+                            <p class="text-muted small mb-0">${item.volume_ml}ml</p>
                         </div>
-                        
                         <div class="d-flex justify-content-between align-items-end mt-2">
                             <div>
                                 <div class="qty-capsule mb-2">
@@ -234,8 +220,7 @@
                                     <span>${item.quantity}</span>
                                     <button onclick="updateQuantity('${item.sku}', ${item.quantity + 1})">+</button>
                                 </div>
-                                <br>
-                                <h4 class="fw-bold mb-0" style="color: var(--text-brown);">R$ ${item.price}</h4>
+                                <h4 class="fw-bold mb-0 mt-2" style="color: var(--text-brown);">R$ ${item.price}</h4>
                             </div>
                             <button class="btn-remover mb-1" onclick="removeItem('${item.sku}')">Remover</button>
                         </div>
@@ -244,44 +229,128 @@
                 container.appendChild(itemDiv);
             });
 
-            // O formato do R$
-            totalEl.innerText = `R$ ${cart.total_price}`;
-            subtotalEl.innerText = `R$ ${cart.total_price}`;
+            document.getElementById('cart-total').innerText = `R$ ${cart.total_price}`;
+            document.getElementById('summary-subtotal').innerText = `R$ ${cart.subtotal_price}`;
+            document.getElementById('summary-discount').innerText = `- R$ ${cart.discount_amount}`;
+            
+            document.getElementById('summary-shipping-price').innerText = cart.shipping_price > 0 ? `R$ ${cart.shipping_price}` : 'A calcular';
+            document.getElementById('summary-shipping-name').innerText = cart.shipping_name ? `(${cart.shipping_name})` : '';
+            if(cart.cep) document.getElementById('cep-input').value = cart.cep;
+            
+            const couponBadge = document.getElementById('summary-coupon-code');
+            if(cart.coupon_code) {
+                couponBadge.innerText = cart.coupon_code;
+                couponBadge.style.display = 'inline-block';
+                document.getElementById('coupon-input').value = cart.coupon_code;
+            } else {
+                couponBadge.style.display = 'none';
+            }
 
         } catch (error) {
             console.error("Erro ao carregar o carrinho:", error);
         }
     }
 
-    async function updateQuantity(skuId, newQuantity) {
-        if(newQuantity <= 0) {
-            removeItem(skuId);
-            return;
-        }
+    async function calculateShipping() {
+        const cep = document.getElementById('cep-input').value;
+        if (!cep) return alert('Por favor, digite um CEP válido.');
+
+        const container = document.getElementById('shipping-options');
+        container.innerHTML = '<div class="text-center small mt-3 fw-bold" style="color: var(--text-brown);">Consultando Correios... 🚚</div>';
+
         try {
-            await fetch(apiUrl, {
-                method: 'PATCH',
+            const response = await fetch(apiUrl + 'shipping/', {
+                method: 'POST',
                 headers: getHeaders(),
-                body: JSON.stringify({ sku_id: skuId, quantity: parseInt(newQuantity) })
+                body: JSON.stringify({ cep: cep })
+            });
+            const data = await response.json();
+
+            if (data.opcoes) {
+                container.innerHTML = '<div class="mt-3"></div>';
+                data.opcoes.forEach(opcao => {
+                    container.innerHTML += `
+                        <label class="d-flex justify-content-between align-items-center p-3 mb-2 shadow-sm" style="border: 2px solid var(--border-brown); border-radius: 15px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.backgroundColor='#fae2df'" onmouseout="this.style.backgroundColor='transparent'">
+                            <div class="d-flex align-items-center">
+                                <input class="form-check-input me-3" style="transform: scale(1.3); accent-color: var(--coral-light);" type="radio" name="frete" onclick="selectShipping('${opcao.name}', ${opcao.price}, ${opcao.days})">
+                                <div>
+                                    <strong style="color: var(--text-brown);">${opcao.name}</strong><br>
+                                    <span class="small text-muted">Chega em até ${opcao.days} dias</span>
+                                </div>
+                            </div>
+                            <strong style="color: #D6A476; font-size: 1.1rem;">R$ ${opcao.price}</strong>
+                        </label>
+                    `;
+                });
+            } else {
+                container.innerHTML = `<div class="text-danger small mt-2 text-center">${data.error || 'Erro ao calcular'}</div>`;
+            }
+        } catch (error) {
+            container.innerHTML = '<div class="text-danger small mt-2 text-center">Erro de conexão.</div>';
+        }
+    }
+
+    async function selectShipping(name, price, days) {
+        const cep = document.getElementById('cep-input').value;
+        try {
+            await fetch(apiUrl + 'shipping/', {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ cep: cep, shipping_name: name, shipping_price: price, shipping_days: days })
             });
             loadCart();
         } catch (error) {
-            console.error("Erro ao atualizar:", error);
+            console.error("Erro ao selecionar frete", error);
         }
+    }
+
+    async function applyCoupon() {
+        const code = document.getElementById('coupon-input').value;
+        const btn = document.getElementById('btn-coupon');
+        const originalText = btn.innerText;
+        btn.innerText = '...';
+        
+        try {
+            const response = await fetch(apiUrl + 'coupon/', {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ code: code })
+            });
+            const data = await response.json();
+            
+            if (response.ok) {
+                loadCart();
+            } else {
+                alert(data.error || 'Cupom inválido ou expirado.');
+                document.getElementById('coupon-input').value = '';
+            }
+        } catch (error) {
+            alert('Erro ao aplicar cupom');
+        } finally {
+            btn.innerText = originalText;
+        }
+    }
+
+    async function updateQuantity(skuId, newQuantity) {
+        if(newQuantity <= 0) { removeItem(skuId); return; }
+        try {
+            await fetch(apiUrl, { method: 'PATCH', headers: getHeaders(), body: JSON.stringify({ sku_id: skuId, quantity: parseInt(newQuantity) }) });
+            loadCart();
+        } catch (error) {}
     }
 
     async function removeItem(skuId) {
         try {
-            await fetch(apiUrl, {
-                method: 'DELETE',
-                headers: getHeaders(),
-                body: JSON.stringify({ sku_id: skuId })
-            });
+            await fetch(apiUrl, { method: 'DELETE', headers: getHeaders(), body: JSON.stringify({ sku_id: skuId }) });
             loadCart();
-        } catch (error) {
-            console.error("Erro ao remover:", error);
-        }
+        } catch (error) {}
     }
+
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            loadCart();
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', loadCart);
 </script>

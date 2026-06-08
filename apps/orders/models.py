@@ -38,11 +38,15 @@ class Order(BaseModel):
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='PENDING', verbose_name='Status')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Preço Total')
     payment_method = models.CharField(max_length=50, blank=True, null=True, verbose_name='Forma de Pagamento')
+    shipping_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Serviço de Entrega')
+    shipping_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Valor do Frete')
+    delivery_days = models.PositiveIntegerField(default=7, verbose_name="Prazo de Entrega (Dias)")
+    coupon_code = models.CharField(max_length=50, blank=True, null=True, verbose_name='Cupom Utilizado')
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Valor do Desconto')
 
     # Relationships
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='orders', verbose_name='Cliente')
     address = models.ForeignKey(Address, on_delete=models.PROTECT, related_name='orders', verbose_name='Endereço de Entrega')
-    shipping_method = models.ForeignKey(ShippingMethod, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Transportadora')
     payment_approved_at = models.DateTimeField(null=True, blank=True, verbose_name='Data de Aprovação do Pagamento')
 
     class Meta:
@@ -59,8 +63,11 @@ class Order(BaseModel):
         the sum of all associated order items' subtotals.
         '''
         total_items = sum(item.get_subtotal() for item in self.items.all())
-        frete = self.shipping_method.price if self.shipping_method else Decimal('0.00')
-        self.total_price = total_items + frete
+        frete = self.shipping_price if self.shipping_price else Decimal('0.00')
+        desconto = self.discount_amount if self.discount_amount else Decimal('0.00')
+        
+        total = (total_items + frete) - desconto
+        self.total_price = max(total, Decimal('0.00'))
         self.save()
 
     @property

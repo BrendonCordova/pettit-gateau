@@ -58,24 +58,31 @@ def checkout_view(request):
         except Address.DoesNotExist:
             return render(request, 'orders/checkout.html', {'cart': cart, 'addresses': addresses, 'error': 'Endereço inválido selecionado.'})
 
+        if not cart.shipping_name:
+            return render(request, 'orders/checkout.html', {'cart': cart, 'addresses': addresses, 'error': 'Você precisa calcular e selecionar uma opção de frete no carrinho antes de prosseguir.'})
+
+        cep_endereco = chosen_address.zip_code.replace('-', '').strip()
+        cep_carrinho = cart.cep.replace('-', '').strip() if cart.cep else ""
+
+        if cep_endereco != cep_carrinho:
+            return render(request, 'orders/checkout.html', {'cart': cart, 'addresses': addresses, 'error': f'O frete foi calculado para o CEP {cart.cep}, mas o endereço selecionado é {chosen_address.zip_code}. Volte ao carrinho e recalcule.'})
+
         try:
             with transaction.atomic():
-
                 for cart_item in cart.items.all():
                     if cart_item.sku.stock_quantity < cart_item.quantity:
                         raise ValueError(f'Desculpe, o produto {cart_item.sku.product.name} não tem estoque suficiente.')
-
-                default_shipping = ShippingMethod.objects.filter(is_active=True).first()
-                
-                frete_price = default_shipping.price if default_shipping else 0
-                final_price = cart.total_price + frete_price
 
                 order = Order.objects.create(
                     customer=request.user,
                     address=chosen_address,
                     status='PENDING',
-                    total_price=final_price,
-                    shipping_method=default_shipping
+                    total_price=cart.total_price,
+                    shipping_name=cart.shipping_name,
+                    shipping_price=cart.shipping_price,
+                    delivery_days=cart.shipping_days,
+                    coupon_code=cart.coupon.code if cart.coupon else None,
+                    discount_amount=cart.discount_amount
                 )
 
                 for cart_item in cart.items.all():
@@ -87,10 +94,11 @@ def checkout_view(request):
                     )
 
                 mp_service = MercadoPagoService()
-
                 preference = mp_service.create_payment_preference(order, cart.items.all())
-
                 payment_url = preference['sandbox_init_point']
+
+            cart.items.all().delete()
+            cart.delete()
 
             return redirect(payment_url)
        

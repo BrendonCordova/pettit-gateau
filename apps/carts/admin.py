@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import Cart, CartItem
+from .models import Cart, CartItem, Coupon
+
+@admin.register(Coupon)
+class CouponAdmin(admin.ModelAdmin):
+    '''Administrative interface for managing discount coupons.'''
+    list_display = ['code', 'discount_percentage', 'discount_fixed', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['code']
+    list_editable = ['is_active']
 
 class CartItemInline(admin.TabularInline):
     '''Inline admin interface for viewing cart items directly inside a Cart record.'''

@@ -16,7 +16,7 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     '''Admin interface configuration for managing customer orders and payment statuses.'''
-    list_display = ('id', 'customer', 'status', 'total_price', 'shipping_method', 'created_at')
+    list_display = ('id', 'customer', 'status', 'total_price', 'shipping_name', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('customer__first_name', 'customer__email', 'id')
     readonly_fields = ('total_price', 'created_at', 'updated_at', 'payment_approved_at')
@@ -27,7 +27,7 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('customer', 'address')
         }),
         ('Status e Valores', {
-            'fields': ('status', 'shipping_method', 'total_price')
+            'fields': ('status', 'shipping_name', 'shipping_price', 'coupon_code', 'discount_amount', 'total_price')
         }),
         ('Datas', {
             'fields': ('created_at', 'payment_approved_at', 'updated_at')

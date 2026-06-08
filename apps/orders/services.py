@@ -11,27 +11,24 @@ class MercadoPagoService:
         self.sdk = mercadopago.SDK(config('MP_ACCESS_TOKEN'))
 
     def create_payment_preference(self, order, items_list):
-        '''
-        Builds and registers a payment preference payload with Mercado Pago.
-        Configures return URLs (success, pending, failure) and the webhook notification endpoint.
-
-        Args:
-            order (Order): The order instance triggering the payment.
-            items_list (QuerySet): A list of cart items to be formatted for the gateway.
-
-        Returns:
-            dict: The Mercado Pago response dictionary containing the 'sandbox_init_point' URL.
-            
-        Raises:
-            Exception: If the Mercado Pago API fails to return a valid initialization URL.
-        '''
         items = []
-        for item in items_list:
+        
+        if order.discount_amount and order.discount_amount > 0:
+            valor_produtos_com_desconto = float(order.total_price - order.shipping_price)
             items.append({
-                'title': f'{item.sku.product.name} - {item.sku.volume_ml}ml',
-                'quantity': item.quantity,
-                'unit_price': float(item.sku.price),
+                'title': f'Pedido #{str(order.id)[:8]} - Pettit Gateau',
+                'description': 'Produtos com cupom de desconto aplicado.',
+                'quantity': 1,
+                'unit_price': valor_produtos_com_desconto,
             })
+        else:
+            for item in items_list:
+                preco_unitario = item.price if hasattr(item, 'price') else item.sku.price
+                items.append({
+                    'title': f'{item.sku.product.name} - {item.sku.volume_ml}ml',
+                    'quantity': item.quantity,
+                    'unit_price': float(preco_unitario),
+                })
 
         success_url = f'http://localhost:8000/pedidos/sucesso/{order.id}/'
 
@@ -46,9 +43,14 @@ class MercadoPagoService:
                 "failure": "http://127.0.0.1:8000/carrinho/",
                 "pending": "http://127.0.0.1:8000/pedidos/pendente/",
             },
-            # 'auto_return': 'approved',
             'notification_url': webhook_url,
         }
+
+        if order.shipping_price and order.shipping_price > 0:
+            preference_data['shipments'] = {
+                'cost': float(order.shipping_price),
+                'mode': 'not_specified'
+            }
 
         print("==== JSON ENVIADO PARA O MERCADO PAGO ====")
         print(preference_data)
