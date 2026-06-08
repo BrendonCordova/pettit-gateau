@@ -7,6 +7,10 @@ from apps.products.models import SKU
 from .serializers import CartSerializer
 from django.views.generic import TemplateView
 from django.contrib import messages
+from .models import Coupon
+from .serializers import CartSerializer
+from .services import CorreiosService
+from decimal import Decimal
 
 class CartDetailAPIView(APIView):
     '''
@@ -165,3 +169,54 @@ class CartPageView(TemplateView):
     The actual data population is handled asynchronously via the CartDetailAPIView.
     '''
     template_name = 'carts/cart_page.html'
+
+class CartShippingAPIView(APIView):
+    def post(self, request):
+        '''
+        Receives the zip code, checks with the postal service, and returns the options.
+        If the customer submits their final choice, it is saved to the cart.
+        '''
+        cart = CartDetailAPIView()._get_cart(request)
+        cep = request.data.get('cep')
+        
+        if cep and not request.data.get('shipping_name'):
+            correios = CorreiosService()
+            peso_total = max(cart.items.count() * 0.5, 1) 
+            resposta = correios.calcular_frete(cep_destino=cep, peso=peso_total)
+            
+            if isinstance(resposta, dict) and 'error' in resposta:
+                return Response(resposta, status=status.HTTP_400_BAD_REQUEST)
+                
+            return Response({'opcoes': resposta})
+
+        shipping_name = request.data.get('shipping_name')
+        shipping_price = request.data.get('shipping_price')
+        shipping_days = request.data.get('shipping_days')
+
+        if shipping_name and shipping_price:
+            cart.cep = cep
+            cart.shipping_name = shipping_name
+            cart.shipping_price = Decimal(str(shipping_price))
+            cart.shipping_days = int(shipping_days)
+            cart.save()
+            return Response(CartSerializer(cart).data)
+            
+        return Response({"error": "Dados inválidos."}, status=status.HTTP_400_BAD_REQUEST)
+
+class CartCouponAPIView(APIView):
+    def post(self, request):
+        cart = CartDetailAPIView()._get_cart(request)
+        code = request.data.get('code')
+        
+        if not code:
+            cart.coupon = None
+            cart.save()
+            return Response(CartSerializer(cart).data)
+
+        coupon = Coupon.objects.filter(code__iexact=code, is_active=True).first()
+        if not coupon:
+            return Response({"error": "Cupom inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart.coupon = coupon
+        cart.save()
+        return Response(CartSerializer(cart).data)

@@ -19,7 +19,6 @@ class CartItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'sku', 'product_name', 'volume_ml', 'price', 'quantity', 'subtotal', 'image_url']
 
     def get_image_url(self, obj):
-        # Vai até o Produto, busca as imagens e filtra a principal
         main_image = obj.sku.product.images.filter(is_main=True).first()
         if main_image and main_image.image:
             return main_image.image.url
@@ -32,8 +31,16 @@ class CartSerializer(serializers.ModelSerializer):
     calculated total_price for the entire cart.
     '''
     items = CartItemSerializer(many=True, read_only=True)
+    
+    subtotal_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    discount_amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     total_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    coupon_code = serializers.CharField(source='coupon.code', read_only=True, default=None)
 
     class Meta:
         model = Cart
-        fields = ['id', 'session_key', 'items', 'total_price', 'created_at']
+        fields = [
+            'id', 'session_key', 'items', 'subtotal_price', 
+            'cep', 'shipping_name', 'shipping_price', 'shipping_days',
+            'coupon_code', 'discount_amount', 'total_price'
+        ]
