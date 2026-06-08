@@ -207,6 +207,16 @@
             </div>
         {% endif %}
 
+        {% if order.tracking_code %}
+            <div style="background-color: transparent; border: 2px dashed #D6A476; border-radius: 15px; padding: 20px; text-align: center; margin-bottom: 25px;">
+                <h5 style="color: var(--text-brown); font-weight: bold; margin-bottom: 5px;">Acompanhe sua entrega!</h5>
+                <p class="text-muted small mb-3">Código dos Correios: <strong style="color: var(--coral-light);">{{ order.tracking_code }}</strong></p>
+                <a href="https://linketrack.com/track?codigo={{ order.tracking_code }}" target="_blank" class="btn" style="background-color: var(--coral-light); color: white; border-radius: 20px; font-weight: bold; padding: 8px 30px; text-decoration: none;">
+                    Rastrear Encomenda <i class="bi bi-box-seam ms-1"></i>
+                </a>
+            </div>
+        {% endif %}
+
         <div class="action-buttons">
             
             {% if order.status == 'PENDING' %}
