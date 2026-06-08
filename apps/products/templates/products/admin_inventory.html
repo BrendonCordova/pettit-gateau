@@ -280,6 +280,63 @@
         <a href="#" class="btn-secondary-action" onclick="openBrandModal()"><i class="bi bi-bookmark-star"></i> Nova Marca</a>
         <a href="#" class="btn-secondary-action" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Nova Categoria</a>
         <a href="#" class="btn-secondary-action" onclick="openBannerModal()"><i class="bi bi-images"></i> Histórico de Banners</a>
+        <a href="#" class="btn-secondary-action" onclick="openCouponModal()"><i class="bi bi-ticket-perforated"></i> Cupons de Desconto</a>
+    </div>
+
+    <div class="add-modal-overlay" id="coupon-modal">
+        <div class="mini-modal-box" style="max-width: 550px;">
+            <i class="bi bi-x btn-close-modal" onclick="closeCouponModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Cupons de Desconto</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 15px;">Gerencie as promoções da sua loja.</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px; border-bottom: 2px solid var(--border-brown); margin-bottom: 20px; padding-bottom: 10px;">
+                {% for coupon in coupons %}
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background-color: {% if coupon.is_active %}#fff{% else %}#f7f3f0{% endif %}; border: 1px solid {% if coupon.is_active %}var(--coral-light){% else %}var(--border-brown){% endif %}; border-radius: 10px;">
+                    
+                    <div>
+                        <strong style="color: var(--text-brown); font-size: 1.1rem; text-transform: uppercase;">{{ coupon.code }}</strong><br>
+                        <span style="font-size: 0.8rem; color: #D6A476; font-weight: bold;">
+                            {% if coupon.discount_percentage %}{{ coupon.discount_percentage }}% OFF{% else %}R$ {{ coupon.discount_fixed }} de desconto{% endif %}
+                        </span>
+                    </div>
+
+                    <form action="{% url 'products:admin-toggle-coupon' coupon.id %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        {% if coupon.is_active %}
+                            <button type="submit" class="btn-secondary-action" style="padding: 5px 15px; font-size: 0.8rem;">Desativar</button>
+                        {% else %}
+                            <button type="submit" class="btn-secondary-action" style="padding: 5px 15px; font-size: 0.8rem; background-color: var(--text-brown); color: white;">Ativar</button>
+                        {% endif %}
+                    </form>
+                </div>
+                {% empty %}
+                    <p style="color: #D6A476; font-size: 0.9rem; text-align: center; margin-top: 10px;">Nenhum cupom cadastrado.</p>
+                {% endfor %}
+            </div>
+
+            <form action="{% url 'products:admin-add-coupon' %}" method="POST">
+                {% csrf_token %}
+                <h3 style="color: var(--text-brown); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;"><i class="bi bi-plus-circle"></i> Criar Novo Cupom</h3>
+                
+                <div class="form-group-custom" style="margin-bottom: 10px;">
+                    <label style="min-width: 60px;">Código:</label>
+                    <input type="text" name="code" placeholder="Ex: VERAO20" style="text-transform: uppercase;" required>
+                </div>
+                <div class="input-row-half" style="margin-bottom: 5px;">
+                    <div class="form-group-custom" style="flex: 1.5;">
+                        <select name="discount_type" required>
+                            <option value="percent">Desconto em (%)</option>
+                            <option value="fixed">Desconto Fixo (R$)</option>
+                        </select>
+                    </div>
+                    <div class="form-group-custom" style="flex: 1;">
+                        <input type="number" step="0.01" name="value" placeholder="Valor" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save-prod" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 10px;">Salvar Cupom</button>
+            </form>
+        </div>
     </div>
 
     <div class="add-modal-overlay" id="add-brand-modal">
@@ -756,5 +813,8 @@
 
     function openBannerModal() { document.getElementById('history-banner-modal').style.display = 'flex'; }
     function closeBannerModal() { document.getElementById('history-banner-modal').style.display = 'none'; }
+
+    function openCouponModal() { document.getElementById('coupon-modal').style.display = 'flex'; }
+    function closeCouponModal() { document.getElementById('coupon-modal').style.display = 'none'; }
 </script>
 {% endblock %}

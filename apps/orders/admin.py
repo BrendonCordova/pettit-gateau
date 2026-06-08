@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem, ShippingMethod
+from .models import Order, OrderItem
 
 class OrderItemInline(admin.TabularInline):
     '''Inline admin interface for viewing purchased items directly within the Order profile.'''

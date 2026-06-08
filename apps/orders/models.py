@@ -8,18 +8,6 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from datetime import timedelta
 
-class ShippingMethod(BaseModel):
-    name = models.CharField(max_length=100, verbose_name="Nome da Transportadora (Ex: PAC, Sedex)")
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço do Frete")
-    delivery_days = models.PositiveIntegerField(default=7, verbose_name="Prazo de Entrega (Dias)")
-    is_active = models.BooleanField(default=True, verbose_name="Ativo")
-
-    class Meta:
-        verbose_name = 'Método de Envio'
-        verbose_name_plural = 'Métodos de Envio'
-
-    def __str__(self):
-        return f"{self.name} ({self.delivery_days} dias) - R$ {self.price}"
 class Order(BaseModel):
     '''
     Represents a customer's purchase order.
@@ -64,7 +52,7 @@ class Order(BaseModel):
         the sum of all associated order items' subtotals.
         '''
         total_items = sum(item.get_subtotal() for item in self.items.all())
-        frete = self.shipping_price if self.shipping_price else Decimal('0.00')
+        frete = self.sprice if self.shipping_price else Decimal('0.00')
         desconto = self.discount_amount if self.discount_amount else Decimal('0.00')
         
         total = (total_items + frete) - desconto

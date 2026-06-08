@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from apps.base.models import BaseModel
 from apps.products.models import SKU
-from apps.orders.models import ShippingMethod
 from decimal import Decimal
 
 User = get_user_model()
