@@ -369,6 +369,32 @@
                                 </div>
                             </div>
 
+                            <div style="border-left: 2px solid var(--border-brown); padding-left: 30px;">
+                                <h3 style="color: var(--text-brown); font-weight: 900; font-size: 1.3rem;">Status</h3>
+                                
+                                <div class="status-radio-group">
+                                   <label class="status-radio-label">
+                                        <input type="radio" name="status" value="SHIPPED" {% if order.status == 'SHIPPED' or order.status == 'DELIVERED' %}checked{% endif %}>
+                                        A caminho
+                                    </label>
+                                    <label class="status-radio-label">
+                                        <input type="radio" name="status" value="PREPARING" {% if order.status == 'PREPARING' or order.status == 'PAID' %}checked{% endif %}>
+                                        A enviar
+                                    </label>
+                                    <label class="status-radio-label">
+                                        <input type="radio" name="status" value="PENDING" {% if order.status == 'PENDING' %}checked{% endif %}>
+                                        Aguardando Pagamento
+                                    </label>
+                                    <label class="status-radio-label" style="color: #c59567;">
+                                        <input type="radio" name="status" value="CANCELED" {% if order.status == 'CANCELED' %}checked{% endif %}>
+                                        Cancelar
+                                    </label>
+                                </div>
+
+                                <h3 style="color: var(--text-brown); font-weight: 900; font-size: 1.1rem; margin-top: 30px;">Código de Rastreio</h3>
+                                <input type="text" name="tracking_code" value="{{ order.tracking_code|default:'' }}" placeholder="Ex: LB123456789BR" style="border: 2px solid var(--border-brown); border-radius: 10px; padding: 10px; width: 100%; margin-top: 10px; background: transparent; color: var(--text-brown); font-weight: bold; text-transform: uppercase;">
+                            </div>
+
                             <div class="modal-actions">
                                 <button type="submit" class="btn-save-status">Salvar Pedido</button>
                                 <button type="button" class="btn-cancel-status" onclick="closeOrderModal('{{ order.id }}')">Cancelar</button>

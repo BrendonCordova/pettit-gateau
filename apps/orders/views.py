@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from apps.carts.models import Cart
 from apps.customers.models import Address
-from .models import Order, OrderItem, ShippingMethod, ReturnRequest
+from .models import Order, OrderItem, ReturnRequest
 from django.db import transaction
 from django.db.models import F
 from django.contrib import messages
@@ -404,12 +404,17 @@ def update_order_status_view(request):
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
         new_status = request.POST.get('status')
+        tracking_code = request.POST.get('tracking_code')
         
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
+
+        if tracking_code is not None:
+            order.tracking_code = tracking_code.strip()
+
         order.save()
         
-        messages.success(request, f"Status do pedido #{str(order.id)[:8]} atualizado com sucesso!")
+        messages.success(request, f"Status e dados do pedido #{str(order.id)[:8]} atualizado com sucesso!")
         
     return redirect('orders:admin-dashboard')
 

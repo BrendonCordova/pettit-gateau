@@ -10,6 +10,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
 from django.utils import timezone
 from django.db.models.functions import Coalesce
+from apps.carts.models import Coupon
 
 def product_list(request, category_name=None):
     '''
@@ -240,6 +241,7 @@ def admin_inventory_view(request):
     fragrance_choices = Product.Fragrance.choices
     concentration_choices = SKU.Concentration.choices
     banners = Banner.objects.all().order_by('-created_at')
+    coupons = Coupon.objects.all().order_by('-created_at')
 
     context = {
         'skus': skus,
@@ -250,6 +252,7 @@ def admin_inventory_view(request):
         'fragrances': fragrance_choices,
         'concentrations': concentration_choices,
         'banners': banners,
+        'coupons': coupons,
     }
     return render(request, 'products/admin_inventory.html', context)
 
@@ -428,4 +431,39 @@ def add_banner_inventory_view(request):
         else:
             messages.error(request, 'Por favor, selecione uma imagem.')
             
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_coupon_view(request):
+    if request.method == 'POST':
+        code = request.POST.get('code', '').strip().upper()
+        discount_type = request.POST.get('discount_type')
+        value = request.POST.get('value')
+        
+        if not code or not value:
+            messages.error(request, 'Código e valor são obrigatórios.')
+            return redirect('products:admin-inventory')
+            
+        try:
+            value = float(str(value).replace(',', '.'))
+            
+            if discount_type == 'percent':
+                Coupon.objects.create(code=code, discount_percentage=value)
+            else:
+                Coupon.objects.create(code=code, discount_fixed=value)
+                
+            messages.success(request, f'Cupom {code} criado com sucesso!')
+        except Exception as e:
+            messages.error(request, 'Erro. Verifique se o código já existe.')
+            
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def toggle_coupon_view(request, coupon_id):
+    if request.method == 'POST':
+        coupon = get_object_or_404(Coupon, id=coupon_id)
+        coupon.is_active = not coupon.is_active
+        coupon.save()
+        status_txt = "ativado" if coupon.is_active else "desativado"
+        messages.success(request, f'Cupom {coupon.code} {status_txt}!')
     return redirect('products:admin-inventory')
