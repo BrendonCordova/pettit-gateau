@@ -73,12 +73,12 @@ class Order(BaseModel):
     @property
     def expected_delivery_date(self):
         '''Calcula a data dinamicamente com base nos dias definidos no Admin pela Transportadora'''
-        days = self.shipping_method.delivery_days if self.shipping_method else 7
+        days = self.delivery_days if self.delivery_days else 7
 
         base_date = self.payment_approved_at if self.payment_approved_at else self.created_at
 
-        if self.created_at:
-            return self.created_at + timedelta(days=days)
+        if base_date:
+            return base_date + timedelta(days=days)
         return None
     
 class OrderItem(BaseModel):

@@ -219,8 +219,8 @@
 
                 <div class="order-shipping-info mt-2" style="font-size: 0.85rem; color: var(--text-brown); font-weight: 600;">
                     <i class="bi bi-truck me-1" style="color: var(--coral-light); font-size: 1rem;"></i>
-                    {% if order.shipping_method %}
-                        Envio via {{ order.shipping_method.name }} (Prazo: {{ order.shipping_method.delivery_days }} dias)
+                    {% if order.shipping_name %}
+                        Envio via {{ order.shipping_name }} (Prazo: {{ order.delivery_days }} dias)
                     {% else %}
                         Envio Padrão (Prazo: 7 dias)
                     {% endif %}

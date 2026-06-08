@@ -165,9 +165,9 @@
                 {% endfor %}
                 
                 <div class="item-row" style="margin-top: 20px; border-top: 1px dashed var(--border-brown); padding-top: 15px;">
-                    <span style="font-size: 0.85rem;">Frete {% if order.shipping_method %}({{ order.shipping_method.name }}){% endif %}</span>
+                    <span style="font-size: 0.85rem;">Frete {% if order.shipping_name %}({{ order.shipping_name }}){% endif %}</span>
                     <span class="item-price" style="font-size: 0.95rem;">
-                        {% if order.shipping_method and order.shipping_method.price > 0 %}R$ {{ order.shipping_method.price }}{% else %}Grátis{% endif %}
+                        {% if order.shipping_price and order.shipping_price > 0 %}R$ {{ order.shipping_price }}{% else %}Grátis{% endif %}
                     </span>
                 </div>
                 
