@@ -27,14 +27,9 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('customer', 'address')
         }),
         ('Status e Valores', {
-            'fields': ('status', 'shipping_name', 'shipping_price', 'coupon_code', 'discount_amount', 'total_price')
+            'fields': ('status', 'tracking_code', 'shipping_name', 'shipping_price', 'coupon_code', 'discount_amount', 'total_price')
         }),
         ('Datas', {
             'fields': ('created_at', 'payment_approved_at', 'updated_at')
         }),
     )
-
-@admin.register(ShippingMethod)
-class ShippingMethodAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'delivery_days', 'is_active')
-    list_editable = ('price', 'delivery_days', 'is_active')

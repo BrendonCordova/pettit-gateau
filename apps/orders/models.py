@@ -41,6 +41,7 @@ class Order(BaseModel):
     shipping_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Serviço de Entrega')
     shipping_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Valor do Frete')
     delivery_days = models.PositiveIntegerField(default=7, verbose_name="Prazo de Entrega (Dias)")
+    tracking_code = models.CharField(max_length=50, blank=True, null=True, verbose_name='Código de Rastreio')
     coupon_code = models.CharField(max_length=50, blank=True, null=True, verbose_name='Cupom Utilizado')
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Valor do Desconto')
 
