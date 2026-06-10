@@ -6,26 +6,44 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Robust-336791.svg?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED.svg?logo=docker&logoColor=white)
 
-**An enterprise-grade niche perfumery e-commerce backend focused on high scalability, asynchronous payment integrations, and strict data integrity.**
+**An enterprise-grade niche perfumery e-commerce platform, engineered to demonstrate advanced software architecture patterns, asynchronous payment integrations, and strict data integrity.**
 
-This project serves as a comprehensive online sales ecosystem, engineered to demonstrate advanced software architecture patterns, internationalized data modeling, and modern backend security protocols.
+While this project features a fully functional and responsive Vanilla JS frontend, its core purpose is to showcase robust **Back-end Engineering**. It tackles real-world e-commerce challenges such as cart mathematics, external API resilience, and transactional security.
 
 ---
 
-## 🧠 Core Architecture & Technical Highlights
+## 📸 System Walkthrough
 
-Unlike basic CRUD applications, **Pettit Gateau** addresses real-world business challenges through robust backend engineering:
+*(Note: Replace the placeholder links below with actual GIFs or screenshots of your project)*
 
-* **Hybrid Rendering Architecture:** Strategic separation of concerns. Utilizes **SSR (Django Templates)** for public-facing storefronts (PLP/PDP) to maximize SEO and Time-to-First-Byte, combined with **API-Driven (DRF)** endpoints for transactional flows (Cart/Checkout) ensuring high responsiveness.
-* **Transactional Integrity & Webhooks:** Complete integration with **Mercado Pago SDK**. Inventory deductions are strictly asynchronous—triggered *only* via secure webhooks upon payment approval to prevent phantom out-of-stock scenarios from abandoned checkouts (PIX/Boleto).
-* **Cryptographic Security First:** Custom Email-Auth user model replacing standard usernames. Features a highly secure, token-based account activation flow (Base64 + Django Token Generator) to mitigate spam and bot registrations.
+| Storefront & Cart | Checkout & Payment Flow | Customized administration panel and inventory |
+| :---: | :---: | :---: |
+| <img src="docs/applying_coupon_and_zip_code.gif" width="250" alt="Applying Coupon and Zip Code"/> | <img src="docs/finalizing_order.gif" width="250" alt="Mercado Pago Integration"/> | <img src="docs/administration_panels_and_changing_and_adding_tracking_codes.gif" width="250" alt="Administration Panels"/> |
+| *Async Cart updates (Fetch API), real-time freight simulation, and coupon validation.* | *Anti-fraud validations and direct Mercado Pago Webhook integration.* | *Custom UI bypassing standard Django Admin for Logistics and Marketing management.* |
+
+---
+
+## 🧠 Core Architecture & Engineering Decisions
+
+Unlike basic CRUD applications, **Pettit Gateau** is built to handle edge cases and maintain business logic integrity:
+
+### 🛡️ Transactional Integrity & Webhooks
+* **Asynchronous Inventory Management:** Inventory deductions are triggered *only* via secure webhooks upon Mercado Pago's payment approval. This prevents phantom out-of-stock scenarios caused by abandoned checkouts (e.g., unpaid PIX or Boletos).
+* **Float Math Protection:** Discounted orders are dynamically grouped into a single transactional payload before being sent to the payment gateway to completely eliminate API crashes caused by floating-point rounding errors or negative item values.
+
+### 🚚 Resilient Logistics & Anti-Fraud
+* **Intelligent Freight Mock & ViaCEP Validation:** Replaced the notoriously unstable public postal API with a resilient local mock service that calculates shipping based on geographic rules (originating from Laguna/SC). Integrated the **ViaCEP API** to instantly validate zip codes and block dummy inputs (e.g., `00000000`).
+* **Address Spoofing Prevention:** The checkout view actively cross-references the zip code calculated in the cart against the final selected delivery address, hard-blocking the transaction if discrepancies are found.
+
+### 🏗️ Advanced Data Modeling
 * **Abstract Data Governance:** All entities inherit from a universal `BaseModel` providing automated UUIDs (preventing enumeration attacks), audit timestamps (`created_at`/`updated_at`), and `is_active` flags for safe soft-deletions.
-* **Advanced SKU Modeling:** Logical decoupling between Product (Identity) and SKU (Logistics/Pricing), allowing for independent inventory tracking across different volumes (e.g., 50ml vs. 100ml) with historical price snapshotting on orders.
-* **Codebase Standardization:** Fully documented using **Google Style Docstrings** across all modules (Views, Models, APIs, Tests), adhering to top-tier software engineering standards.
+* **Decoupled SKU Architecture:** Logical separation between Product (Identity) and SKU (Logistics/Pricing), allowing independent inventory tracking across different volumes with historical price snapshotting on `OrderItems`.
+
+---
 
 ## 🗺️ Entity-Relationship Diagram (ERD)
 
-The database schema is heavily normalized, built on PostgreSQL, and designed for scalability. All tables inherit from a `BaseModel` featuring UUID primary keys, soft-deletion flags, and audit timestamps.
+The database schema is heavily normalized, built on PostgreSQL, and designed for scalability.
 
 ```mermaid
 erDiagram
@@ -35,60 +53,36 @@ erDiagram
         string first_name
         string last_name
         string tax_id UK
-        date birth_date
-        string phone
-        boolean is_staff
     }
     ADDRESS {
         UUID id PK
         boolean is_default
-        string name
         string zip_code
-        string street
-        string number
-        string neighborhood
         string city
-        string state
-        string complement
-    }
-    BRAND {
-        UUID id PK
-        string name
-    }
-    CATEGORY {
-        UUID id PK
-        string name
     }
     PRODUCT {
         UUID id PK
         string name
-        text description
-        string fragrance
         string slug UK
     }
     SKU {
         UUID id PK
         string sku_code UK
-        string concentration
         int volume_ml
         decimal price
         int stock_quantity
     }
-    PRODUCTIMAGE {
+    COUPON {
         UUID id PK
-        string image
-        int display_order
-        boolean is_main
-    }
-    REVIEW {
-        UUID id PK
-        int rating
-        text comment
+        string code UK
+        decimal discount_percentage
+        decimal discount_fixed
     }
     ORDER {
         UUID id PK
         string status
         decimal total_price
+        string tracking_code
     }
     ORDERITEM {
         UUID id PK
@@ -107,26 +101,14 @@ erDiagram
     %% Relationships
     CUSTOMER ||--o{ ADDRESS : "has"
     CUSTOMER ||--o{ ORDER : "places"
-    CUSTOMER ||--o{ REVIEW : "writes"
-    CUSTOMER ||--o| CART : "owns"
-    
-    BRAND ||--o{ PRODUCT : "manufactures"
-    CATEGORY ||--o{ PRODUCT : "categorizes"
-    
     PRODUCT ||--o{ SKU : "contains"
-    PRODUCT ||--o{ PRODUCTIMAGE : "displays"
-    PRODUCT ||--o{ REVIEW : "receives"
-    
     SKU ||--o{ CARTITEM : "added to"
     SKU ||--o{ ORDERITEM : "purchased as"
-    
     CART ||--o{ CARTITEM : "holds"
     ORDER ||--o{ ORDERITEM : "includes"
     ORDER }|--|| ADDRESS : "delivered to"
+    ORDER }|--o| COUPON : "applies"
 ```
-
-## 🖥️ User Interface & Frontend Integration (Coming Soon)
-*This section is reserved for the upcoming frontend implementation phase. It will feature UI screenshots, responsive design details, and documentation on how the Vanilla JS frontend consumes the DRF endpoints.*
 
 ## ⚙️ Prerequisites
 To run this project locally, ensure you have the following installed:

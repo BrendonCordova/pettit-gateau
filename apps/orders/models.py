@@ -52,7 +52,7 @@ class Order(BaseModel):
         the sum of all associated order items' subtotals.
         '''
         total_items = sum(item.get_subtotal() for item in self.items.all())
-        frete = self.sprice if self.shipping_price else Decimal('0.00')
+        frete = self.shipping_price if self.shipping_price else Decimal('0.00')
         desconto = self.discount_amount if self.discount_amount else Decimal('0.00')
         
         total = (total_items + frete) - desconto
