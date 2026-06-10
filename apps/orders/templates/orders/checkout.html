@@ -169,7 +169,7 @@
                     
                     <div class="d-flex justify-content-between mb-2">
                         <strong style="color: var(--text-brown); font-size: 1.1rem;">Produtos ( {{ cart.items.count }} )</strong>
-                        <strong style="color: #D6A476; font-size: 1.1rem;">R$ {{ cart.total_price }}</strong>
+                        <strong style="color: #D6A476; font-size: 1.1rem;">R$ {{ cart.subtotal_price|floatformat:"2g" }}</strong>
                     </div>
 
                     <div class="mb-3 border-bottom pb-3">
@@ -183,23 +183,31 @@
                     
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <strong style="color: var(--text-brown); font-size: 1.1rem;">Frete</strong>
-                        <strong style="color: #D6A476; font-size: 1.1rem;">Grátis</strong>
+                        <strong style="color: #D6A476; font-size: 1.1rem;">
+                            {% if cart.shipping_price and cart.shipping_price > 0 %}
+                                R$ {{ cart.shipping_price|floatformat:"2g" }}
+                            {% else %}
+                                Grátis
+                            {% endif %}
+                        </strong>
                     </div>
                     <div class="mb-3 border-bottom pb-3">
-                        <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">Correios</span>
+                        <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">{{ cart.shipping_name|default:"Correios" }}</span>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <strong style="color: var(--text-brown); font-size: 1.1rem;">Descontos</strong>
-                        <strong style="color: var(--coral-light); font-size: 1.1rem;">- R$ 0,00</strong>
+                        <strong style="color: var(--coral-light); font-size: 1.1rem;">- R$ {{ cart.discount_amount|default:"0"|floatformat:"2g" }}</strong>
                     </div>
                     <div class="mb-4 border-bottom pb-4">
-                        <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">CUPOM APLICADO</span>
+                        <span style="font-size: 0.85rem; color: #D6A476; font-weight: bold;">
+                            {% if cart.coupon %}CUPOM: {{ cart.coupon.code }}{% else %}SEM CUPOM{% endif %}
+                        </span>
                     </div>
                     
                     <div class="mb-4 mt-3 text-center">
                         <h5 class="fw-bold mb-1" style="color: var(--text-brown); font-size: 1.2rem;">Total a Pagar</h5>
-                        <h1 class="fw-bold mt-2" style="color: #D6A476; font-size: 2.8rem;">R$ {{ cart.total_price }}</h1>
+                        <h1 class="fw-bold mt-2" style="color: #D6A476; font-size: 2.8rem;">R$ {{ cart.total_price|floatformat:"2g" }}</h1>
                     </div>
 
                     <div class="text-center mt-4">
