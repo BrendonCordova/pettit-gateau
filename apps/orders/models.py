@@ -61,7 +61,10 @@ class Order(BaseModel):
 
     @property
     def expected_delivery_date(self):
-        '''Calcula a data dinamicamente com base nos dias definidos no Admin pela Transportadora'''
+        '''
+        Dynamically calculates the expected delivery date based on the 
+        delivery days defined during the checkout process.
+        '''
         days = self.delivery_days if self.delivery_days else 7
 
         base_date = self.payment_approved_at if self.payment_approved_at else self.created_at

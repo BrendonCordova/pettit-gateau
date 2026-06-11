@@ -354,7 +354,7 @@ Equipe Pettit Gateau"""
 @login_required(login_url='/conta/login/')
 def order_return_success_view(request, return_id):
     '''
-    Exibe a página de sucesso após uma solicitação de devolução.
+    Renders the success confirmation page after a return request is successfully submitted.
     '''
     return_req = get_object_or_404(ReturnRequest, id=return_id, order__customer=request.user)
     return render(request, 'orders/order_return_success.html', {'return_req': return_req})
@@ -362,8 +362,9 @@ def order_return_success_view(request, return_id):
 @login_required(login_url='/conta/login/')
 def confirm_delivery_view(request, pk):
     '''
-    Permite ao cliente confirmar manualmente que recebeu o produto.
-    Muda o status para DELIVERED e atualiza a data (updated_at) para iniciar o prazo de devolução.
+    Allows the customer to manually confirm the receipt of their package.
+    Transitions the order status to 'DELIVERED' and sets the updated_at timestamp 
+    to initiate the legal return period window.
     '''
     order = get_object_or_404(Order, pk=pk, customer=request.user)
     
@@ -376,6 +377,10 @@ def confirm_delivery_view(request, pk):
 
 @staff_member_required(login_url='/conta/login/')
 def admin_orders_dashboard_view(request):
+    '''
+    Renders the custom administrative dashboard for order management.
+    Calculates total revenue, aggregates order statuses, and lists all transactions.
+    '''
     orders = Order.objects.all().order_by('-created_at')
 
     agregado = orders.filter(
@@ -401,6 +406,10 @@ def admin_orders_dashboard_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def update_order_status_view(request):
+    '''
+    Handles administrative updates to an order's lifecycle status and tracking code.
+    Triggered via the custom modal interface in the admin dashboard.
+    '''
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
         new_status = request.POST.get('status')
@@ -420,6 +429,10 @@ def update_order_status_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def export_data_view(request, export_type):
+    '''
+    Generates and downloads CSV reports containing store metrics.
+    Supports exporting global item details, financial revenue, and customer records.
+    '''
     response = HttpResponse(content_type='text/csv')
     nome_arquivo = f"relatorio_{export_type}_{timezone.now().strftime('%Y-%m-%d')}.csv"
     response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'

@@ -40,7 +40,7 @@ class OrderCreationTestCase(TestCase):
 
         self.checkout_url = reverse('orders:checkout')
 
-    def teste_create_order_from_cart(self):
+    def test_create_order_from_cart(self):
         '''
         Tests the checkout endpoint to ensure a valid cart generates a 'PENDING' order, 
         clears the cart items, and properly redirects the user to the payment gateway.
@@ -59,7 +59,7 @@ class OrderCreationTestCase(TestCase):
         cart_items_count = CartItem.objects.filter(cart=self.cart).count()
         self.assertEqual(cart_items_count, 0)
 
-class OrderWerbhookTestCase(TestCase):
+class OrderWebhookTestCase(TestCase):
     '''
     Test suite for the asynchronous Mercado Pago webhook handler.
     Verifies the correct parsing of payloads and subsequent database updates.
