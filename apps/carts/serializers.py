@@ -19,6 +19,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'sku', 'product_name', 'volume_ml', 'price', 'quantity', 'subtotal', 'image_url']
 
     def get_image_url(self, obj):
+        '''Retrieves the absolute URL of the product's main image, if available.'''
         main_image = obj.sku.product.images.filter(is_main=True).first()
         if main_image and main_image.image:
             return main_image.image.url

@@ -34,6 +34,7 @@ class ReviewAdmin(admin.ModelAdmin):
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
+    '''Admin interface configuration for the Banner promotional model.'''
     list_display = ('title', 'is_active', 'created_at')
     list_editable = ('is_active',)
     search_fields = ('title',)

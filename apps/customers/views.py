@@ -57,6 +57,10 @@ class CustomerLoginView(LoginView):
     redirect_authenticated_user = True
 
     def form_valid(self, form):
+        '''
+        Processes the valid login form and merges any anonymous shopping cart 
+        into the authenticated user's account.
+        '''
         session_key = self.request.session.session_key
 
         response = super().form_valid(form)
@@ -221,9 +225,16 @@ def address_update_view(request, pk):
     return render(request, 'customers/address_update.html', {'form': form})
 
 def logout_view(request):
+    '''
+    Terminates the user's session and redirects them to the login page
+    with a farewell message.
+    '''
     logout(request)
     messages.success(request, "Sessão terminada com sucesso. Esperamos ver você novamente em breve!")
     return redirect('customers:login')
 
 def help_center_view(request):
+    '''
+    Renders the static help center and FAQ page for customer support.
+    '''
     return render(request, 'customers/help_center.html')
