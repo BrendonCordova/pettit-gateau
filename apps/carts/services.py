@@ -2,7 +2,13 @@ import requests
 import xml.etree.ElementTree as ET
 
 class CorreiosService:
+    '''
+    Service class responsible for handling freight calculations.
+    Integrates with ViaCEP for address validation and provides 
+    dynamic shipping rates based on regional rules.
+    '''
     def __init__(self, cep_origem='88790000'):
+        '''Initializes the service with the store's origin ZIP code.'''
         self.cep_origem = cep_origem.replace('-', '')
 
     def calcular_frete(self, cep_destino, peso=1):

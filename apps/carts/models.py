@@ -17,6 +17,10 @@ class Coupon(BaseModel):
         return self.code
 
 class Cart(BaseModel):
+    '''
+    Represents a shopping cart tied to a user or an anonymous session.
+    Handles pricing logic including shipping calculations and coupon discounts.
+    '''
     user = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True, related_name='carts')
     session_key = models.CharField(max_length=40, null=True, blank=True, verbose_name='chave da sessão')
     
@@ -29,10 +33,12 @@ class Cart(BaseModel):
 
     @property
     def subtotal_price(self):
+        '''Calculates the sum of all cart items before shipping and discounts.'''
         return sum(item.subtotal for item in self.items.all())
 
     @property
     def discount_amount(self):
+        '''Calculates the discount to be applied based on the attached coupon.'''
         if not self.coupon:
             return Decimal('0.00')
         if self.coupon.discount_percentage:
@@ -43,6 +49,7 @@ class Cart(BaseModel):
 
     @property
     def total_price(self):
+        '''Calculates the final cart total ensuring it never drops below zero.'''
         total = (self.subtotal_price + self.shipping_price) - self.discount_amount
         return max(total, Decimal('0.00'))
 
@@ -52,6 +59,10 @@ class Cart(BaseModel):
         return f'Carrinho de {self.session_key}'
     
     def merge_with_user_cart(self, user):
+        '''
+        Merges an anonymous session cart into the authenticated user's cart
+        upon login, preserving items, coupons, and shipping details.
+        '''
         user_cart, _ = Cart.objects.get_or_create(user=user)
         for item in self.items.all():
             user_item, created = CartItem.objects.get_or_create(cart=user_cart, sku=item.sku, defaults={'quantity': item.quantity})
@@ -69,12 +80,16 @@ class Cart(BaseModel):
         self.delete()
 
 class CartItem(BaseModel):
+    '''
+    Represents an individual SKU inside a shopping cart.
+    '''
     cart = models.ForeignKey(Cart, on_delete=models.PROTECT, related_name='items')
     sku = models.ForeignKey(SKU, on_delete=models.PROTECT, related_name='cart_item')
     quantity = models.PositiveIntegerField(default=1, verbose_name='Quantidade')
 
     @property
     def subtotal(self):
+        '''Calculates the total price for this specific item based on its quantity.'''
         return self.sku.price * self.quantity
 
     def __str__(self):

@@ -171,10 +171,13 @@ class CartPageView(TemplateView):
     template_name = 'carts/cart_page.html'
 
 class CartShippingAPIView(APIView):
+    '''
+    API endpoint for calculating and updating shipping options in the cart.
+    '''
     def post(self, request):
         '''
-        Receives the zip code, checks with the postal service, and returns the options.
-        If the customer submits their final choice, it is saved to the cart.
+        Receives the zip code, validates it with the postal service mock, and returns options.
+        If the customer submits their final choice, it is saved directly to the cart.
         '''
         cart = CartDetailAPIView()._get_cart(request)
         cep = request.data.get('cep')
@@ -204,7 +207,14 @@ class CartShippingAPIView(APIView):
         return Response({"error": "Dados inválidos."}, status=status.HTTP_400_BAD_REQUEST)
 
 class CartCouponAPIView(APIView):
+    '''
+    API endpoint for applying or removing discount coupons in the shopping cart.
+    '''
     def post(self, request):
+        '''
+        Validates the provided coupon code and applies it to the cart.
+        If no code is provided, removes any currently applied coupon.
+        '''
         cart = CartDetailAPIView()._get_cart(request)
         code = request.data.get('code')
         
