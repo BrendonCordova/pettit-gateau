@@ -198,6 +198,11 @@ def home_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def admin_inventory_view(request):
+    '''
+    Renders the custom inventory management dashboard for staff members.
+    Handles complex filtering, sorting, and search functionality for SKUs, 
+    and passes related entities (Categories, Brands, Banners, Coupons) to the UI.
+    '''
     skus = SKU.objects.select_related('product').all()
 
     search_query = request.GET.get('q', '')
@@ -259,6 +264,11 @@ def admin_inventory_view(request):
 @staff_member_required(login_url='/conta/login/')
 @transaction.atomic
 def add_product_quick_view(request):
+    '''
+    Handles the creation of a new Product and its initial SKU from the admin dashboard.
+    Ensures SKU uniqueness, processes the main product image upload, 
+    and wraps the creation in a database transaction to prevent orphaned data.
+    '''
     if request.method == 'POST':
         try:
             sku_code = request.POST.get('sku_code')
@@ -315,6 +325,9 @@ def add_product_quick_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def add_brand_quick_view(request):
+    '''
+    Creates a new Brand entity directly from the inventory dashboard modal.
+    '''
     if request.method == 'POST':
         name = request.POST.get('name')
         if name:
@@ -327,6 +340,9 @@ def add_brand_quick_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def add_category_quick_view(request):
+    '''
+    Creates a new Category entity directly from the inventory dashboard modal.
+    '''
     if request.method == 'POST':
         name = request.POST.get('name')
         if name:
@@ -340,6 +356,11 @@ def add_category_quick_view(request):
 @staff_member_required(login_url='/conta/login/')
 @transaction.atomic
 def edit_product_quick_view(request, sku_id):
+    '''
+    Updates an existing Product and its specific SKU details.
+    Handles dynamic image deletions, new image uploads, and ensures 
+    the updated SKU code remains unique within the system.
+    '''
     if request.method == 'POST':
         try:
             sku = get_object_or_404(SKU, id=sku_id)
@@ -397,6 +418,10 @@ def edit_product_quick_view(request, sku_id):
 
 @staff_member_required(login_url='/conta/login/')
 def toggle_banner_view(request, banner_id):
+    '''
+    Activates the selected promotional banner and automatically deactivates 
+    all other banners, ensuring only one campaign is displayed on the storefront at a time.
+    '''
     if request.method == 'POST':
         banner = get_object_or_404(Banner, id=banner_id)
         
@@ -409,6 +434,9 @@ def toggle_banner_view(request, banner_id):
 
 @staff_member_required(login_url='/conta/login/')
 def delete_banner_view(request, banner_id):
+    '''
+    Permanently removes a promotional banner from the system's history.
+    '''
     if request.method == 'POST':
         banner = get_object_or_404(Banner, id=banner_id)
         banner.delete()
@@ -417,6 +445,10 @@ def delete_banner_view(request, banner_id):
 
 @staff_member_required(login_url='/conta/login/')
 def add_banner_inventory_view(request):
+    '''
+    Uploads and creates a new promotional banner.
+    Automatically sets the new banner as the active storefront campaign upon creation.
+    '''
     if request.method == 'POST':
         image = request.FILES.get('image')
         if image:
@@ -435,6 +467,10 @@ def add_banner_inventory_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def add_coupon_view(request):
+    '''
+    Creates a new discount coupon from the inventory dashboard.
+    Supports both fixed-value (currency) and percentage-based discounts.
+    '''
     if request.method == 'POST':
         code = request.POST.get('code', '').strip().upper()
         discount_type = request.POST.get('discount_type')
@@ -460,6 +496,9 @@ def add_coupon_view(request):
 
 @staff_member_required(login_url='/conta/login/')
 def toggle_coupon_view(request, coupon_id):
+    '''
+    Toggles the active status (enabled/disabled) of a promotional discount coupon.
+    '''
     if request.method == 'POST':
         coupon = get_object_or_404(Coupon, id=coupon_id)
         coupon.is_active = not coupon.is_active
