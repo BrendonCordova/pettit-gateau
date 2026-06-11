@@ -30,6 +30,9 @@ class CustomerCreationForm(UserCreationForm):
         fields = ('email', 'first_name', 'last_name', 'tax_id', 'phone')
 
 class CustomerUpdateForm(forms.ModelForm):
+    '''
+    Form for updating an existing customer's personal information.
+    '''
     class Meta:
         model = Customer
         fields = ['first_name', 'last_name', 'email', 'tax_id', 'birth_date', 'phone']

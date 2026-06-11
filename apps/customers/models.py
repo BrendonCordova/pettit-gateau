@@ -3,10 +3,10 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from apps.base.models import BaseModel
 
 class CustomerManager(BaseUserManager):
-    """
+    '''
     Customized manager for creating users using email as the unique identifier
     instead of a standard username.
-    """
+    '''
     
     def create_user(self, email, password=None, **extra_fields):
         '''
@@ -60,10 +60,10 @@ class CustomerManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
     
 class Customer(AbstractBaseUser, PermissionsMixin, BaseModel):
-    """
+    '''
     Custom User Model focused on E-commerce.
     Replaces the default Django Username with Email as the primary authentication field.
-    """
+    '''
     email = models.EmailField(unique=True, verbose_name="E-mail")
     first_name = models.CharField(max_length=50, verbose_name="Nome")
     last_name = models.CharField(max_length=50, verbose_name="Sobrenome")
@@ -71,7 +71,6 @@ class Customer(AbstractBaseUser, PermissionsMixin, BaseModel):
     birth_date = models.DateField(null=True, blank=True, verbose_name='Data de nascimento')
     phone = models.CharField(max_length=20, null=True, blank=True, verbose_name="Telefone")
 
-    # is_active = models.BooleanField(default=True, verbose_name="Ativo")
     is_staff = models.BooleanField(default=False, verbose_name="Membro da equipe")
 
     objects = CustomerManager()
@@ -87,10 +86,10 @@ class Customer(AbstractBaseUser, PermissionsMixin, BaseModel):
         return f"{self.first_name} {self.last_name} - ({self.email})"
 
 class Address(BaseModel):
-    """
+    '''
     Model for managing multiple addresses for the same customer.
     Tracks location details and identifies the default delivery address.
-    """
+    '''
     is_default = models.BooleanField(default=False, verbose_name="Endereço Padrão")
     name = models.CharField(max_length=35, verbose_name="Nome do Endereço")
     zip_code = models.CharField(max_length=9, verbose_name="CEP")
