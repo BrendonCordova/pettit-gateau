@@ -11,6 +11,11 @@ class MercadoPagoService:
         self.sdk = mercadopago.SDK(config('MP_ACCESS_TOKEN'))
 
     def create_payment_preference(self, order, items_list):
+        '''
+        Generates the payload and creates a payment preference in Mercado Pago.
+        Handles discounts by grouping items into a single transactional entry 
+        to prevent floating-point rounding errors and negative values in the external API.
+        '''
         items = []
         
         if order.discount_amount and order.discount_amount > 0:
