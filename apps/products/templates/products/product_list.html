@@ -7,7 +7,6 @@
         background-color: var(--bg-cream) !important;
     }
 
-    /* Título Decorativo */
     .catalog-main-title {
         color: var(--text-brown);
         font-family: 'Georgia', serif;
@@ -18,7 +17,6 @@
         margin-bottom: 20px;
     }
 
-    /* Menu de Ordenação Dourado */
     .sort-wrapper {
         display: flex;
         justify-content: flex-end;
@@ -50,7 +48,6 @@
     
     .sort-icon { color: var(--text-brown); font-weight: bold; }
 
-    /* Cartão do Produto */
     .catalog-card {
         background: transparent;
         border: none;
@@ -233,9 +230,9 @@
                             {% if first_sku %}
                                 <div class="catalog-price">R$ {{ first_sku.price }}</div>
                                 
-                                {% if first_sku.stock_quantity == 0 %}
+                                {% if first_sku.stock_quantity <= 0 %}
                                     <div class="catalog-stock">Esgotado</div>
-                                {% elif first_sku.stock_quantity < 5 %}
+                                {% elif first_sku.stock_quantity <= 15 %}
                                     <div class="catalog-stock">Restam apenas {{ first_sku.stock_quantity }}</div>
                                 {% endif %}
                             {% else %}

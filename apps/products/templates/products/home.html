@@ -154,9 +154,9 @@
                         {% with first_sku=product.skus.first %}
                             {% if first_sku %}
                                 <div class="catalog-price">R$ {{ first_sku.price }}</div>
-                                {% if first_sku.stock_quantity == 0 %}
+                                {% if first_sku.stock_quantity <= 0 %}
                                     <div class="catalog-stock">Esgotado</div>
-                                {% elif first_sku.stock_quantity < 5 %}
+                                {% elif first_sku.stock_quantity <= 15 %}
                                     <div class="catalog-stock">Restam apenas {{ first_sku.stock_quantity }}</div>
                                 {% endif %}
                             {% endif %}
@@ -208,9 +208,9 @@
                         {% with first_sku=product.skus.first %}
                             {% if first_sku %}
                                 <div class="catalog-price">R$ {{ first_sku.price }}</div>
-                                {% if first_sku.stock_quantity == 0 %}
+                                {% if first_sku.stock_quantity <= 0 %}
                                     <div class="catalog-stock">Esgotado</div>
-                                {% elif first_sku.stock_quantity < 5 %}
+                                {% elif first_sku.stock_quantity <= 15 %}
                                     <div class="catalog-stock">Restam apenas {{ first_sku.stock_quantity }}</div>
                                 {% endif %}
                             {% endif %}
