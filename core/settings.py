@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'apps.carts',
     'rest_framework',
     'apps.orders',
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -125,13 +126,17 @@ REST_FRAMEWORK = {
 }
 
 # E-mail settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Print emails in the render logs to avoid getting stuck on a blocked port.
+if config('RENDER', default=False, cast=bool):
+    ANYMAIL = {
+        "BREVO_API_KEY": config('BREVO_API_KEY', default=''),
+    }
+    EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Bootstraps settings
 
