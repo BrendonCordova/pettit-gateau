@@ -28,7 +28,7 @@ class Cart(BaseModel):
 
     cep = models.CharField(max_length=9, null=True, blank=True)
     shipping_name = models.CharField(max_length=100, null=True, blank=True)
-    shipping_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    shipping_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal(0.00))
     shipping_days = models.PositiveIntegerField(default=0)
 
     @property
@@ -50,7 +50,11 @@ class Cart(BaseModel):
     @property
     def total_price(self):
         '''Calculates the final cart total ensuring it never drops below zero.'''
-        total = (self.subtotal_price + self.shipping_price) - self.discount_amount
+        subtotal = Decimal(str(self.subtotal_price or '0.00'))
+        shipping = Decimal(str(self.shipping_price or '0.00'))
+        discount = Decimal(str(self.discount_amount or '0.00'))
+        
+        total = (subtotal + shipping) - discount
         return max(total, Decimal('0.00'))
 
     def __str__(self):
