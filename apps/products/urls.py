@@ -19,4 +19,5 @@ urlpatterns = [
     path('painel/estoque/banner/adicionar/', views.add_banner_inventory_view, name='admin-add-banner-inventory'),
     path('painel/estoque/cupom/adicionar/', views.add_coupon_view, name='admin-add-coupon'),
     path('painel/estoque/cupom/ativar/<uuid:coupon_id>/', views.toggle_coupon_view, name='admin-toggle-coupon'),
+    path('painel/estoque/variacao/adicionar/', views.add_variation_view, name='admin-add-variation')
 ]

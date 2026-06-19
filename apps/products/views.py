@@ -247,6 +247,7 @@ def admin_inventory_view(request):
     concentration_choices = SKU.Concentration.choices
     banners = Banner.objects.all().order_by('-created_at')
     coupons = Coupon.objects.all().order_by('-created_at')
+    products_list = Product.objects.all().order_by('name')
 
     context = {
         'skus': skus,
@@ -258,6 +259,7 @@ def admin_inventory_view(request):
         'concentrations': concentration_choices,
         'banners': banners,
         'coupons': coupons,
+        'products_list': products_list
     }
     return render(request, 'products/admin_inventory.html', context)
 
@@ -376,6 +378,7 @@ def edit_product_quick_view(request, sku_id):
             produto.fragrance = request.POST.get('fragrance')
             produto.category = get_object_or_404(Category, id=request.POST.get('category'))
             produto.brand = get_object_or_404(Brand, id=request.POST.get('brand'))
+            produto.is_active = request.POST.get('product_is_active') == 'on'
             produto.save()
 
             sku.sku_code = new_sku_code
@@ -505,4 +508,33 @@ def toggle_coupon_view(request, coupon_id):
         coupon.save()
         status_txt = "ativado" if coupon.is_active else "desativado"
         messages.success(request, f'Cupom {coupon.code} {status_txt}!')
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+@transaction.atomic
+def add_variation_view(request):
+    ''' Adds a new SKU (size variation) '''
+    if request.method == 'POST':
+        try:
+            sku_code = request.POST.get('sku_code')
+            if SKU.objects.filter(sku_code=sku_code).exists():
+                messages.error(request, f"O SKU '{sku_code}' já existe! Tente outro.")
+                return redirect('products:admin-inventory')
+
+            produto = get_object_or_404(Product, id=request.POST.get('product_id'))
+
+            raw_price = request.POST.get('price', '0').replace('R$', '').replace(' ', '')
+            clean_price = raw_price.replace('.', '').replace(',', '.') if '.' in raw_price and ',' in raw_price else raw_price.replace(',', '.')
+
+            SKU.objects.create(
+                product=produto,
+                sku_code=sku_code,
+                concentration=request.POST.get('concentration'),
+                volume_ml=request.POST.get('volume_ml'),
+                price=clean_price,
+                stock_quantity=request.POST.get('stock_quantity')
+            )
+            messages.success(request, f"Nova variação de {request.POST.get('volume_ml')}ml adicionada ao perfume {produto.name}!")
+        except Exception as e:
+            messages.error(request, "Erro ao adicionar variação. Verifique os dados.")
     return redirect('products:admin-inventory')

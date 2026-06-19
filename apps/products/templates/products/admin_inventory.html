@@ -277,6 +277,7 @@
 
     <div class="top-actions-row">
         <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
+        <a href="#" class="btn-secondary-action" onclick="openVariationModal()"><i class="bi bi-boxes"></i> Nova Variação (SKU)</a>
         <a href="#" class="btn-secondary-action" onclick="openBrandModal()"><i class="bi bi-bookmark-star"></i> Nova Marca</a>
         <a href="#" class="btn-secondary-action" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Nova Categoria</a>
         <a href="#" class="btn-secondary-action" onclick="openBannerModal()"><i class="bi bi-images"></i> Histórico de Banners</a>
@@ -351,6 +352,54 @@
                 </div>
                 <div class="modal-actions-add" style="margin-top: 20px;">
                     <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Marca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="add-modal-overlay" id="add-variation-modal">
+        <div class="mini-modal-box" style="max-width: 600px;">
+            <i class="bi bi-x btn-close-modal" onclick="closeVariationModal()"></i>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Vincular Nova Variação</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 20px;">Adicione um novo tamanho/preço a um perfume já cadastrado.</p>
+            
+            <form action="{% url 'products:admin-add-variation' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group-custom">
+                    <label style="min-width: 100px;">Produto Base:</label>
+                    <select name="product_id" required>
+                        <option value="">Selecione o Perfume...</option>
+                        {% for p in products_list %}<option value="{{ p.id }}">{{ p.brand.name }} - {{ p.name }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group-custom">
+                    <label style="min-width: 100px;">Novo SKU:</label>
+                    <input type="text" name="sku_code" placeholder="Ex: FLORATTA-100ML" required>
+                </div>
+                <div class="input-row-half" style="margin-top: 15px;">
+                    <div class="form-group-custom">
+                        <label style="min-width: 60px;">Vol. (ml):</label>
+                        <input type="number" name="volume_ml" placeholder="100" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label style="min-width: 50px;">Conc.:</label>
+                        <select name="concentration" required>
+                            {% for val, name in concentrations %}<option value="{{ val }}">{{ val }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="input-row-half">
+                    <div class="form-group-custom">
+                        <label style="min-width: 60px;">Preço:</label>
+                        <input type="text" name="price" placeholder="R$ 300,00" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label style="min-width: 50px;">Estoque:</label>
+                        <input type="number" name="stock_quantity" placeholder="10" required>
+                    </div>
+                </div>
+                <div class="modal-actions-add" style="margin-top: 25px;">
+                    <button type="submit" class="btn-save-prod" style="width: 100%;">Criar Variação</button>
                 </div>
             </form>
         </div>
@@ -665,6 +714,10 @@
                             <input type="checkbox" name="is_active" id="active_{{ sku.id }}" {% if sku.is_active %}checked{% endif %} style="width: 20px; height: 20px; accent-color: #D6A476; cursor: pointer;">
                             <label for="active_{{ sku.id }}" style="color: var(--text-brown); font-weight: bold; cursor: pointer; min-width: auto; font-size: 0.95rem;">Variação (SKU) Ativa na Loja</label>
                         </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-left: 5px;">
+                            <input type="checkbox" name="product_is_active" id="prod_active_{{ sku.id }}" {% if sku.product.is_active %}checked{% endif %} style="width: 20px; height: 20px; accent-color: var(--coral-light); cursor: pointer;">
+                            <label for="prod_active_{{ sku.id }}" style="color: var(--text-brown); font-weight: bold; cursor: pointer; min-width: auto; font-size: 0.95rem;">Produto (Geral) Visível na Vitrine</label>
+                        </div>
                 </div>
 
                 <div>
@@ -816,5 +869,8 @@
 
     function openCouponModal() { document.getElementById('coupon-modal').style.display = 'flex'; }
     function closeCouponModal() { document.getElementById('coupon-modal').style.display = 'none'; }
+
+    function openVariationModal() { document.getElementById('add-variation-modal').style.display = 'flex'; }
+    function closeVariationModal() { document.getElementById('add-variation-modal').style.display = 'none'; }
 </script>
 {% endblock %}
