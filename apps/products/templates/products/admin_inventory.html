@@ -341,83 +341,77 @@
     </div>
 
     <div class="add-modal-overlay" id="add-brand-modal">
-        <div class="mini-modal-box">
+        <div class="mini-modal-box" style="max-width: 550px;">
             <i class="bi bi-x btn-close-modal" onclick="closeBrandModal()"></i>
-            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Marca</h2>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Gerenciar Marcas</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 15px;">Edite ou exclua as marcas da sua loja.</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px; border-bottom: 2px solid var(--border-brown); margin-bottom: 20px; padding-bottom: 10px;">
+                {% for brand in brands %}
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding: 10px; background-color: #fff; border: 1px solid var(--border-brown); border-radius: 10px;">
+                    
+                    <form action="{% url 'products:admin-edit-brand' brand.id %}" method="POST" style="margin: 0; display: flex; flex-grow: 1; gap: 10px;">
+                        {% csrf_token %}
+                        <input type="text" name="name" value="{{ brand.name }}" style="flex-grow: 1; border: 1px solid #dcbfa5; border-radius: 5px; padding: 5px; color: var(--text-brown); font-weight: bold; outline: none;" required>
+                        <button type="submit" class="btn-secondary-action" style="padding: 5px 10px; font-size: 0.8rem;">Atualizar</button>
+                    </form>
+
+                    <form action="{% url 'products:admin-delete-brand' brand.id %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; font-size: 1.2rem; color: var(--coral-light); cursor: pointer;" title="Excluir Marca" onclick="return confirm('Tem certeza que deseja excluir a marca {{ brand.name }}?')"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+                {% empty %}
+                    <p style="color: #D6A476; font-size: 0.9rem; text-align: center; margin-top: 10px;">Nenhuma marca cadastrada.</p>
+                {% endfor %}
+            </div>
+
             <form action="{% url 'products:admin-add-brand' %}" method="POST">
                 {% csrf_token %}
-                <div class="form-group-custom" style="margin-top: 20px;">
+                <h3 style="color: var(--text-brown); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;"><i class="bi bi-plus-circle"></i> Cadastrar Nova Marca</h3>
+                <div class="form-group-custom">
                     <label style="min-width: 60px;">Nome:</label>
                     <input type="text" name="name" placeholder="Ex: Dior, Chanel..." required>
                 </div>
-                <div class="modal-actions-add" style="margin-top: 20px;">
-                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Marca</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="add-modal-overlay" id="add-variation-modal">
-        <div class="mini-modal-box" style="max-width: 600px;">
-            <i class="bi bi-x btn-close-modal" onclick="closeVariationModal()"></i>
-            <h2 class="modal-title-add" style="font-size: 1.4rem;">Vincular Nova Variação</h2>
-            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 20px;">Adicione um novo tamanho/preço a um perfume já cadastrado.</p>
-            
-            <form action="{% url 'products:admin-add-variation' %}" method="POST">
-                {% csrf_token %}
-                <div class="form-group-custom">
-                    <label style="min-width: 100px;">Produto Base:</label>
-                    <select name="product_id" required>
-                        <option value="">Selecione o Perfume...</option>
-                        {% for p in products_list %}<option value="{{ p.id }}">{{ p.brand.name }} - {{ p.name }}</option>{% endfor %}
-                    </select>
-                </div>
-                <div class="form-group-custom">
-                    <label style="min-width: 100px;">Novo SKU:</label>
-                    <input type="text" name="sku_code" placeholder="Ex: FLORATTA-100ML" required>
-                </div>
-                <div class="input-row-half" style="margin-top: 15px;">
-                    <div class="form-group-custom">
-                        <label style="min-width: 60px;">Vol. (ml):</label>
-                        <input type="number" name="volume_ml" placeholder="100" required>
-                    </div>
-                    <div class="form-group-custom">
-                        <label style="min-width: 50px;">Conc.:</label>
-                        <select name="concentration" required>
-                            {% for val, name in concentrations %}<option value="{{ val }}">{{ val }}</option>{% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="input-row-half">
-                    <div class="form-group-custom">
-                        <label style="min-width: 60px;">Preço:</label>
-                        <input type="text" name="price" placeholder="R$ 300,00" required>
-                    </div>
-                    <div class="form-group-custom">
-                        <label style="min-width: 50px;">Estoque:</label>
-                        <input type="number" name="stock_quantity" placeholder="10" required>
-                    </div>
-                </div>
-                <div class="modal-actions-add" style="margin-top: 25px;">
-                    <button type="submit" class="btn-save-prod" style="width: 100%;">Criar Variação</button>
-                </div>
+                <button type="submit" class="btn-save-prod" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 10px;">Salvar Marca</button>
             </form>
         </div>
     </div>
 
     <div class="add-modal-overlay" id="add-category-modal">
-        <div class="mini-modal-box">
+        <div class="mini-modal-box" style="max-width: 550px;">
             <i class="bi bi-x btn-close-modal" onclick="closeCategoryModal()"></i>
-            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Categoria</h2>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Gerenciar Categorias</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 15px;">Edite ou exclua as categorias da sua loja.</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px; border-bottom: 2px solid var(--border-brown); margin-bottom: 20px; padding-bottom: 10px;">
+                {% for category in categories %}
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding: 10px; background-color: #fff; border: 1px solid var(--border-brown); border-radius: 10px;">
+                    
+                    <form action="{% url 'products:admin-edit-category' category.id %}" method="POST" style="margin: 0; display: flex; flex-grow: 1; gap: 10px;">
+                        {% csrf_token %}
+                        <input type="text" name="name" value="{{ category.name }}" style="flex-grow: 1; border: 1px solid #dcbfa5; border-radius: 5px; padding: 5px; color: var(--text-brown); font-weight: bold; outline: none;" required>
+                        <button type="submit" class="btn-secondary-action" style="padding: 5px 10px; font-size: 0.8rem;">Atualizar</button>
+                    </form>
+
+                    <form action="{% url 'products:admin-delete-category' category.id %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; font-size: 1.2rem; color: var(--coral-light); cursor: pointer;" title="Excluir Categoria" onclick="return confirm('Tem certeza que deseja excluir a categoria {{ category.name }}?')"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+                {% empty %}
+                    <p style="color: #D6A476; font-size: 0.9rem; text-align: center; margin-top: 10px;">Nenhuma categoria cadastrada.</p>
+                {% endfor %}
+            </div>
+
             <form action="{% url 'products:admin-add-category' %}" method="POST">
                 {% csrf_token %}
-                <div class="form-group-custom" style="margin-top: 20px;">
+                <h3 style="color: var(--text-brown); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;"><i class="bi bi-plus-circle"></i> Cadastrar Nova Categoria</h3>
+                <div class="form-group-custom">
                     <label style="min-width: 60px;">Nome:</label>
                     <input type="text" name="name" placeholder="Ex: Unissex, Infantil..." required>
                 </div>
-                <div class="modal-actions-add" style="margin-top: 20px;">
-                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Categoria</button>
-                </div>
+                <button type="submit" class="btn-save-prod" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 10px;">Salvar Categoria</button>
             </form>
         </div>
     </div>

@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.db.models.functions import Coalesce
 from apps.carts.models import Coupon
+from django.db.models import ProtectedError
 
 def product_list(request, category_name=None):
     '''
@@ -537,4 +538,54 @@ def add_variation_view(request):
             messages.success(request, f"Nova variação de {request.POST.get('volume_ml')}ml adicionada ao perfume {produto.name}!")
         except Exception as e:
             messages.error(request, "Erro ao adicionar variação. Verifique os dados.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def edit_brand_view(request, brand_id):
+    ''' Update the name of an existing brand. '''
+    if request.method == 'POST':
+        brand = get_object_or_404(Brand, id=brand_id)
+        new_name = request.POST.get('name', '').strip()
+        if new_name:
+            brand.name = new_name
+            brand.save()
+            messages.success(request, f"Marca atualizada para '{brand.name}'.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def delete_brand_view(request, brand_id):
+    ''' Exclude a brand if there are no products associated with it. '''
+    if request.method == 'POST':
+        brand = get_object_or_404(Brand, id=brand_id)
+        try:
+            name = brand.name
+            brand.delete()
+            messages.success(request, f"Marca '{name}' excluída com sucesso.")
+        except ProtectedError:
+            messages.error(request, f"A marca '{brand.name}' não pode ser excluída pois existem perfumes vinculados a ela.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def edit_category_view(request, category_id):
+    ''' Update the name of an existing category. '''
+    if request.method == 'POST':
+        category = get_object_or_404(Category, id=category_id)
+        new_name = request.POST.get('name', '').strip()
+        if new_name:
+            category.name = new_name
+            category.save()
+            messages.success(request, f"Categoria atualizada para '{category.name}'.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def delete_category_view(request, category_id):
+    ''' Delete a category if there are no products associated with it. '''
+    if request.method == 'POST':
+        category = get_object_or_404(Category, id=category_id)
+        try:
+            name = category.name
+            category.delete()
+            messages.success(request, f"Categoria '{name}' excluída com sucesso.")
+        except ProtectedError:
+            messages.error(request, f"A categoria '{category.name}' não pode ser excluída pois existem perfumes vinculados a ela.")
     return redirect('products:admin-inventory')
