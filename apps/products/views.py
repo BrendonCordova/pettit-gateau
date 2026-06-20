@@ -376,14 +376,14 @@ def edit_product_quick_view(request, sku_id):
 
             produto.name = request.POST.get('name')
             produto.description = request.POST.get('description')
-            produto.fragrance = request.POST.get('fragrance')
+            produto.fragrance_id = request.POST.get('fragrance')
             produto.category = get_object_or_404(Category, id=request.POST.get('category'))
             produto.brand = get_object_or_404(Brand, id=request.POST.get('brand'))
             produto.is_active = request.POST.get('product_is_active') == 'on'
             produto.save()
 
             sku.sku_code = new_sku_code
-            sku.concentration = request.POST.get('concentration')
+            sku.concentration_id = request.POST.get('concentration')
             sku.volume_ml = request.POST.get('volume_ml')
             
             sku.is_active = request.POST.get('is_active') == 'on'
