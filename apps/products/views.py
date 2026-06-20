@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Brand, Category, Banner, SKU, Fragrance, Concentration
 from django.core.paginator import Paginator
-from django.db.models import Q, Avg, Count
+from django.db.models import Q, Avg, Count, Prefetch
 from apps.orders.models import Order
 from .forms import ReviewForm, Review
 from django.http import JsonResponse
@@ -26,7 +26,10 @@ def product_list(request, category_name=None):
         HttpResponse: The rendered 'product_list.html' template containing the 
                       filtered products and context data.
     '''
-    products = Product.objects.prefetch_related('skus', 'images').filter(is_active=True)
+    products = Product.objects.prefetch_related(
+        Prefetch('skus', queryset=SKU.objects.filter(is_active=True)),
+        'images'
+    ).filter(is_active=True)
 
     page_title = "Nossas Fragrâncias"
 
@@ -184,11 +187,17 @@ def home_view(request):
     '''
     active_banner = Banner.objects.filter(is_active=True).first()
 
-    best_sellers = Product.objects.prefetch_related('skus', 'images').filter(is_active=True).annotate(
+    best_sellers = Product.objects.prefetch_related(
+        Prefetch('skus', queryset=SKU.objects.filter(is_active=True)),
+        'images'
+    ).filter(is_active=True).annotate(
         num_reviews=Count('reviews')
     ).order_by('-num_reviews', '-created_at')[:4]
 
-    newest = Product.objects.prefetch_related('skus', 'images').filter(is_active=True).order_by('-created_at')[:4]
+    newest = Product.objects.prefetch_related(
+        Prefetch('skus', queryset=SKU.objects.filter(is_active=True)),
+        'images'
+    ).filter(is_active=True).order_by('-created_at')[:4]
 
     context = {
         'banner': active_banner,
