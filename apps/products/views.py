@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Brand, Category, Banner, SKU
+from .models import Product, Brand, Category, Banner, SKU, Fragrance, Concentration
 from django.core.paginator import Paginator
 from django.db.models import Q, Avg, Count
 from apps.orders.models import Order
@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.db.models.functions import Coalesce
 from apps.carts.models import Coupon
+from django.db.models import ProtectedError
 
 def product_list(request, category_name=None):
     '''
@@ -243,10 +244,11 @@ def admin_inventory_view(request):
 
     categories = Category.objects.all()
     brands = Brand.objects.all()
-    fragrance_choices = Product.Fragrance.choices
-    concentration_choices = SKU.Concentration.choices
     banners = Banner.objects.all().order_by('-created_at')
+    fragrances = Fragrance.objects.all().order_by('name')
+    concentrations = Concentration.objects.all().order_by('name')
     coupons = Coupon.objects.all().order_by('-created_at')
+    products_list = Product.objects.all().order_by('name')
 
     context = {
         'skus': skus,
@@ -254,10 +256,11 @@ def admin_inventory_view(request):
         'current_sort': sort_by,
         'categories': categories,
         'brands': brands,
-        'fragrances': fragrance_choices,
-        'concentrations': concentration_choices,
+        'fragrances': fragrances,
+        'concentrations': concentrations,
         'banners': banners,
         'coupons': coupons,
+        'products_list': products_list
     }
     return render(request, 'products/admin_inventory.html', context)
 
@@ -285,7 +288,7 @@ def add_product_quick_view(request):
             produto = Product.objects.create(
                 name=name,
                 description=description,
-                fragrance=fragrance,
+                fragrance_id=request.POST.get('fragrance'),
                 category=category,
                 brand=brand
             )
@@ -299,7 +302,7 @@ def add_product_quick_view(request):
             SKU.objects.create(
                 product=produto,
                 sku_code=sku_code,
-                concentration=request.POST.get('concentration'),
+                concentration_id=request.POST.get('concentration'),
                 volume_ml=request.POST.get('volume_ml'),
                 price=clean_price,
                 stock_quantity=request.POST.get('stock_quantity')
@@ -376,6 +379,7 @@ def edit_product_quick_view(request, sku_id):
             produto.fragrance = request.POST.get('fragrance')
             produto.category = get_object_or_404(Category, id=request.POST.get('category'))
             produto.brand = get_object_or_404(Brand, id=request.POST.get('brand'))
+            produto.is_active = request.POST.get('product_is_active') == 'on'
             produto.save()
 
             sku.sku_code = new_sku_code
@@ -505,4 +509,101 @@ def toggle_coupon_view(request, coupon_id):
         coupon.save()
         status_txt = "ativado" if coupon.is_active else "desativado"
         messages.success(request, f'Cupom {coupon.code} {status_txt}!')
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+@transaction.atomic
+def add_variation_view(request):
+    ''' Adds a new SKU (size variation) '''
+    if request.method == 'POST':
+        try:
+            sku_code = request.POST.get('sku_code')
+            if SKU.objects.filter(sku_code=sku_code).exists():
+                messages.error(request, f"O SKU '{sku_code}' já existe! Tente outro.")
+                return redirect('products:admin-inventory')
+
+            produto = get_object_or_404(Product, id=request.POST.get('product_id'))
+
+            raw_price = request.POST.get('price', '0').replace('R$', '').replace(' ', '')
+            clean_price = raw_price.replace('.', '').replace(',', '.') if '.' in raw_price and ',' in raw_price else raw_price.replace(',', '.')
+
+            SKU.objects.create(
+                product=produto,
+                sku_code=sku_code,
+                concentration_id=request.POST.get('concentration'),
+                volume_ml=request.POST.get('volume_ml'),
+                price=clean_price,
+                stock_quantity=request.POST.get('stock_quantity')
+            )
+            messages.success(request, f"Nova variação de {request.POST.get('volume_ml')}ml adicionada ao perfume {produto.name}!")
+        except Exception as e:
+            messages.error(request, "Erro ao adicionar variação. Verifique os dados.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def edit_brand_view(request, brand_id):
+    ''' Update the name of an existing brand. '''
+    if request.method == 'POST':
+        brand = get_object_or_404(Brand, id=brand_id)
+        new_name = request.POST.get('name', '').strip()
+        if new_name:
+            brand.name = new_name
+            brand.save()
+            messages.success(request, f"Marca atualizada para '{brand.name}'.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def delete_brand_view(request, brand_id):
+    ''' Exclude a brand if there are no products associated with it. '''
+    if request.method == 'POST':
+        brand = get_object_or_404(Brand, id=brand_id)
+        try:
+            name = brand.name
+            brand.delete()
+            messages.success(request, f"Marca '{name}' excluída com sucesso.")
+        except ProtectedError:
+            messages.error(request, f"A marca '{brand.name}' não pode ser excluída pois existem perfumes vinculados a ela.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def edit_category_view(request, category_id):
+    ''' Update the name of an existing category. '''
+    if request.method == 'POST':
+        category = get_object_or_404(Category, id=category_id)
+        new_name = request.POST.get('name', '').strip()
+        if new_name:
+            category.name = new_name
+            category.save()
+            messages.success(request, f"Categoria atualizada para '{category.name}'.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def delete_category_view(request, category_id):
+    ''' Delete a category if there are no products associated with it. '''
+    if request.method == 'POST':
+        category = get_object_or_404(Category, id=category_id)
+        try:
+            name = category.name
+            category.delete()
+            messages.success(request, f"Categoria '{name}' excluída com sucesso.")
+        except ProtectedError:
+            messages.error(request, f"A categoria '{category.name}' não pode ser excluída pois existem perfumes vinculados a ela.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_fragrance_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Fragrance.objects.get_or_create(name=name.strip())
+            messages.success(request, f"Fragrância '{name}' cadastrada com sucesso!")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_concentration_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Concentration.objects.get_or_create(name=name.strip())
+            messages.success(request, f"Concentração '{name}' cadastrada com sucesso!")
     return redirect('products:admin-inventory')

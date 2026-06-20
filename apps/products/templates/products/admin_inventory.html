@@ -277,6 +277,9 @@
 
     <div class="top-actions-row">
         <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
+        <a href="#" class="btn-secondary-action" onclick="openVariationModal()"><i class="bi bi-boxes"></i> Nova Variação (SKU)</a>
+        <a href="#" class="btn-secondary-action" onclick="openFragranceModal()"><i class="bi bi-droplet"></i> Nova Fragrância</a>
+        <a href="#" class="btn-secondary-action" onclick="openConcentrationModal()"><i class="bi bi-moisture"></i> Nova Concentração</a>
         <a href="#" class="btn-secondary-action" onclick="openBrandModal()"><i class="bi bi-bookmark-star"></i> Nova Marca</a>
         <a href="#" class="btn-secondary-action" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Nova Categoria</a>
         <a href="#" class="btn-secondary-action" onclick="openBannerModal()"><i class="bi bi-images"></i> Histórico de Banners</a>
@@ -340,35 +343,77 @@
     </div>
 
     <div class="add-modal-overlay" id="add-brand-modal">
-        <div class="mini-modal-box">
+        <div class="mini-modal-box" style="max-width: 550px;">
             <i class="bi bi-x btn-close-modal" onclick="closeBrandModal()"></i>
-            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Marca</h2>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Gerenciar Marcas</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 15px;">Edite ou exclua as marcas da sua loja.</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px; border-bottom: 2px solid var(--border-brown); margin-bottom: 20px; padding-bottom: 10px;">
+                {% for brand in brands %}
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding: 10px; background-color: #fff; border: 1px solid var(--border-brown); border-radius: 10px;">
+                    
+                    <form action="{% url 'products:admin-edit-brand' brand.id %}" method="POST" style="margin: 0; display: flex; flex-grow: 1; gap: 10px;">
+                        {% csrf_token %}
+                        <input type="text" name="name" value="{{ brand.name }}" style="flex-grow: 1; border: 1px solid #dcbfa5; border-radius: 5px; padding: 5px; color: var(--text-brown); font-weight: bold; outline: none;" required>
+                        <button type="submit" class="btn-secondary-action" style="padding: 5px 10px; font-size: 0.8rem;">Atualizar</button>
+                    </form>
+
+                    <form action="{% url 'products:admin-delete-brand' brand.id %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; font-size: 1.2rem; color: var(--coral-light); cursor: pointer;" title="Excluir Marca" onclick="return confirm('Tem certeza que deseja excluir a marca {{ brand.name }}?')"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+                {% empty %}
+                    <p style="color: #D6A476; font-size: 0.9rem; text-align: center; margin-top: 10px;">Nenhuma marca cadastrada.</p>
+                {% endfor %}
+            </div>
+
             <form action="{% url 'products:admin-add-brand' %}" method="POST">
                 {% csrf_token %}
-                <div class="form-group-custom" style="margin-top: 20px;">
+                <h3 style="color: var(--text-brown); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;"><i class="bi bi-plus-circle"></i> Cadastrar Nova Marca</h3>
+                <div class="form-group-custom">
                     <label style="min-width: 60px;">Nome:</label>
                     <input type="text" name="name" placeholder="Ex: Dior, Chanel..." required>
                 </div>
-                <div class="modal-actions-add" style="margin-top: 20px;">
-                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Marca</button>
-                </div>
+                <button type="submit" class="btn-save-prod" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 10px;">Salvar Marca</button>
             </form>
         </div>
     </div>
 
     <div class="add-modal-overlay" id="add-category-modal">
-        <div class="mini-modal-box">
+        <div class="mini-modal-box" style="max-width: 550px;">
             <i class="bi bi-x btn-close-modal" onclick="closeCategoryModal()"></i>
-            <h2 class="modal-title-add" style="font-size: 1.3rem;">Cadastrar Nova Categoria</h2>
+            <h2 class="modal-title-add" style="font-size: 1.4rem;">Gerenciar Categorias</h2>
+            <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 15px;">Edite ou exclua as categorias da sua loja.</p>
+            
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px; border-bottom: 2px solid var(--border-brown); margin-bottom: 20px; padding-bottom: 10px;">
+                {% for category in categories %}
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding: 10px; background-color: #fff; border: 1px solid var(--border-brown); border-radius: 10px;">
+                    
+                    <form action="{% url 'products:admin-edit-category' category.id %}" method="POST" style="margin: 0; display: flex; flex-grow: 1; gap: 10px;">
+                        {% csrf_token %}
+                        <input type="text" name="name" value="{{ category.name }}" style="flex-grow: 1; border: 1px solid #dcbfa5; border-radius: 5px; padding: 5px; color: var(--text-brown); font-weight: bold; outline: none;" required>
+                        <button type="submit" class="btn-secondary-action" style="padding: 5px 10px; font-size: 0.8rem;">Atualizar</button>
+                    </form>
+
+                    <form action="{% url 'products:admin-delete-category' category.id %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; font-size: 1.2rem; color: var(--coral-light); cursor: pointer;" title="Excluir Categoria" onclick="return confirm('Tem certeza que deseja excluir a categoria {{ category.name }}?')"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+                {% empty %}
+                    <p style="color: #D6A476; font-size: 0.9rem; text-align: center; margin-top: 10px;">Nenhuma categoria cadastrada.</p>
+                {% endfor %}
+            </div>
+
             <form action="{% url 'products:admin-add-category' %}" method="POST">
                 {% csrf_token %}
-                <div class="form-group-custom" style="margin-top: 20px;">
+                <h3 style="color: var(--text-brown); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;"><i class="bi bi-plus-circle"></i> Cadastrar Nova Categoria</h3>
+                <div class="form-group-custom">
                     <label style="min-width: 60px;">Nome:</label>
                     <input type="text" name="name" placeholder="Ex: Unissex, Infantil..." required>
                 </div>
-                <div class="modal-actions-add" style="margin-top: 20px;">
-                    <button type="submit" class="btn-save-prod" style="padding: 8px 20px; font-size: 1rem;">Salvar Categoria</button>
-                </div>
+                <button type="submit" class="btn-save-prod" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 10px;">Salvar Categoria</button>
             </form>
         </div>
     </div>
@@ -471,7 +516,7 @@
                             <label>Fragrância:</label>
                             <select name="fragrance" required>
                                 <option value="">Selecione...</option>
-                                {% for val, name in fragrances %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                                {% for f in fragrances %}<option value="{{ f.id }}">{{ f.name }}</option>{% endfor %}
                             </select>
                         </div>
                     </div>
@@ -485,7 +530,8 @@
                             <div class="form-group-custom">
                                 <label>Conc.:</label>
                                 <select name="concentration" required>
-                                    {% for val, name in concentrations %}<option value="{{ val }}">{{ val }}</option>{% endfor %}
+                                    <option value="">Selecione...</option>
+                                    {% for c in concentrations %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
                                 </select>
                             </div>
                         </div>
@@ -655,8 +701,8 @@
                     <div class="form-group-custom">
                         <label>Fragrância:</label>
                         <select name="fragrance" required>
-                            {% for val, name in fragrances %}
-                                <option value="{{ val }}" {% if val == sku.product.fragrance %}selected{% endif %}>{{ name }}</option>
+                            {% for f in fragrances %}
+                                <option value="{{ f.id }}" {% if f.id == sku.product.fragrance_id %}selected{% endif %}>{{ f.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -664,6 +710,10 @@
                         <div style="display: flex; align-items: center; gap: 10px; margin-top: 20px; padding-left: 5px;">
                             <input type="checkbox" name="is_active" id="active_{{ sku.id }}" {% if sku.is_active %}checked{% endif %} style="width: 20px; height: 20px; accent-color: #D6A476; cursor: pointer;">
                             <label for="active_{{ sku.id }}" style="color: var(--text-brown); font-weight: bold; cursor: pointer; min-width: auto; font-size: 0.95rem;">Variação (SKU) Ativa na Loja</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-left: 5px;">
+                            <input type="checkbox" name="product_is_active" id="prod_active_{{ sku.id }}" {% if sku.product.is_active %}checked{% endif %} style="width: 20px; height: 20px; accent-color: var(--coral-light); cursor: pointer;">
+                            <label for="prod_active_{{ sku.id }}" style="color: var(--text-brown); font-weight: bold; cursor: pointer; min-width: auto; font-size: 0.95rem;">Produto (Geral) Visível na Vitrine</label>
                         </div>
                 </div>
 
@@ -676,8 +726,8 @@
                         <div class="form-group-custom">
                             <label>Conc.:</label>
                             <select name="concentration" required>
-                                {% for val, name in concentrations %}
-                                    <option value="{{ val }}" {% if val == sku.concentration %}selected{% endif %}>{{ val }}</option>
+                                {% for c in concentrations %}
+                                    <option value="{{ c.id }}" {% if c.id == sku.concentration_id %}selected{% endif %}>{{ c.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -727,6 +777,88 @@
     </div>
 </div>
 {% endfor %}
+
+<div class="add-modal-overlay" id="add-fragrance-modal">
+    <div class="mini-modal-box">
+        <i class="bi bi-x btn-close-modal" onclick="closeFragranceModal()"></i>
+        <h2 class="modal-title-add">Nova Fragrância</h2>
+        <form action="{% url 'products:admin-add-fragrance' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group-custom">
+                <label>Nome:</label>
+                <input type="text" name="name" required>
+            </div>
+            <button type="submit" class="btn-save-prod" style="width: 100%; margin-top: 15px;">Salvar</button>
+        </form>
+    </div>
+</div>
+<div class="add-modal-overlay" id="add-concentration-modal">
+    <div class="mini-modal-box">
+        <i class="bi bi-x btn-close-modal" onclick="closeConcentrationModal()"></i>
+        <h2 class="modal-title-add">Nova Concentração</h2>
+        <form action="{% url 'products:admin-add-concentration' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group-custom">
+                <label>Nome:</label>
+                <input type="text" name="name" required>
+            </div>
+            <button type="submit" class="btn-save-prod" style="width: 100%; margin-top: 15px;">Salvar</button>
+        </form>
+    </div>
+</div>
+
+<div class="add-modal-overlay" id="add-variation-modal">
+    <div class="mini-modal-box" style="max-width: 600px;">
+        <i class="bi bi-x btn-close-modal" onclick="closeVariationModal()"></i>
+        <h2 class="modal-title-add" style="font-size: 1.4rem;">Vincular Nova Variação</h2>
+        <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 20px;">Adicione um novo tamanho/preço a um perfume já cadastrado.</p>
+        
+        <form action="{% url 'products:admin-add-variation' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group-custom">
+                <label style="min-width: 100px;">Produto Base:</label>
+                <select name="product_id" required>
+                    <option value="">Selecione o Perfume...</option>
+                    {% for p in products_list %}
+                        <option value="{{ p.id }}">{{ p.brand.name }} - {{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group-custom">
+                <label style="min-width: 100px;">Novo SKU:</label>
+                <input type="text" name="sku_code" placeholder="Ex: FLORATTA-100ML" required>
+            </div>
+            <div class="input-row-half" style="margin-top: 15px;">
+                <div class="form-group-custom">
+                    <label style="min-width: 60px;">Vol. (ml):</label>
+                    <input type="number" name="volume_ml" placeholder="100" required>
+                </div>
+                <div class="form-group-custom">
+                    <label style="min-width: 50px;">Conc.:</label>
+                    <select name="concentration" required>
+                        <option value="">Selecione...</option>
+                        {% for c in concentrations %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="input-row-half">
+                <div class="form-group-custom">
+                    <label style="min-width: 60px;">Preço:</label>
+                    <input type="text" name="price" placeholder="R$ 300,00" required>
+                </div>
+                <div class="form-group-custom">
+                    <label style="min-width: 50px;">Estoque:</label>
+                    <input type="number" name="stock_quantity" placeholder="10" required>
+                </div>
+            </div>
+            <div class="modal-actions-add" style="margin-top: 25px;">
+                <button type="submit" class="btn-save-prod" style="width: 100%;">Criar Variação</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -816,5 +948,13 @@
 
     function openCouponModal() { document.getElementById('coupon-modal').style.display = 'flex'; }
     function closeCouponModal() { document.getElementById('coupon-modal').style.display = 'none'; }
+
+    function openVariationModal() { document.getElementById('add-variation-modal').style.display = 'flex'; }
+    function closeVariationModal() { document.getElementById('add-variation-modal').style.display = 'none'; }
+
+    function openFragranceModal() { document.getElementById('add-fragrance-modal').style.display = 'flex'; }
+    function closeFragranceModal() { document.getElementById('add-fragrance-modal').style.display = 'none'; }
+    function openConcentrationModal() { document.getElementById('add-concentration-modal').style.display = 'flex'; }
+    function closeConcentrationModal() { document.getElementById('add-concentration-modal').style.display = 'none'; }
 </script>
 {% endblock %}

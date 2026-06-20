@@ -19,4 +19,11 @@ urlpatterns = [
     path('painel/estoque/banner/adicionar/', views.add_banner_inventory_view, name='admin-add-banner-inventory'),
     path('painel/estoque/cupom/adicionar/', views.add_coupon_view, name='admin-add-coupon'),
     path('painel/estoque/cupom/ativar/<uuid:coupon_id>/', views.toggle_coupon_view, name='admin-toggle-coupon'),
+    path('painel/estoque/variacao/adicionar/', views.add_variation_view, name='admin-add-variation'),
+    path('painel/estoque/marca/editar/<uuid:brand_id>/', views.edit_brand_view, name='admin-edit-brand'),
+    path('painel/estoque/marca/deletar/<uuid:brand_id>/', views.delete_brand_view, name='admin-delete-brand'),
+    path('painel/estoque/categoria/editar/<uuid:category_id>/', views.edit_category_view, name='admin-edit-category'),
+    path('painel/estoque/categoria/deletar/<uuid:category_id>/', views.delete_category_view, name='admin-delete-category'),
+    path('painel/estoque/adicionar-fragrancia/', views.add_fragrance_view, name='admin-add-fragrance'),
+    path('painel/estoque/adicionar-concentracao/', views.add_concentration_view, name='admin-add-concentration'),
 ]

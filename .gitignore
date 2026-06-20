@@ -25,3 +25,9 @@ static/
 
 # Logs do sistema e erro
 *.log
+
+# Static Files
+staticfiles/
+media/
+banners/
+products/
