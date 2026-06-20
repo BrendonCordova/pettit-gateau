@@ -24,4 +24,6 @@ urlpatterns = [
     path('painel/estoque/marca/deletar/<uuid:brand_id>/', views.delete_brand_view, name='admin-delete-brand'),
     path('painel/estoque/categoria/editar/<uuid:category_id>/', views.edit_category_view, name='admin-edit-category'),
     path('painel/estoque/categoria/deletar/<uuid:category_id>/', views.delete_category_view, name='admin-delete-category'),
+    path('painel/estoque/adicionar-fragrancia/', views.add_fragrance_view, name='admin-add-fragrance'),
+    path('painel/estoque/adicionar-concentracao/', views.add_concentration_view, name='admin-add-concentration'),
 ]

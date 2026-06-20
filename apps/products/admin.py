@@ -20,7 +20,7 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(SKU)
 class SKUAdmin(admin.ModelAdmin):
     '''Admin interface configuration for the SKU model.'''
-    list_display = ('sku_code', 'product', 'concentration', 'volume_ml', 'price', 'stock_quantity')
+    list_display = ('sku_code', 'product',  'volume_ml', 'price', 'concentration', 'stock_quantity')
     search_fields = ('sku_code', 'product__name')
     list_filter = ('concentration', 'volume_ml')
     list_editable = ('price', 'stock_quantity')

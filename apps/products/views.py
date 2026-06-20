@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Brand, Category, Banner, SKU
+from .models import Product, Brand, Category, Banner, SKU, Fragrance, Concentration
 from django.core.paginator import Paginator
 from django.db.models import Q, Avg, Count
 from apps.orders.models import Order
@@ -244,9 +244,9 @@ def admin_inventory_view(request):
 
     categories = Category.objects.all()
     brands = Brand.objects.all()
-    fragrance_choices = Product.Fragrance.choices
-    concentration_choices = SKU.Concentration.choices
     banners = Banner.objects.all().order_by('-created_at')
+    fragrances = Fragrance.objects.all().order_by('name')
+    concentrations = Concentration.objects.all().order_by('name')
     coupons = Coupon.objects.all().order_by('-created_at')
     products_list = Product.objects.all().order_by('name')
 
@@ -256,8 +256,8 @@ def admin_inventory_view(request):
         'current_sort': sort_by,
         'categories': categories,
         'brands': brands,
-        'fragrances': fragrance_choices,
-        'concentrations': concentration_choices,
+        'fragrances': fragrances,
+        'concentrations': concentrations,
         'banners': banners,
         'coupons': coupons,
         'products_list': products_list
@@ -288,7 +288,7 @@ def add_product_quick_view(request):
             produto = Product.objects.create(
                 name=name,
                 description=description,
-                fragrance=fragrance,
+                fragrance_id=request.POST.get('fragrance'),
                 category=category,
                 brand=brand
             )
@@ -302,7 +302,7 @@ def add_product_quick_view(request):
             SKU.objects.create(
                 product=produto,
                 sku_code=sku_code,
-                concentration=request.POST.get('concentration'),
+                concentration_id=request.POST.get('concentration'),
                 volume_ml=request.POST.get('volume_ml'),
                 price=clean_price,
                 stock_quantity=request.POST.get('stock_quantity')
@@ -530,7 +530,7 @@ def add_variation_view(request):
             SKU.objects.create(
                 product=produto,
                 sku_code=sku_code,
-                concentration=request.POST.get('concentration'),
+                concentration_id=request.POST.get('concentration'),
                 volume_ml=request.POST.get('volume_ml'),
                 price=clean_price,
                 stock_quantity=request.POST.get('stock_quantity')
@@ -588,4 +588,22 @@ def delete_category_view(request, category_id):
             messages.success(request, f"Categoria '{name}' excluída com sucesso.")
         except ProtectedError:
             messages.error(request, f"A categoria '{category.name}' não pode ser excluída pois existem perfumes vinculados a ela.")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_fragrance_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Fragrance.objects.get_or_create(name=name.strip())
+            messages.success(request, f"Fragrância '{name}' cadastrada com sucesso!")
+    return redirect('products:admin-inventory')
+
+@staff_member_required(login_url='/conta/login/')
+def add_concentration_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Concentration.objects.get_or_create(name=name.strip())
+            messages.success(request, f"Concentração '{name}' cadastrada com sucesso!")
     return redirect('products:admin-inventory')

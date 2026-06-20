@@ -278,6 +278,8 @@
     <div class="top-actions-row">
         <a href="#" class="btn-add-product" onclick="openAddProductModal()">Adicionar Produto <i class="bi bi-plus-lg"></i></a>
         <a href="#" class="btn-secondary-action" onclick="openVariationModal()"><i class="bi bi-boxes"></i> Nova Variação (SKU)</a>
+        <a href="#" class="btn-secondary-action" onclick="openFragranceModal()"><i class="bi bi-droplet"></i> Nova Fragrância</a>
+        <a href="#" class="btn-secondary-action" onclick="openConcentrationModal()"><i class="bi bi-moisture"></i> Nova Concentração</a>
         <a href="#" class="btn-secondary-action" onclick="openBrandModal()"><i class="bi bi-bookmark-star"></i> Nova Marca</a>
         <a href="#" class="btn-secondary-action" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Nova Categoria</a>
         <a href="#" class="btn-secondary-action" onclick="openBannerModal()"><i class="bi bi-images"></i> Histórico de Banners</a>
@@ -514,7 +516,7 @@
                             <label>Fragrância:</label>
                             <select name="fragrance" required>
                                 <option value="">Selecione...</option>
-                                {% for val, name in fragrances %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                                {% for f in fragrances %}<option value="{{ f.id }}">{{ f.name }}</option>{% endfor %}
                             </select>
                         </div>
                     </div>
@@ -528,7 +530,8 @@
                             <div class="form-group-custom">
                                 <label>Conc.:</label>
                                 <select name="concentration" required>
-                                    {% for val, name in concentrations %}<option value="{{ val }}">{{ val }}</option>{% endfor %}
+                                    <option value="">Selecione...</option>
+                                    {% for c in concentrations %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
                                 </select>
                             </div>
                         </div>
@@ -698,8 +701,8 @@
                     <div class="form-group-custom">
                         <label>Fragrância:</label>
                         <select name="fragrance" required>
-                            {% for val, name in fragrances %}
-                                <option value="{{ val }}" {% if val == sku.product.fragrance %}selected{% endif %}>{{ name }}</option>
+                            {% for f in fragrances %}
+                                <option value="{{ f.id }}" {% if f.id == sku.product.fragrance_id %}selected{% endif %}>{{ f.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -723,8 +726,8 @@
                         <div class="form-group-custom">
                             <label>Conc.:</label>
                             <select name="concentration" required>
-                                {% for val, name in concentrations %}
-                                    <option value="{{ val }}" {% if val == sku.concentration %}selected{% endif %}>{{ val }}</option>
+                                {% for c in concentrations %}
+                                    <option value="{{ c.id }}" {% if c.id == sku.concentration_id %}selected{% endif %}>{{ c.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -774,6 +777,88 @@
     </div>
 </div>
 {% endfor %}
+
+<div class="add-modal-overlay" id="add-fragrance-modal">
+    <div class="mini-modal-box">
+        <i class="bi bi-x btn-close-modal" onclick="closeFragranceModal()"></i>
+        <h2 class="modal-title-add">Nova Fragrância</h2>
+        <form action="{% url 'products:admin-add-fragrance' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group-custom">
+                <label>Nome:</label>
+                <input type="text" name="name" required>
+            </div>
+            <button type="submit" class="btn-save-prod" style="width: 100%; margin-top: 15px;">Salvar</button>
+        </form>
+    </div>
+</div>
+<div class="add-modal-overlay" id="add-concentration-modal">
+    <div class="mini-modal-box">
+        <i class="bi bi-x btn-close-modal" onclick="closeConcentrationModal()"></i>
+        <h2 class="modal-title-add">Nova Concentração</h2>
+        <form action="{% url 'products:admin-add-concentration' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group-custom">
+                <label>Nome:</label>
+                <input type="text" name="name" required>
+            </div>
+            <button type="submit" class="btn-save-prod" style="width: 100%; margin-top: 15px;">Salvar</button>
+        </form>
+    </div>
+</div>
+
+<div class="add-modal-overlay" id="add-variation-modal">
+    <div class="mini-modal-box" style="max-width: 600px;">
+        <i class="bi bi-x btn-close-modal" onclick="closeVariationModal()"></i>
+        <h2 class="modal-title-add" style="font-size: 1.4rem;">Vincular Nova Variação</h2>
+        <p style="color: var(--text-brown); font-size: 0.9rem; margin-bottom: 20px;">Adicione um novo tamanho/preço a um perfume já cadastrado.</p>
+        
+        <form action="{% url 'products:admin-add-variation' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group-custom">
+                <label style="min-width: 100px;">Produto Base:</label>
+                <select name="product_id" required>
+                    <option value="">Selecione o Perfume...</option>
+                    {% for p in products_list %}
+                        <option value="{{ p.id }}">{{ p.brand.name }} - {{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group-custom">
+                <label style="min-width: 100px;">Novo SKU:</label>
+                <input type="text" name="sku_code" placeholder="Ex: FLORATTA-100ML" required>
+            </div>
+            <div class="input-row-half" style="margin-top: 15px;">
+                <div class="form-group-custom">
+                    <label style="min-width: 60px;">Vol. (ml):</label>
+                    <input type="number" name="volume_ml" placeholder="100" required>
+                </div>
+                <div class="form-group-custom">
+                    <label style="min-width: 50px;">Conc.:</label>
+                    <select name="concentration" required>
+                        <option value="">Selecione...</option>
+                        {% for c in concentrations %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="input-row-half">
+                <div class="form-group-custom">
+                    <label style="min-width: 60px;">Preço:</label>
+                    <input type="text" name="price" placeholder="R$ 300,00" required>
+                </div>
+                <div class="form-group-custom">
+                    <label style="min-width: 50px;">Estoque:</label>
+                    <input type="number" name="stock_quantity" placeholder="10" required>
+                </div>
+            </div>
+            <div class="modal-actions-add" style="margin-top: 25px;">
+                <button type="submit" class="btn-save-prod" style="width: 100%;">Criar Variação</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -866,5 +951,10 @@
 
     function openVariationModal() { document.getElementById('add-variation-modal').style.display = 'flex'; }
     function closeVariationModal() { document.getElementById('add-variation-modal').style.display = 'none'; }
+
+    function openFragranceModal() { document.getElementById('add-fragrance-modal').style.display = 'flex'; }
+    function closeFragranceModal() { document.getElementById('add-fragrance-modal').style.display = 'none'; }
+    function openConcentrationModal() { document.getElementById('add-concentration-modal').style.display = 'flex'; }
+    function closeConcentrationModal() { document.getElementById('add-concentration-modal').style.display = 'none'; }
 </script>
 {% endblock %}

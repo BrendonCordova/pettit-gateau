@@ -24,27 +24,28 @@ class Brand(BaseModel):
 
     def __str__(self):
         return self.name
+    
+class Fragrance(BaseModel):
+    name = models.CharField(max_length=80, verbose_name="Família Olfativa")
+    def __str__(self): return self.name
+
+class Concentration(BaseModel):
+    name = models.CharField(max_length=50, verbose_name="Concentração")
+    def __str__(self): return self.name
 class Product(BaseModel):
     '''
     Core model representing a unique fragrance item.
     Contains general details like name, description, and fragrance family.
     Acts as the parent entity for specific SKUs and Images.
     '''
-    class Fragrance(models.TextChoices):
-        WOOD = "WO", "Wood"
-        FLORAL = "FL", "Floral"
-        CITRUS = "CI", "Citrus"
-        ORIENTAL = "OR", "Oriental"
-        FRUITY = "FR", "Fruity"
-
     name = models.CharField(max_length=120, verbose_name="Nome do Produto")
     description = models.TextField(max_length=600, verbose_name="Descrição")
-    fragrance = models.CharField(max_length=2, choices=Fragrance.choices, verbose_name="Fragrância")
     slug = models.SlugField(max_length=100, unique=True, blank=True, null=True, verbose_name="Slug (URL)")
 
     #Relationship
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="products")
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="products")
+    fragrance = models.ForeignKey(Fragrance, on_delete=models.PROTECT, related_name="products", null=True, verbose_name="Fragrância")
 
     def __str__(self):
         return f"{self.brand.name} - {self.name}"
@@ -84,20 +85,14 @@ class SKU(BaseModel):
     Defines unique variations based on concentration and volume, 
     tracking individual pricing and inventory levels.
     '''
-    class Concentration(models.TextChoices):
-        EDC = "EDC", "Eau de Cologne"
-        EDT = "EDT", "Eau de Toilette"
-        EDP = "EDP", "Eau de Parfum"
-        PARFUM = "PAR", "Parfum"
-
     sku_code = models.CharField(max_length=50, unique=True, verbose_name="Código SKU")
-    concentration = models.CharField(max_length=3, choices=Concentration.choices, verbose_name="Concentração")
     volume_ml = models.PositiveIntegerField(verbose_name="Volume em ml")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Preço")
     stock_quantity = models.PositiveIntegerField(default=0, verbose_name="Quantidade em Estoque")
 
     # Relationship
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name="skus")
+    concentration = models.ForeignKey(Concentration, on_delete=models.PROTECT, related_name="skus", null=True, verbose_name="Concentração")
 
     class Meta:
         verbose_name_plural = "SKUs"
