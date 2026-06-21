@@ -174,13 +174,26 @@ cd pettit-gateau
 **2. Configure Environment Variables:**
 Create a `.env` file in the root directory based on `.env.example`:
 ```env
+# Core Django
 SECRET_KEY=your_django_secret_key
 DEBUG=True
+
+# Local Database
 POSTGRES_PASSWORD=your_database_password
+
+# Payments & Webhooks (Mercado Pago & Ngrok)
 MP_ACCESS_TOKEN=your_mercado_pago_token
 WEBHOOK_BASE_URL=[https://your-ngrok-url.ngrok-free.app](https://your-ngrok-url.ngrok-free.app)
+
+# Email Configuration (SMTP & Brevo)
 EMAIL_HOST_USER=your_smtp_email
 EMAIL_HOST_PASSWORD=your_app_password
+BREVO_API_KEY=your_brevo_api_key
+
+# Persistent Media Storage (Cloudinary)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 **3. Boot the Database (Docker):**
@@ -208,6 +221,13 @@ python manage.py runserver
 
 > **Note on Webhooks:** To fully test the Mercado Pago checkout flow locally, start an Ngrok tunnel (`ngrok http 8000`), copy the HTTPS URL, update the `WEBHOOK_BASE_URL` in your `.env` file, and restart the Django server.
 
+## ☁️ Cloud Deployment Architecture
+This project is architected deployment on modern PaaS (Platform as a Service) environments, adhering to the Twelve-Factor App methodology:
+
+- Database: Serverless PostgreSQL hosted on Neon.tech.
+- Web Server & Static Assets: Hosted on Render, utilizing Gunicorn and WhiteNoise for compressed, manifest-based static file delivery.
+- Media Storage: Integrated with Cloudinary to ensure user-uploaded images (banners, product photos) persist reliably across ephemeral, isolated production containers.
+  
 ## 🧪 Testing
 The application includes comprehensive test suites focusing on core logic, user permissions, API endpoints, and webhook mocking.
 ```bash
