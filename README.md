@@ -60,10 +60,32 @@ erDiagram
         string zip_code
         string city
     }
+    BRAND {
+        UUID id PK
+        string name
+    }
+    CATEGORY {
+        UUID id PK
+        string name
+    }
+    FRAGRANCE {
+        UUID id PK
+        string name
+    }
+    CONCENTRATION {
+        UUID id PK
+        string name
+    }
     PRODUCT {
         UUID id PK
         string name
         string slug UK
+        string description
+    }
+    PRODUCTIMAGE {
+        UUID id PK
+        string image_url
+        boolean is_main
     }
     SKU {
         UUID id PK
@@ -71,6 +93,11 @@ erDiagram
         int volume_ml
         decimal price
         int stock_quantity
+    }
+    REVIEW {
+        UUID id PK
+        int rating
+        string comment
     }
     COUPON {
         UUID id PK
@@ -97,13 +124,32 @@ erDiagram
         UUID id PK
         int quantity
     }
+    BANNER {
+        UUID id PK
+        string title
+        boolean is_active
+    }
 
-    %% Relationships
+    %% Relationships - Logistics & Users
     CUSTOMER ||--o{ ADDRESS : "has"
     CUSTOMER ||--o{ ORDER : "places"
+    CUSTOMER ||--o{ REVIEW : "writes"
+    
+    %% Relationships - Catalog & Metadata
+    BRAND ||--o{ PRODUCT : "manufactures"
+    CATEGORY ||--o{ PRODUCT : "categorizes"
+    FRAGRANCE ||--o{ PRODUCT : "defines"
+    
     PRODUCT ||--o{ SKU : "contains"
+    PRODUCT ||--o{ PRODUCTIMAGE : "displays"
+    PRODUCT ||--o{ REVIEW : "receives"
+    
+    CONCENTRATION ||--o{ SKU : "classifies"
+    
+    %% Relationships - Cart & Sales
     SKU ||--o{ CARTITEM : "added to"
     SKU ||--o{ ORDERITEM : "purchased as"
+    
     CART ||--o{ CARTITEM : "holds"
     ORDER ||--o{ ORDERITEM : "includes"
     ORDER }|--|| ADDRESS : "delivered to"
